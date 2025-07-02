@@ -386,12 +386,14 @@ const AdminPanel = () => {
                           <div className="flex-1">
                             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                               <div className="min-w-0 flex-1">
+                                <div className="flex flex-row gap-2">
                                 <p className="font-medium text-sm sm:text-base truncate">{material.material}</p>
-                                <p className="text-lg font-bold">{material.price}</p>
-                              </div>
-                              <Badge variant={material.trend === 'up' ? 'default' : 'destructive'} className="self-start sm:self-auto">
-                                {material.change}
+                                <Badge variant={material.trend === 'up' ? 'default' : 'destructive'} className="self-start sm:self-auto">
+                                {material.trend === 'up' ? '+' + material.change : '-' + material.change}
                               </Badge>
+                                </div>
+                                <p className="text-lg font-bold">₹{material.price}</p>
+                              </div>
                             </div>
                           </div>
                         )}

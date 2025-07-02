@@ -3,7 +3,8 @@ import React from "react";
 const navLinks = [
   { name: "Dashboard", to: "/" },
   { name: "Calculator", to: "/#calculator" },
-  { name: "Marketplace", to: "/#marketplace" },
+  { name: "Privacy Policy", to: "/privacy-policy" },
+  { name: "Terms & Conditions", to: "/terms" },
 ];
 
 const Footer = () => (
@@ -20,9 +21,7 @@ const Footer = () => (
             {link.name}
           </a>
         ))}
-        <a href="/terms" className="hover:text-blue-600 transition-colors font-medium">
-          Terms & Conditions
-        </a>
+        
       </nav>
       {/* Company Info */}
       <div className="flex flex-col items-center md:items-start gap-2 text-xs text-gray-500 min-w-[180px]">

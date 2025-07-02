@@ -26,31 +26,63 @@ const PricingSlideshow = () => {
     fetchData();
   }, []);
 
-  // Marquee auto-scroll effect
+  const animationFrameRef = useRef<number | null>(null);
+
   useEffect(() => {
     const marquee = marqueeRef.current;
-    if (!marquee) return;
-    let frame: number;
+    if (!marquee || priceData.length === 0) return;
+  
     let start: number | null = null;
     const speed = 40; // px per second
+  
     const step = (timestamp: number) => {
       if (start === null) start = timestamp;
       const elapsed = timestamp - start;
       marquee.scrollLeft = (marquee.scrollLeft + speed * (elapsed / 1000)) % (marquee.scrollWidth / 2);
       start = timestamp;
-      frame = requestAnimationFrame(step);
+      animationFrameRef.current = requestAnimationFrame(step);
     };
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
+  
+    animationFrameRef.current = requestAnimationFrame(step);
+  
+    return () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
   }, [priceData]);
+  
 
   // Button scroll handlers
-  const scrollBy = (amount: number) => {
-    const marquee = marqueeRef.current;
-    if (marquee) {
-      marquee.scrollBy({ left: amount, behavior: "smooth" });
+  const pauseDuration = 3000; 
+
+const scrollBy = (amount: number) => {
+  const marquee = marqueeRef.current;
+  if (marquee) {
+    marquee.scrollBy({ left: amount, behavior: "smooth" });
+
+    // Stop animation
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
     }
-  };
+
+    // Restart after pause
+    setTimeout(() => {
+      let start: number | null = null;
+      const speed = 40;
+      const step = (timestamp: number) => {
+        if (start === null) start = timestamp;
+        const elapsed = timestamp - start;
+        marquee.scrollLeft = (marquee.scrollLeft + speed * (elapsed / 1000)) % (marquee.scrollWidth / 2);
+        start = timestamp;
+        animationFrameRef.current = requestAnimationFrame(step);
+      };
+      animationFrameRef.current = requestAnimationFrame(step);
+    }, pauseDuration);
+  }
+};
+
 
   if (loading) return <Loader className="py-8" />;
   if (error) return <div>Error: {error}</div>;
