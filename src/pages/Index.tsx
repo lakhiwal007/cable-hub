@@ -1,6 +1,6 @@
-
-import { useState } from "react";
-import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import PricingSlideshow from "@/components/PricingSlideshow";
 import RawMaterialCalculator from "@/components/RawMaterialCalculator";
 import Marketplace from "@/components/Marketplace";
@@ -8,16 +8,55 @@ import HeroSection from "@/components/HeroSection";
 import FeatureCards from "@/components/FeatureCards";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import apiClient from "@/lib/apiClient";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userType, setUserType] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Get user type from localStorage (set during login)
+    const token = localStorage.getItem('token');
+    const storedUserType = localStorage.getItem('userType');
+    
+    if (token && storedUserType) {
+      setUserType(storedUserType);
+      // Try to get user profile for email
+      fetchUserProfile();
+    }
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const profile = await apiClient.getProfile();
+      setUserEmail(profile.user.email);
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error);
+    }
+  };
 
   const navigation = [
     { id: "dashboard", name: "Dashboard", icon: TrendingUp },
     { id: "calculator", name: "Calculator", icon: Calculator },
     { id: "marketplace", name: "Marketplace", icon: Users },
+    ...(userType === 'admin' ? [{ id: "admin", name: "Admin Panel", icon: Settings }] : []),
   ];
+
+  const handleNavigation = (tabId: string) => {
+    if (tabId === "admin") {
+      navigate("/admin");
+    } else {
+      setActiveTab(tabId);
+    }
+  };
+
+  const handleLogout = () => {
+    apiClient.logout();
+    navigate("/login");
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -148,6 +187,19 @@ const Index = () => {
               </h1>
               <span className="ml-3 text-sm text-gray-500 font-medium">Manufacturing Solutions</span>
             </div>
+
+            {/* User Info - Hidden on mobile */}
+            {userEmail && (
+              <div className="hidden lg:flex items-center text-sm text-gray-600">
+                <span>Welcome, </span>
+                <span className="font-medium ml-1">{userEmail}</span>
+                {userType === 'admin' && (
+                  <span className="ml-2 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                    Admin
+                  </span>
+                )}
+              </div>
+            )}
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-2">
@@ -156,7 +208,7 @@ const Index = () => {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => handleNavigation(item.id)}
                     className={`flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                       activeTab === item.id
                         ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
@@ -168,6 +220,14 @@ const Index = () => {
                   </button>
                 );
               })}
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </button>
             </nav>
 
             {/* Mobile menu button */}
@@ -190,7 +250,7 @@ const Index = () => {
                   <button
                     key={item.id}
                     onClick={() => {
-                      setActiveTab(item.id);
+                      handleNavigation(item.id);
                       setMobileMenuOpen(false);
                     }}
                     className={`flex items-center w-full px-3 py-2 rounded-lg text-base font-medium transition-colors ${
@@ -204,6 +264,17 @@ const Index = () => {
                   </button>
                 );
               })}
+              {/* Mobile Logout Button */}
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center w-full px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+              >
+                <LogOut className="h-5 w-5 mr-3" />
+                Logout
+              </button>
             </div>
           </div>
         )}

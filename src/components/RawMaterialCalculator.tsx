@@ -1,5 +1,5 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
+import apiClient from "@/lib/apiClient";
 import { Calculator, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,16 +8,46 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const RawMaterialCalculator = () => {
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     cableType: "",
-    coreCount: "",
-    coreSize: "",
-    insulationThickness: "",
-    cableLength: "",
-    quantity: ""
+    length: 100,
+    conductorSize: 10,
+    insulationThickness: 1.5,
+    sheathThickness: 1.5,
+    conductorMaterial: "copper",
+    insulationMaterial: "pvc",
+    sheathMaterial: "pvc"
   });
-  
-  const [results, setResults] = useState(null);
+  const [result, setResult] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setResult(null);
+    try {
+      // Convert numeric fields
+      const payload = {
+        ...form,
+        length: Number(form.length),
+        conductorSize: Number(form.conductorSize),
+        insulationThickness: Number(form.insulationThickness),
+        sheathThickness: Number(form.sheathThickness)
+      };
+      const res = await apiClient.calculateRawMaterial(payload);
+      setResult(res);
+    } catch (err: any) {
+      setError(err.message || "Calculation failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const cableTypes = [
     { value: "power", label: "Power Cable" },
@@ -30,45 +60,6 @@ const RawMaterialCalculator = () => {
   const coreSizes = [
     "1.5", "2.5", "4", "6", "10", "16", "25", "35", "50", "70", "95", "120", "150", "185", "240", "300"
   ];
-
-  const calculateMaterials = () => {
-    if (!formData.cableType || !formData.coreCount || !formData.coreSize || !formData.cableLength || !formData.quantity) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
-    // Simplified calculation logic
-    const coreCount = parseInt(formData.coreCount);
-    const coreSize = parseFloat(formData.coreSize);
-    const length = parseFloat(formData.cableLength);
-    const quantity = parseInt(formData.quantity);
-    const insulationThickness = parseFloat(formData.insulationThickness) || 1;
-
-    // Basic material calculations (simplified for demo)
-    const copperVolume = (coreCount * coreSize * length * quantity * 0.001).toFixed(2);
-    const copperWeight = (parseFloat(copperVolume) * 8.96).toFixed(2); // Copper density
-    
-    const pvcVolume = (coreCount * Math.PI * Math.pow(coreSize + insulationThickness, 2) * length * quantity * 0.0001).toFixed(2);
-    const pvcWeight = (parseFloat(pvcVolume) * 1.4).toFixed(2); // PVC density
-    
-    const totalCost = (parseFloat(copperWeight) * 485 + parseFloat(pvcWeight) * 89).toFixed(2);
-
-    setResults({
-      copperVolume,
-      copperWeight,
-      pvcVolume,
-      pvcWeight,
-      totalCost,
-      breakdown: [
-        { material: "Copper", volume: copperVolume + " cm³", weight: copperWeight + " kg", cost: "₹" + (parseFloat(copperWeight) * 485).toFixed(2) },
-        { material: "PVC Insulation", volume: pvcVolume + " cm³", weight: pvcWeight + " kg", cost: "₹" + (parseFloat(pvcWeight) * 89).toFixed(2) }
-      ]
-    });
-  };
-
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
 
   return (
     <div className="space-y-8">
@@ -90,7 +81,7 @@ const RawMaterialCalculator = () => {
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="cableType">Cable Type *</Label>
-              <Select onValueChange={(value) => handleInputChange("cableType", value)}>
+              <Select onValueChange={(value) => handleChange({ target: { name: "cableType", value } } as any)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select cable type" />
                 </SelectTrigger>
@@ -106,29 +97,26 @@ const RawMaterialCalculator = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="coreCount">Core Count *</Label>
+                <Label htmlFor="length">Cable Length (m) *</Label>
                 <Input
-                  id="coreCount"
+                  id="length"
                   type="number"
-                  placeholder="e.g., 3"
-                  value={formData.coreCount}
-                  onChange={(e) => handleInputChange("coreCount", e.target.value)}
+                  placeholder="e.g., 100"
+                  name="length"
+                  value={form.length}
+                  onChange={handleChange}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="coreSize">Core Size (mm²) *</Label>
-                <Select onValueChange={(value) => handleInputChange("coreSize", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {coreSizes.map((size) => (
-                      <SelectItem key={size} value={size}>
-                        {size} mm²
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="conductorSize">Conductor Size (mm²) *</Label>
+                <Input
+                  id="conductorSize"
+                  type="number"
+                  placeholder="e.g., 10"
+                  name="conductorSize"
+                  value={form.conductorSize}
+                  onChange={handleChange}
+                />
               </div>
             </div>
 
@@ -139,36 +127,70 @@ const RawMaterialCalculator = () => {
                 type="number"
                 step="0.1"
                 placeholder="e.g., 1.5"
-                value={formData.insulationThickness}
-                onChange={(e) => handleInputChange("insulationThickness", e.target.value)}
+                name="insulationThickness"
+                value={form.insulationThickness}
+                onChange={handleChange}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="cableLength">Cable Length (m) *</Label>
-                <Input
-                  id="cableLength"
-                  type="number"
-                  placeholder="e.g., 100"
-                  value={formData.cableLength}
-                  onChange={(e) => handleInputChange("cableLength", e.target.value)}
-                />
+            <div className="space-y-2">
+              <Label htmlFor="sheathThickness">Sheath Thickness (mm)</Label>
+              <Input
+                id="sheathThickness"
+                type="number"
+                step="0.1"
+                placeholder="e.g., 1.5"
+                name="sheathThickness"
+                value={form.sheathThickness}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Label htmlFor="conductorMaterial">Conductor Material</Label>
+                <select
+                  name="conductorMaterial"
+                  value={form.conductorMaterial}
+                  onChange={handleChange}
+                  className="mt-1 p-2 w-full border rounded"
+                >
+                  <option value="copper">Copper</option>
+                  <option value="aluminum">Aluminum</option>
+                </select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="quantity">Quantity *</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  placeholder="e.g., 50"
-                  value={formData.quantity}
-                  onChange={(e) => handleInputChange("quantity", e.target.value)}
-                />
+              <div className="flex-1">
+                <Label htmlFor="insulationMaterial">Insulation Material</Label>
+                <select
+                  name="insulationMaterial"
+                  value={form.insulationMaterial}
+                  onChange={handleChange}
+                  className="mt-1 p-2 w-full border rounded"
+                >
+                  <option value="pvc">PVC</option>
+                  <option value="xlpe">XLPE</option>
+                  <option value="rubber">Rubber</option>
+                </select>
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="sheathMaterial">Sheath Material</Label>
+                <select
+                  name="sheathMaterial"
+                  value={form.sheathMaterial}
+                  onChange={handleChange}
+                  className="mt-1 p-2 w-full border rounded"
+                >
+                  <option value="pvc">PVC</option>
+                  <option value="xlpe">XLPE</option>
+                  <option value="rubber">Rubber</option>
+                </select>
               </div>
             </div>
 
-            <Button onClick={calculateMaterials} className="w-full">
-              Calculate Materials
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+
+            <Button onClick={handleSubmit} className="w-full" disabled={loading}>
+              {loading ? "Calculating..." : "Calculate"}
             </Button>
           </CardContent>
         </Card>
@@ -180,30 +202,27 @@ const RawMaterialCalculator = () => {
             <CardDescription>Raw material requirements and estimated costs</CardDescription>
           </CardHeader>
           <CardContent>
-            {results ? (
+            {result ? (
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600">{results.copperWeight} kg</p>
-                    <p className="text-sm text-blue-800">Total Copper</p>
+                    <p className="text-2xl font-bold text-blue-600">{result.weights.conductor} kg</p>
+                    <p className="text-sm text-blue-800">Total Conductor</p>
                   </div>
                   <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">{results.pvcWeight} kg</p>
-                    <p className="text-sm text-green-800">Total PVC</p>
+                    <p className="text-2xl font-bold text-green-600">{result.weights.insulation} kg</p>
+                    <p className="text-sm text-green-800">Total Insulation</p>
                   </div>
                 </div>
 
-                <div className="border-t pt-4">
+                <div>
                   <h4 className="font-semibold mb-3">Material Breakdown</h4>
                   <div className="space-y-3">
-                    {results.breakdown.map((item, index) => (
+                    {Object.entries(result.materials).map(([key, value]: [string, any], index: number) => (
                       <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded">
                         <div>
-                          <p className="font-medium">{item.material}</p>
-                          <p className="text-sm text-gray-600">{item.weight}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-bold">{item.cost}</p>
+                          <p className="font-medium capitalize">{key}</p>
+                          <p className="text-sm text-gray-600">{value}</p>
                         </div>
                       </div>
                     ))}
@@ -213,7 +232,7 @@ const RawMaterialCalculator = () => {
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold">Total Estimated Cost:</span>
-                    <span className="text-2xl font-bold text-green-600">₹{results.totalCost}</span>
+                    <span className="text-2xl font-bold text-green-600">₹{result.costs.total}</span>
                   </div>
                 </div>
 

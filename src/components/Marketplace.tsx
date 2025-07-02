@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getMarketplaceListings } from "@/lib/supabaseApi";
 import type { MarketplaceListing } from "@/lib/types";
 import Loader from "@/components/ui/loader";
+import apiClient from "@/lib/apiClient";
 
 const Marketplace = () => {
   const [activeTab, setActiveTab] = useState("browse");
@@ -32,7 +33,7 @@ const Marketplace = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getMarketplaceListings();
+        const data = await apiClient.getMarketplaceListings();
         setSupplierListings(data || []);
       } catch (err: any) {
         setError(err.message || "Failed to fetch listings");
