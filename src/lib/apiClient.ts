@@ -136,6 +136,18 @@ class ApiClient {
     });
   }
 
+  // Calculation settings methods
+  async getCalculationSettings() {
+    return this.request<any>('/admin/calculation-settings');
+  }
+
+  async updateCalculationSettings(settings: any) {
+    return this.request<any>('/admin/calculation-settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings),
+    });
+  }
+
   // Calculator methods
   async calculateRawMaterial(calculationData: {
     cableType: string;
@@ -146,6 +158,7 @@ class ApiClient {
     conductorMaterial?: string;
     insulationMaterial?: string;
     sheathMaterial?: string;
+    calculationSettings?: any;
   }) {
     return this.request<any>('/calculator/raw-material', {
       method: 'POST',

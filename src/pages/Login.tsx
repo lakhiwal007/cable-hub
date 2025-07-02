@@ -218,12 +218,7 @@ const Login = () => {
               </p>
             </div>
 
-            {/* Demo credentials info */}
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">
-              <p className="font-medium mb-1">Demo Credentials:</p>
-              <p>Admin: admin@cablehub.com / admin123</p>
-              <p>User: Register a new account</p>
-            </div>
+          
           </CardContent>
         </Card>
       </div>

@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import apiClient from "@/lib/apiClient";
-import { Calculator, Download } from "lucide-react";
+import { Calculator, Download, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const RawMaterialCalculator = () => {
   const [form, setForm] = useState({
@@ -21,6 +22,44 @@ const RawMaterialCalculator = () => {
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [calculationSettings, setCalculationSettings] = useState<any>(null);
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Fetch calculation settings on component mount
+  useEffect(() => {
+    fetchCalculationSettings();
+  }, []);
+
+  const fetchCalculationSettings = async () => {
+    try {
+      const settings = await apiClient.getCalculationSettings();
+      setCalculationSettings(settings);
+    } catch (err: any) {
+      console.log("Using default calculation settings");
+      // Set default settings if API call fails
+      setCalculationSettings({
+        materialDensities: {
+          copper: 8.96,
+          aluminum: 2.70,
+          pvc: 1.40,
+          xlpe: 0.92,
+          rubber: 1.50
+        },
+        costFactors: {
+          laborCost: 0.15,
+          overheadCost: 0.10,
+          profitMargin: 0.20,
+          wasteFactor: 0.05
+        },
+        calculationConstants: {
+          conductorDensityFactor: 1.0,
+          insulationThicknessFactor: 1.2,
+          sheathThicknessFactor: 1.1,
+          lengthSafetyFactor: 1.02
+        }
+      });
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -38,7 +77,8 @@ const RawMaterialCalculator = () => {
         length: Number(form.length),
         conductorSize: Number(form.conductorSize),
         insulationThickness: Number(form.insulationThickness),
-        sheathThickness: Number(form.sheathThickness)
+        sheathThickness: Number(form.sheathThickness),
+        calculationSettings: calculationSettings // Include settings in the payload
       };
       const res = await apiClient.calculateRawMaterial(payload);
       setResult(res);
@@ -66,7 +106,112 @@ const RawMaterialCalculator = () => {
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">Raw Material Calculator</h2>
         <p className="text-gray-600">Calculate exact raw material requirements for your cable production</p>
+        {calculationSettings && (
+          <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full text-xs bg-green-100 text-green-800">
+            ✓ Using admin-configured calculation settings
+          </div>
+        )}
       </div>
+
+      {/* Current Calculation Settings Display
+      {calculationSettings && (
+        <Collapsible open={showSettings} onOpenChange={setShowSettings}>
+          <CollapsibleTrigger asChild>
+            <Button variant="outline" className="w-full">
+              {showSettings ? (
+                <>
+                  <ChevronUp className="h-4 w-4 mr-2" />
+                  Hide Current Settings
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="h-4 w-4 mr-2" />
+                  View Current Settings
+                </>
+              )}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Current Calculation Parameters</CardTitle>
+                <CardDescription>These settings are configured by administrators</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <h4 className="font-semibold mb-3 text-blue-600">Material Densities (g/cm³)</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Copper:</span>
+                        <span className="font-mono">{calculationSettings.materialDensities?.copper}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Aluminum:</span>
+                        <span className="font-mono">{calculationSettings.materialDensities?.aluminum}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>PVC:</span>
+                        <span className="font-mono">{calculationSettings.materialDensities?.pvc}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>XLPE:</span>
+                        <span className="font-mono">{calculationSettings.materialDensities?.xlpe}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Rubber:</span>
+                        <span className="font-mono">{calculationSettings.materialDensities?.rubber}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-3 text-green-600">Cost Factors</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Labor Cost:</span>
+                        <span className="font-mono">{calculationSettings.costFactors?.laborCost}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Overhead:</span>
+                        <span className="font-mono">{calculationSettings.costFactors?.overheadCost}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Profit Margin:</span>
+                        <span className="font-mono">{calculationSettings.costFactors?.profitMargin}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Waste Factor:</span>
+                        <span className="font-mono">{calculationSettings.costFactors?.wasteFactor}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold mb-3 text-purple-600">Calculation Constants</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Conductor Density:</span>
+                        <span className="font-mono">{calculationSettings.calculationConstants?.conductorDensityFactor}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Insulation Thickness:</span>
+                        <span className="font-mono">{calculationSettings.calculationConstants?.insulationThicknessFactor}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Sheath Thickness:</span>
+                        <span className="font-mono">{calculationSettings.calculationConstants?.sheathThicknessFactor}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Length Safety:</span>
+                        <span className="font-mono">{calculationSettings.calculationConstants?.lengthSafetyFactor}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </CollapsibleContent>
+        </Collapsible>
+      )} */}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Input Form */}

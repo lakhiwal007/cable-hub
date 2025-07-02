@@ -19,7 +19,7 @@ const Index = () => {
 
   useEffect(() => {
     // Get user type from localStorage (set during login)
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     const storedUserType = localStorage.getItem('userType');
     
     if (token && storedUserType) {
@@ -188,23 +188,13 @@ const Index = () => {
               <span className="ml-3 text-sm text-gray-500 font-medium">Manufacturing Solutions</span>
             </div>
 
-            {/* User Info - Hidden on mobile */}
-            {userEmail && (
-              <div className="hidden lg:flex items-center text-sm text-gray-600">
-                <span>Welcome, </span>
-                <span className="font-medium ml-1">{userEmail}</span>
-                {userType === 'admin' && (
-                  <span className="ml-2 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
-                    Admin
-                  </span>
-                )}
-              </div>
-            )}
+            
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-2">
               {navigation.map((item) => {
                 const Icon = item.icon;
+                const isAdminButton = item.id === "admin";
                 return (
                   <button
                     key={item.id}
@@ -212,6 +202,8 @@ const Index = () => {
                     className={`flex items-center px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                       activeTab === item.id
                         ? "bg-blue-600 text-white shadow-lg shadow-blue-600/25"
+                        : isAdminButton
+                        ? "text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200"
                         : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                     }`}
                   >
@@ -246,6 +238,7 @@ const Index = () => {
             <div className="px-4 pt-2 pb-3 space-y-1">
               {navigation.map((item) => {
                 const Icon = item.icon;
+                const isAdminButton = item.id === "admin";
                 return (
                   <button
                     key={item.id}
@@ -256,6 +249,8 @@ const Index = () => {
                     className={`flex items-center w-full px-3 py-2 rounded-lg text-base font-medium transition-colors ${
                       activeTab === item.id
                         ? "bg-blue-600 text-white"
+                        : isAdminButton
+                        ? "text-red-600 hover:text-red-700 hover:bg-red-50 border border-red-200"
                         : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                     }`}
                   >
