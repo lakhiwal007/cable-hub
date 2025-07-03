@@ -3,7 +3,7 @@ import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, L
 import { useNavigate } from "react-router-dom";
 import PricingSlideshow from "@/components/PricingSlideshow";
 import RawMaterialCalculator from "@/components/RawMaterialCalculator";
-import Marketplace from "@/components/Marketplace";
+
 import HeroSection from "@/components/HeroSection";
 import FeatureCards from "@/components/FeatureCards";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,6 +46,8 @@ const Index = () => {
   const handleNavigation = (tabId: string) => {
     if (tabId === "admin") {
       navigate("/admin");
+    } else if (tabId === "marketplace") {
+      navigate("/marketplace");
     } else {
       setActiveTab(tabId);
     }
@@ -65,13 +67,11 @@ const Index = () => {
     switch (activeTab) {
       case "calculator":
         return <RawMaterialCalculator />;
-      case "marketplace":
-        return <Marketplace />;
       default:
         return (
           <div className="space-y-12">
-            <HeroSection onGetStarted={() => setActiveTab("marketplace")} />
-            <FeatureCards onNavigate={setActiveTab} />
+            <HeroSection onGetStarted={() => navigate("/marketplace")} />
+            <FeatureCards onNavigate={handleNavigation} />
             
             {/* Market Intelligence Section */}
             <section className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-3xl p-8 md:p-12">

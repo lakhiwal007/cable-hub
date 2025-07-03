@@ -36,7 +36,7 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
             onClick={onGetStarted}
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg shadow-blue-600/25 transition-all duration-200 hover:shadow-xl hover:shadow-blue-600/30"
           >
-            join MarketPlace
+            Join MarketPlace
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           

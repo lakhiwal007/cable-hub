@@ -358,6 +358,732 @@ class ApiClient {
   getSupabase() {
     return supabase;
   }
+
+  // =================== ENHANCED MARKETPLACE APIs ===================
+
+  // === SUPPLY LISTINGS ===
+  async getSupplyListings(filters?: {
+    category?: string;
+    location?: string;
+    price_min?: number;
+    price_max?: number;
+    material_type?: string;
+    verified_only?: boolean;
+    urgent_only?: boolean;
+    search?: string;
+  }) {
+    let query = supabase
+      .from('supply_listings')
+      .select(`
+        *,
+        supplier:users!supplier_id(id, name, email, user_type)
+      `)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (filters) {
+      if (filters.category) query = query.eq('category', filters.category);
+      if (filters.location) query = query.ilike('location', `%${filters.location}%`);
+      if (filters.price_min) query = query.gte('price_per_unit', filters.price_min);
+      if (filters.price_max) query = query.lte('price_per_unit', filters.price_max);
+      if (filters.material_type) query = query.eq('material_type', filters.material_type);
+      if (filters.verified_only) query = query.eq('is_verified', true);
+      if (filters.urgent_only) query = query.eq('is_urgent', true);
+      if (filters.search) {
+        query = query.or(
+          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,material_type.ilike.%${filters.search}%`
+        );
+      }
+    }
+
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getSupplyListingById(id: string) {
+    const { data, error } = await supabase
+      .from('supply_listings')
+      .select(`
+        *,
+        supplier:users!supplier_id(*)
+      `)
+      .eq('id', id)
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async createSupplyListing(listingData: {
+    title: string;
+    description: string;
+    category: string;
+    material_type: string;
+    grade_specification: string;
+    available_quantity: number;
+    unit: string;
+    price_per_unit: number;
+    currency?: string;
+    minimum_order: number;
+    location: string;
+    delivery_terms: string;
+    certification?: string;
+    images?: string[];
+    is_urgent?: boolean;
+    expires_at?: string;
+  }) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data, error } = await supabase
+      .from('supply_listings')
+      .insert([{
+        ...listingData,
+        supplier_id: user.user.id,
+        currency: listingData.currency || 'INR',
+        is_active: true,
+        is_verified: false,
+        is_urgent: listingData.is_urgent || false,
+      }])
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async updateSupplyListing(id: string, listingData: Partial<{
+    title: string;
+    description: string;
+    category: string;
+    material_type: string;
+    grade_specification: string;
+    available_quantity: number;
+    unit: string;
+    price_per_unit: number;
+    minimum_order: number;
+    location: string;
+    delivery_terms: string;
+    certification?: string;
+    images?: string[];
+    is_urgent?: boolean;
+    expires_at?: string;
+  }>) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data, error } = await supabase
+      .from('supply_listings')
+      .update(listingData)
+      .eq('id', id)
+      .eq('supplier_id', user.user.id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async deleteSupplyListing(id: string) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { error } = await supabase
+      .from('supply_listings')
+      .delete()
+      .eq('id', id)
+      .eq('supplier_id', user.user.id);
+
+    if (error) throw new Error(error.message);
+    return { message: 'Supply listing deleted successfully' };
+  }
+
+  // === DEMAND LISTINGS ===
+  async getDemandListings(filters?: {
+    category?: string;
+    location?: string;
+    budget_min?: number;
+    budget_max?: number;
+    material_type?: string;
+    urgent_only?: boolean;
+    search?: string;
+  }) {
+    let query = supabase
+      .from('demand_listings')
+      .select(`
+        *,
+        buyer:users!buyer_id(id, name, email, user_type)
+      `)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (filters) {
+      if (filters.category) query = query.eq('category', filters.category);
+      if (filters.location) query = query.ilike('location', `%${filters.location}%`);
+      if (filters.budget_min) query = query.gte('budget_min', filters.budget_min);
+      if (filters.budget_max) query = query.lte('budget_max', filters.budget_max);
+      if (filters.material_type) query = query.eq('material_type', filters.material_type);
+      if (filters.urgent_only) query = query.eq('is_urgent', true);
+      if (filters.search) {
+        query = query.or(
+          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,material_type.ilike.%${filters.search}%`
+        );
+      }
+    }
+
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getDemandListingById(id: string) {
+    const { data, error } = await supabase
+      .from('demand_listings')
+      .select(`
+        *,
+        buyer:users!buyer_id(*)
+      `)
+      .eq('id', id)
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async createDemandListing(listingData: {
+    title: string;
+    description: string;
+    category: string;
+    material_type: string;
+    specifications: string;
+    required_quantity: number;
+    unit: string;
+    budget_min: number;
+    budget_max: number;
+    currency?: string;
+    location: string;
+    delivery_deadline: string;
+    additional_requirements?: string;
+    is_urgent?: boolean;
+    expires_at?: string;
+  }) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data, error } = await supabase
+      .from('demand_listings')
+      .insert([{
+        ...listingData,
+        buyer_id: user.user.id,
+        currency: listingData.currency || 'INR',
+        is_active: true,
+        is_urgent: listingData.is_urgent || false,
+      }])
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async updateDemandListing(id: string, listingData: Partial<{
+    title: string;
+    description: string;
+    category: string;
+    material_type: string;
+    specifications: string;
+    required_quantity: number;
+    unit: string;
+    budget_min: number;
+    budget_max: number;
+    location: string;
+    delivery_deadline: string;
+    additional_requirements?: string;
+    is_urgent?: boolean;
+    expires_at?: string;
+  }>) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data, error } = await supabase
+      .from('demand_listings')
+      .update(listingData)
+      .eq('id', id)
+      .eq('buyer_id', user.user.id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async deleteDemandListing(id: string) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { error } = await supabase
+      .from('demand_listings')
+      .delete()
+      .eq('id', id)
+      .eq('buyer_id', user.user.id);
+
+    if (error) throw new Error(error.message);
+    return { message: 'Demand listing deleted successfully' };
+  }
+
+  // === SUPPLIER CONTACTS ===
+  async getSupplierProfile(id: string) {
+    const { data, error } = await supabase
+      .from('suppliers')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async createSupplierProfile(supplierData: {
+    name: string;
+    email: string;
+    phone: string;
+    company_name: string;
+    company_address: string;
+    gst_number?: string;
+    website?: string;
+    description?: string;
+  }) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data, error } = await supabase
+      .from('suppliers')
+      .insert([{
+        ...supplierData,
+        id: user.user.id,
+        verified: false,
+        rating: 0,
+        total_listings: 0,
+      }])
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async updateSupplierProfile(supplierData: Partial<{
+    name: string;
+    email: string;
+    phone: string;
+    company_name: string;
+    company_address: string;
+    gst_number?: string;
+    website?: string;
+    description?: string;
+  }>) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data, error } = await supabase
+      .from('suppliers')
+      .update(supplierData)
+      .eq('id', user.user.id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  // === CONTACT SUPPLIER ===
+  async contactSupplier(contactData: {
+    listing_id: string;
+    listing_type: 'supply' | 'demand';
+    requester_name: string;
+    requester_email: string;
+    requester_phone: string;
+    message: string;
+  }) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data, error } = await supabase
+      .from('marketplace_contacts')
+      .insert([{
+        ...contactData,
+        requester_id: user.user.id,
+        status: 'pending',
+      }])
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getContactRequests() {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data, error } = await supabase
+      .from('marketplace_contacts')
+      .select('*')
+      .eq('requester_id', user.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async updateContactStatus(contactId: string, status: 'pending' | 'responded' | 'closed') {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data, error } = await supabase
+      .from('marketplace_contacts')
+      .update({ status })
+      .eq('id', contactId)
+      .eq('requester_id', user.user.id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  // === SEARCH & FILTER ===
+  async searchMarketplace(searchTerm: string, type?: 'supply' | 'demand') {
+    const results = {
+      supply: [],
+      demand: [],
+    };
+
+    if (!type || type === 'supply') {
+      const { data: supplyData } = await supabase
+        .from('supply_listings')
+        .select(`
+          *,
+          supplier:users!supplier_id(name, email, user_type)
+        `)
+        .eq('is_active', true)
+        .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,material_type.ilike.%${searchTerm}%`)
+        .limit(10);
+      results.supply = supplyData || [];
+    }
+
+    if (!type || type === 'demand') {
+      const { data: demandData } = await supabase
+        .from('demand_listings')
+        .select(`
+          *,
+          buyer:users!buyer_id(name, email, user_type)
+        `)
+        .eq('is_active', true)
+        .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,material_type.ilike.%${searchTerm}%`)
+        .limit(10);
+      results.demand = demandData || [];
+    }
+
+    return results;
+  }
+
+  async getMarketplaceStats() {
+    const [supplyCount, demandCount, activeUsers] = await Promise.all([
+      supabase.from('supply_listings').select('id', { count: 'exact' }).eq('is_active', true),
+      supabase.from('demand_listings').select('id', { count: 'exact' }).eq('is_active', true),
+      supabase.from('users').select('id', { count: 'exact' }).eq('is_active', true),
+    ]);
+
+    return {
+      total_supply_listings: supplyCount.count || 0,
+      total_demand_listings: demandCount.count || 0,
+      active_suppliers: activeUsers.count || 0,
+    };
+  }
+
+  // =================== CHAT SYSTEM APIs ===================
+
+  // === CHAT ROOMS ===
+  async getChatRooms() {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data, error } = await supabase
+      .from('chat_rooms')
+      .select(`
+        *,
+        listing:supply_listings(id, title, material_type, price_per_unit, unit),
+        supplier:users!supplier_id(id, name, email, user_type),
+        buyer:users!buyer_id(id, name, email, user_type)
+      `)
+      .or(`supplier_id.eq.${user.user.id},buyer_id.eq.${user.user.id}`)
+      .eq('status', 'active')
+      .order('last_message_at', { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getChatRoom(roomId: string) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data, error } = await supabase
+      .from('chat_rooms')
+      .select(`
+        *,
+        listing:supply_listings(id, title, description, material_type, price_per_unit, unit, location),
+        supplier:users!supplier_id(id, name, email, user_type),
+        buyer:users!buyer_id(id, name, email, user_type)
+      `)
+      .eq('id', roomId)
+      .or(`supplier_id.eq.${user.user.id},buyer_id.eq.${user.user.id}`)
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async createChatRoom(data: {
+    listing_id: string;
+    listing_type: 'supply' | 'demand';
+    supplier_id: string;
+    buyer_id: string;
+  }) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    // Check if chat room already exists
+    const { data: existingRoom } = await supabase
+      .from('chat_rooms')
+      .select('id')
+      .eq('listing_id', data.listing_id)
+      .eq('supplier_id', data.supplier_id)
+      .eq('buyer_id', data.buyer_id)
+      .single();
+
+    if (existingRoom) {
+      return existingRoom;
+    }
+
+    // Create new chat room
+    const { data: newRoom, error } = await supabase
+      .from('chat_rooms')
+      .insert([data])
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return newRoom;
+  }
+
+  // === CHAT MESSAGES ===
+  async getChatMessages(roomId: string, limit: number = 50, offset: number = 0) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    // Verify user has access to this chat room
+    const { data: room } = await supabase
+      .from('chat_rooms')
+      .select('id')
+      .eq('id', roomId)
+      .or(`supplier_id.eq.${user.user.id},buyer_id.eq.${user.user.id}`)
+      .single();
+
+    if (!room) throw new Error('Chat room not found or access denied');
+
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .select(`
+        *,
+        sender:users!sender_id(id, name, email)
+      `)
+      .eq('chat_room_id', roomId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw new Error(error.message);
+    return data?.reverse() || [];
+  }
+
+  async sendMessage(data: {
+    chat_room_id: string;
+    message_text: string;
+    message_type?: 'text' | 'image' | 'file' | 'system';
+    attachment_url?: string;
+  }) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    // Determine sender type
+    const { data: room } = await supabase
+      .from('chat_rooms')
+      .select('supplier_id, buyer_id')
+      .eq('id', data.chat_room_id)
+      .single();
+
+    if (!room) throw new Error('Chat room not found');
+
+    const sender_type = room.supplier_id === user.user.id ? 'supplier' : 'buyer';
+
+    const { data: message, error } = await supabase
+      .from('chat_messages')
+      .insert([{
+        ...data,
+        sender_id: user.user.id,
+        sender_type,
+        message_type: data.message_type || 'text',
+      }])
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return message;
+  }
+
+  async markMessagesAsRead(roomId: string) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { error } = await supabase
+      .from('chat_messages')
+      .update({ is_read: true })
+      .eq('chat_room_id', roomId)
+      .neq('sender_id', user.user.id);
+
+    if (error) throw new Error(error.message);
+
+    // Update participant's last_read_at
+    const { error: participantError } = await supabase
+      .from('chat_participants')
+      .update({ last_read_at: new Date().toISOString() })
+      .eq('chat_room_id', roomId)
+      .eq('user_id', user.user.id);
+
+    if (participantError) throw new Error(participantError.message);
+  }
+
+  async getUnreadMessageCount(roomId?: string) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    let query = supabase
+      .from('chat_messages')
+      .select('id', { count: 'exact' })
+      .eq('is_read', false)
+      .neq('sender_id', user.user.id);
+
+    if (roomId) {
+      query = query.eq('chat_room_id', roomId);
+    } else {
+      // Get unread count across all user's chat rooms
+      const { data: rooms } = await supabase
+        .from('chat_rooms')
+        .select('id')
+        .or(`supplier_id.eq.${user.user.id},buyer_id.eq.${user.user.id}`);
+
+      if (rooms && rooms.length > 0) {
+        const roomIds = rooms.map(r => r.id);
+        query = query.in('chat_room_id', roomIds);
+      }
+    }
+
+    const { count, error } = await query;
+    if (error) throw new Error(error.message);
+    return count || 0;
+  }
+
+  // === REAL-TIME SUBSCRIPTIONS ===
+  subscribeToChatRoom(roomId: string, callback: (message: any) => void) {
+    return supabase
+      .channel(`chat_room_${roomId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `chat_room_id=eq.${roomId}`,
+        },
+        callback
+      )
+      .subscribe();
+  }
+
+  subscribeToChatRooms(userId: string, callback: (room: any) => void) {
+    return supabase
+      .channel('chat_rooms')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'chat_rooms',
+          filter: `supplier_id=eq.${userId}`,
+        },
+        callback
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'chat_rooms',
+          filter: `buyer_id=eq.${userId}`,
+        },
+        callback
+      )
+      .subscribe();
+  }
+
+  unsubscribeFromChannel(channel: any) {
+    if (channel) {
+      supabase.removeChannel(channel);
+    }
+  }
+
+  // === ENHANCED CONTACT SUPPLIER WITH CHAT ===
+  async contactSupplierWithChat(contactData: {
+    listing_id: string;
+    listing_type: 'supply' | 'demand';
+    supplier_id: string;
+    requester_name: string;
+    requester_email: string;
+    requester_phone: string;
+    message: string;
+  }) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    // Create or get existing chat room
+    const chatRoom = await this.createChatRoom({
+      listing_id: contactData.listing_id,
+      listing_type: contactData.listing_type,
+      supplier_id: contactData.supplier_id,
+      buyer_id: user.user.id,
+    });
+
+    // Send initial message
+    await this.sendMessage({
+      chat_room_id: chatRoom.id,
+      message_text: contactData.message,
+      message_type: 'text',
+    });
+
+    // Also create traditional contact record for backwards compatibility
+    const contact = await this.contactSupplier({
+      listing_id: contactData.listing_id,
+      listing_type: contactData.listing_type,
+      requester_name: contactData.requester_name,
+      requester_email: contactData.requester_email,
+      requester_phone: contactData.requester_phone,
+      message: contactData.message,
+    });
+
+    return {
+      chat_room: chatRoom,
+      contact: contact,
+    };
+  }
 }
 
 export const apiClient = new ApiClient();
