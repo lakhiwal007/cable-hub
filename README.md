@@ -1,86 +1,216 @@
-# Welcome to your Lovable project
+# Cable Hub Connect
 
-## Supabase Setup
+A modern web application for cable management and electrical calculations, built with React, TypeScript, and Supabase.
 
-1. Create a project at [Supabase](https://supabase.com/).
-2. In your project dashboard, go to Project Settings > API and copy your `Project URL` and `anon public` key.
-3. Create a `.env` file in the root of your project (next to package.json) and add:
+## Features
 
+- **User Authentication**: Secure registration and login with Supabase Auth
+- **Pricing Management**: Real-time cable and material pricing data
+- **Marketplace**: Browse and list cable products and services
+- **Electrical Calculators**: 
+  - Raw material calculations
+  - Pricing calculations
+  - Electrical performance calculations
+- **Admin Panel**: User management and system administration
+- **Mobile Responsive**: Works seamlessly on all devices
+
+## Tech Stack
+
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Backend**: Supabase Edge Functions (serverless)
+- **Database**: Supabase PostgreSQL
+- **Authentication**: Supabase Auth
+- **Hosting**: Vercel (recommended)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/cable-hub-connect.git
+cd cable-hub-connect
 ```
-VITE_SUPABASE_URL=your-supabase-url
-VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+2. Install dependencies:
+```bash
+npm install
 ```
 
-Replace `your-supabase-url` and `your-supabase-anon-key` with the values from your Supabase project.
+3. Set up Supabase:
+   - Create a new project at [Supabase](https://supabase.com)
+   - Copy `env.example` to `.env`
+   - Fill in your Supabase credentials
 
-## Project info
+4. Deploy Edge Functions:
+```bash
+# Install Supabase CLI
+npm install -g supabase
 
-**URL**: https://lovable.dev/projects/cb3588df-3abd-4621-ba22-0a823b3f094c
+# Login and link project
+supabase login
+supabase link --project-ref your-project-id
 
-## How can I edit this code?
+# Deploy functions
+supabase functions deploy auth
+supabase functions deploy user-profile
+supabase functions deploy pricing
+supabase functions deploy marketplace
+supabase functions deploy calculator
+supabase functions deploy admin
+```
 
-There are several ways of editing your application.
+5. Set up database tables (see `SUPABASE_MIGRATION.md` for SQL scripts)
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/cb3588df-3abd-4621-ba22-0a823b3f094c) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+6. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Project Structure
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```
+cable-hub-connect/
+├── src/
+│   ├── components/          # React components
+│   ├── pages/              # Page components
+│   ├── lib/                # Utilities and API client
+│   ├── hooks/              # Custom React hooks
+│   └── ...
+├── supabase/
+│   ├── functions/          # Edge Functions
+│   │   ├── auth/           # Authentication endpoints
+│   │   ├── pricing/        # Pricing data endpoints
+│   │   ├── marketplace/    # Marketplace endpoints
+│   │   ├── calculator/     # Calculator endpoints
+│   │   ├── admin/          # Admin endpoints
+│   │   └── _shared/        # Shared utilities
+│   └── config.toml         # Supabase configuration
+├── public/                 # Static assets
+└── ...
+```
 
-**Use GitHub Codespaces**
+## API Endpoints
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Authentication
+- `POST /functions/v1/auth/register` - User registration
+- `POST /functions/v1/auth/login` - User login
+- `POST /functions/v1/auth/logout` - User logout
 
-## What technologies are used for this project?
+### User Management
+- `GET /functions/v1/user-profile` - Get user profile
 
-This project is built with:
+### Pricing
+- `GET /functions/v1/pricing` - Get pricing data
+- `POST /functions/v1/pricing` - Create pricing entry (Admin)
+- `PUT /functions/v1/pricing/:id` - Update pricing entry (Admin)
+- `DELETE /functions/v1/pricing/:id` - Delete pricing entry (Admin)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Marketplace
+- `GET /functions/v1/marketplace` - Get marketplace listings
 
-## How can I deploy this project?
+### Calculators
+- `POST /functions/v1/calculator/raw-material` - Raw material calculations
+- `POST /functions/v1/calculator/pricing` - Pricing calculations
+- `POST /functions/v1/calculator/electrical` - Electrical calculations
 
-Simply open [Lovable](https://lovable.dev/projects/cb3588df-3abd-4621-ba22-0a823b3f094c) and click on Share -> Publish.
+### Admin
+- `GET /functions/v1/admin/users` - Get all users (Admin)
+- `PUT /functions/v1/admin/users/:id` - Update user (Admin)
+- `DELETE /functions/v1/admin/users/:id` - Delete user (Admin)
+- `POST /functions/v1/admin/promote/:email` - Promote user to admin
 
-## Can I connect a custom domain to my Lovable project?
+## Environment Variables
 
-Yes, you can!
+Create a `.env` file with the following variables:
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```env
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_URL=https://your-project-id.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## Migration from Express Server
+
+If you're migrating from the previous Express.js server setup, see `SUPABASE_MIGRATION.md` for detailed migration instructions.
+
+## Deployment
+
+### Frontend (Vercel)
+
+1. Connect your GitHub repository to Vercel
+2. Set environment variables in Vercel dashboard
+3. Deploy automatically on push to main branch
+
+### Edge Functions
+
+Functions are deployed using the Supabase CLI:
+
+```bash
+supabase functions deploy
+```
+
+## Development
+
+### Running Locally
+
+```bash
+# Start frontend
+npm run dev
+
+# Start Supabase functions locally (optional)
+supabase functions serve
+```
+
+### Testing
+
+```bash
+# Run tests
+npm test
+
+# Run linting
+npm run lint
+
+# Type checking
+npm run type-check
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the `LICENSE` file for details.
+
+## Support
+
+For support and questions:
+- Create an issue in this repository
+- Check the `SUPABASE_MIGRATION.md` for common setup issues
+- Review Supabase documentation at https://supabase.com/docs
+
+## Changelog
+
+### v2.0.0
+- **BREAKING**: Migrated from Express.js server to Supabase Edge Functions
+- Improved authentication with Supabase Auth
+- Better scalability and cost efficiency
+- Simplified deployment process
+
+### v1.0.0
+- Initial release with Express.js server
+- Basic authentication and user management
+- Calculator functions
+- Admin panel

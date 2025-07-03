@@ -6,7 +6,6 @@ import RawMaterialCalculator from "@/components/RawMaterialCalculator";
 import Marketplace from "@/components/Marketplace";
 import HeroSection from "@/components/HeroSection";
 import FeatureCards from "@/components/FeatureCards";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import apiClient from "@/lib/apiClient";
 
@@ -18,11 +17,10 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Get user type from localStorage (set during login)
-    const token = localStorage.getItem('authToken');
+    
     const storedUserType = localStorage.getItem('userType');
     
-    if (token && storedUserType) {
+    if (storedUserType) {
       setUserType(storedUserType);
       // Try to get user profile for email
       fetchUserProfile();
@@ -32,7 +30,7 @@ const Index = () => {
   const fetchUserProfile = async () => {
     try {
       const profile = await apiClient.getProfile();
-      setUserEmail(profile.user.email);
+      setUserEmail(profile.email);
     } catch (error) {
       console.error('Failed to fetch user profile:', error);
     }
@@ -53,9 +51,14 @@ const Index = () => {
     }
   };
 
-  const handleLogout = () => {
-    apiClient.logout();
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      await apiClient.logout();
+      navigate("/login");
+    } catch (error) {
+      console.error('Logout error:', error);
+      navigate("/login");
+    }
   };
 
   const renderContent = () => {
@@ -67,7 +70,7 @@ const Index = () => {
       default:
         return (
           <div className="space-y-12">
-            <HeroSection onGetStarted={() => setActiveTab("calculator")} />
+            <HeroSection onGetStarted={() => setActiveTab("marketplace")} />
             <FeatureCards onNavigate={setActiveTab} />
             
             {/* Market Intelligence Section */}

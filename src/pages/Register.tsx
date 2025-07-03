@@ -109,19 +109,57 @@ const Register = () => {
         userType: 'user'
       });
       
-      // Store user type and additional info for navigation purposes
-      if (response.user?.userType) {
-        localStorage.setItem('userType', response.user.userType);
-        localStorage.setItem('userName', response.user.name || '');
-        localStorage.setItem('userEmail', response.user.email || '');
+      console.log('Registration response:', response);
+      
+      // After successful registration, automatically log the user in
+      try {
+        const loginResponse = await apiClient.login({ 
+          email: email.toLowerCase().trim(), 
+          password: password 
+        });
+        
+        // Store access token in localStorage
+        if (loginResponse.session?.access_token) {
+          localStorage.setItem('authToken', loginResponse.session.access_token);
+          // Update apiClient internal token
+          apiClient.setToken(loginResponse.session.access_token);
+        }
+        
+        // Fetch the latest user profile from Supabase
+        const user = await apiClient.getProfile();
+        console.log('User object after registration:', user);
+        const userType = user.user_metadata?.user_type || 'user';
+        console.log('Extracted userType:', userType);
+        const userName = user.user_metadata?.name || name.trim();
+        const userEmail = user.email || email.toLowerCase().trim();
+        
+        // Store user type and additional info for navigation purposes
+        localStorage.setItem('userType', userType);
+        localStorage.setItem('userName', userName);
+        localStorage.setItem('userEmail', userEmail);
+        
+        setSuccess("Registration successful! Welcome to Cable Hub Connect.");
+        
+        console.log('About to redirect after registration, userType:', userType);
+        // Redirect based on user type
+        setTimeout(() => {
+          if (userType === 'admin') {
+            console.log('Redirecting to admin panel');
+            navigate("/admin");
+          } else {
+            console.log('Redirecting to home page');
+            navigate("/");
+          }
+        }, 1500);
+        
+      } catch (loginErr: any) {
+        console.error('Auto-login failed after registration:', loginErr);
+        // If auto-login fails, just redirect to login page
+        setSuccess("Registration successful! Please log in to continue.");
+        setTimeout(() => {
+          navigate("/login");
+        }, 1500);
       }
-      
-      setSuccess("Registration successful! Welcome to Cable Hub Connect.");
-      
-      // Auto redirect to dashboard after success
-      setTimeout(() => {
-        navigate("/");
-      }, 1500);
       
     } catch (err: any) {
       setError(err.message || "Registration failed. Please try again.");

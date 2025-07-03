@@ -24,7 +24,7 @@ const Login = () => {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     const userType = localStorage.getItem('userType');
-    if (token && apiClient.isAuthenticated()) {
+    if (apiClient.isAuthenticated() && token) {
       if (userType === 'admin') {
         navigate("/admin", { replace: true });
       } else {
@@ -65,33 +65,40 @@ const Login = () => {
     
     try {
       const response = await apiClient.login({ email, password });
-      
-      // Store user type and additional info for navigation purposes
-      if (response.user?.userType) {
-        localStorage.setItem('userType', response.user.userType);
-        localStorage.setItem('userName', response.user.name || '');
-        localStorage.setItem('userEmail', response.user.email || '');
+      // Store access token in localStorage
+      if (response.session?.access_token) {
+        localStorage.setItem('authToken', response.session.access_token);
+        // Update apiClient internal token
+        apiClient.setToken(response.session.access_token);
       }
-
+      // Fetch the latest user profile from Supabase
+      const user = await apiClient.getProfile();
+      console.log('User object after login:', user);
+      const userType = user.user_metadata?.user_type;
+      console.log('Extracted userType:', userType);
+      const name = user.user_metadata?.name || '';
+      const emailVal = user.email || '';
+      if (userType) {
+        localStorage.setItem('userType', userType);
+        localStorage.setItem('userName', name);
+        localStorage.setItem('userEmail', emailVal);
+      }
       // Handle remember me functionality
       if (rememberMe) {
         localStorage.setItem('rememberMe', 'true');
       } else {
         localStorage.removeItem('rememberMe');
       }
-
-      // Show success message briefly before redirect
       setError("");
-      
+      console.log('About to redirect, userType:', userType);
       // Redirect based on user type
-      setTimeout(() => {
-        if (response.user?.userType === 'admin') {
-          navigate("/admin", { replace: true });
-        } else {
-          navigate(from, { replace: true });
-        }
-      }, 100);
-      
+      if (userType === 'admin') {
+        console.log('Redirecting to admin panel');
+        navigate("/admin", { replace: true });
+      } else {
+        console.log('Redirecting to home page');
+        navigate(from, { replace: true });
+      }
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials and try again.");
     } finally {

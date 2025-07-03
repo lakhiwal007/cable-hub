@@ -44,7 +44,6 @@ const AdminPanel = () => {
   useEffect(() => {
     fetchUsers();
     fetchMaterials();
-    fetchCalculationSettings();
   }, []);
 
   const fetchUsers = async () => {
@@ -65,31 +64,6 @@ const AdminPanel = () => {
       setMaterials(response || []);
     } catch (err: any) {
       setError(err.message || "Failed to fetch materials");
-    }
-  };
-
-  const fetchCalculationSettings = async () => {
-    try {
-      const response = await apiClient.getCalculationSettings();
-      if (response) {
-        setCalculationSettings(response);
-      }
-    } catch (err: any) {
-      console.log("Using default calculation settings");
-    }
-  };
-
-  const handleSaveCalculationSettings = async () => {
-    try {
-      await apiClient.updateCalculationSettings(calculationSettings);
-      setError("");
-      // Show success message
-      const successDiv = document.createElement('div');
-      successDiv.className = 'mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-700';
-      successDiv.textContent = 'Calculation settings saved successfully!';
-      setTimeout(() => successDiv.remove(), 3000);
-    } catch (err: any) {
-      setError(err.message || "Failed to save calculation settings");
     }
   };
 
@@ -157,9 +131,17 @@ const AdminPanel = () => {
     }
   };
 
-  const handleLogout = () => {
-    apiClient.logout();
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      console.log('Admin logging out...');
+      await apiClient.logout();
+      console.log('Logout completed, redirecting to login page...');
+      navigate("/login");
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if logout fails, redirect to login for security
+      navigate("/login");
+    }
   };
 
   return (
@@ -248,8 +230,8 @@ const AdminPanel = () => {
                               <div className="min-w-0 flex-1">
                                 <div className="flex flex-row gap-2">
                                 <p className="font-medium text-sm sm:text-base truncate">{user.name}</p>
-                              <Badge variant={user.userType === 'admin' ? 'destructive' : 'secondary'} className="self-start sm:self-auto">
-                                {user.userType}
+                              <Badge variant={user.user_type === 'admin' ? 'destructive' : 'secondary'} className="self-start sm:self-auto">
+                                {user.user_type}
                               </Badge>
                                 </div>
                                 <p className="text-xs sm:text-sm text-gray-500 truncate">{user.email}</p>
@@ -614,10 +596,6 @@ const AdminPanel = () => {
                     </CardContent>
                   </Card>
                 </div>
-                <Button onClick={handleSaveCalculationSettings} className="mt-6 w-full sm:w-auto">
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Settings
-                </Button>
               </CardContent>
             </Card>
           </TabsContent>

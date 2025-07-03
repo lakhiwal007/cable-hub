@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ArrowRight, TrendingUp, Calculator, Users } from "lucide-react";
+import { ArrowRight, TrendingUp } from "lucide-react";
 
 interface HeroSectionProps {
   onGetStarted: () => void;
@@ -36,16 +36,11 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
             onClick={onGetStarted}
             className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg shadow-blue-600/25 transition-all duration-200 hover:shadow-xl hover:shadow-blue-600/30"
           >
-            Get Started Free
+            join MarketPlace
             <ArrowRight className="ml-2 h-5 w-5" />
           </Button>
           
-          <Button 
-            variant="outline" 
-            className="border-2 border-gray-300 hover:border-gray-400 px-8 py-3 text-lg font-semibold rounded-xl transition-all duration-200"
-          >
-            Watch Demo
-          </Button>
+          
         </div>
         
         {/* Stats */}
