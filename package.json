@@ -60,7 +60,7 @@
     "react-hook-form": "^7.43.9",
     "react-resizable-panels": "^0.0.55",
     "react-router-dom": "^6.8.1",
-    "recharts": "^2.8.0",
+    "recharts": "^2.15.4",
     "sonner": "^1.4.3",
     "tailwind-merge": "^1.14.0",
     "tailwind-scrollbar-hide": "^4.0.0",

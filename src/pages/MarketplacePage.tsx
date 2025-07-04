@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Menu, X, LogOut, Settings } from "lucide-react";
 import { useState, useEffect } from "react";
 import Marketplace from "@/components/Marketplace";
-import PricingSlideshow from "@/components/PricingSlideshow";
 import apiClient from "@/lib/apiClient";
 
 const MarketplacePage = () => {
@@ -40,11 +39,8 @@ const MarketplacePage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Pricing Slideshow */}
-      <PricingSlideshow />
-      
       {/* Header */}
-      <header className="bg-white/95 backdrop-blur-md border-b border-gray-200/50 sticky top-16 z-40">
+      <header className="bg-white/95 backdrop-blur-md border-b border-gray-200/50 top-0 sticky z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -55,9 +51,7 @@ const MarketplacePage = () => {
                 <ArrowLeft className="h-5 w-5 mr-2" />
                 
               </button>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                Marketplace
-              </h1>
+              
             </div>
 
             {/* Desktop Navigation */}
@@ -108,7 +102,7 @@ const MarketplacePage = () => {
                 className="flex items-center w-full px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
               >
                 <ArrowLeft className="h-5 w-5 mr-3" />
-                Back to Dashboard
+                
               </button>
               <button
                 onClick={() => {

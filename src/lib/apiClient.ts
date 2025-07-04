@@ -111,8 +111,33 @@ class ApiClient {
   }
 
   async updatePricingData(pricingId: string, pricingData: any) {
+    // Fetch the old price first
+    const { data: oldData, error: oldError } = await supabase.from('pricing').select('price').eq('id', pricingId).single();
+    if (oldError) throw new Error(oldError.message);
+    const oldPrice = oldData?.price;
+    const newPrice = pricingData.price;
+
+    // Update the pricing data
     const { data, error } = await supabase.from('pricing').update(pricingData).eq('id', pricingId).select().single();
     if (error) throw new Error(error.message);
+
+    // If price changed, insert into material_price_history
+    if (oldPrice !== newPrice) {
+      // Get current user/admin id (if available)
+      let changedBy = null;
+      if (supabase.auth && supabase.auth.getUser) {
+        const user = await supabase.auth.getUser();
+        changedBy = user?.data?.user?.id || null;
+      }
+      await supabase.from('material_price_history').insert([
+        {
+          pricing_id: pricingId,
+          old_price: oldPrice.split("/")[0],
+          new_price: newPrice.split("/")[0],
+          changed_by: changedBy,
+        },
+      ]);
+    }
     return data;
   }
 
@@ -1083,6 +1108,16 @@ class ApiClient {
       chat_room: chatRoom,
       contact: contact,
     };
+  }
+
+  async getMaterialPriceHistory(pricingId: string) {
+    const { data, error } = await supabase
+      .from('material_price_history')
+      .select('old_price, new_price, changed_at')
+      .eq('pricing_id', pricingId)
+      .order('changed_at', { ascending: true });
+    if (error) throw new Error(error.message);
+    return data;
   }
 }
 

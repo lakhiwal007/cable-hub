@@ -301,12 +301,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onBack }) => {
           </div>
           <div className="flex gap-1 md:gap-2">
             <Button variant="outline" size="sm" asChild className="px-2 md:px-3">
-              <a href={`tel:${supplier?.phone || ''}`}>
-                <Phone className="h-4 w-4 md:mr-1" />
-                <span className="hidden md:inline">Call</span>
-              </a>
-            </Button>
-            <Button variant="outline" size="sm" asChild className="px-2 md:px-3">
               <a href={`mailto:${supplier?.email || ''}`}>
                 <Mail className="h-4 w-4 md:mr-1" />
                 <span className="hidden md:inline">Email</span>

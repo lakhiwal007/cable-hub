@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import Loader from "@/components/ui/loader";
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -196,7 +197,7 @@ const AdminPanel = () => {
               </CardHeader>
               <CardContent>
                 {loading ? (
-                  <div className="text-center py-8">Loading users...</div>
+                  <Loader/>
                 ) : (
                   <div className="space-y-4">
                     {users.map((user) => (
