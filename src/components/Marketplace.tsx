@@ -14,12 +14,19 @@ import DemandForm from "@/components/marketplace/DemandForm";
 import SupplierDetailsDialog from "@/components/marketplace/SupplierDetailsDialog";
 import ContactDialog from "@/components/marketplace/ContactDialog";
 
+interface MaterialCategory {
+  id: string;
+  name: string;
+  image_url?: string;
+}
+
 const Marketplace = () => {
   const [activeTab, setActiveTab] = useState("browse");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [supplyListings, setSupplyListings] = useState<SupplyListing[]>([]);
   const [demandListings, setDemandListings] = useState<DemandListing[]>([]);
+  const [materialCategories, setMaterialCategories] = useState<MaterialCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
@@ -49,6 +56,7 @@ const Marketplace = () => {
 
   useEffect(() => {
     fetchListings();
+    fetchMaterialCategories();
     setIsAuthenticated(apiClient.isAuthenticated());
     // Pre-fetch user profile for contact form
     if (apiClient.isAuthenticated()) {
@@ -72,6 +80,15 @@ const Marketplace = () => {
       setError(err.message || "Failed to fetch listings");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMaterialCategories = async () => {
+    try {
+      const categories = await apiClient.getMaterialCategories();
+      setMaterialCategories(categories || []);
+    } catch (err: any) {
+      console.error('Failed to fetch material categories:', err);
     }
   };
 
@@ -258,13 +275,14 @@ const Marketplace = () => {
                       No supply listings found. Try adjusting your search or filters.
                     </div>
                   ) : (
-                    <div className="grid gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {filteredSupplyListings.map((listing) => (
                         <SupplyListingCard
                           key={listing.id}
                           listing={listing}
                           onContactSupplier={handleContactSupplier}
                           currentUserId={userProfileRef.current?.id}
+                          materialCategories={materialCategories}
                         />
                       ))}
                     </div>
@@ -279,9 +297,13 @@ const Marketplace = () => {
                       No demand listings found. Try adjusting your search or filters.
                     </div>
                   ) : (
-                    <div className="grid gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                       {filteredDemandListings.map((listing) => (
-                        <DemandListingCard key={listing.id} listing={listing} />
+                        <DemandListingCard 
+                          key={listing.id} 
+                          listing={listing} 
+                          materialCategories={materialCategories}
+                        />
                       ))}
                     </div>
                   )}
@@ -294,6 +316,7 @@ const Marketplace = () => {
             <SupplyForm
               onSubmit={handleSupplySubmit}
               categories={categories}
+              materialCategories={materialCategories}
               isAuthenticated={isAuthenticated}
             />
           </UITabsContent>
@@ -302,6 +325,7 @@ const Marketplace = () => {
             <DemandForm
               onSubmit={handleDemandSubmit}
               categories={categories}
+              materialCategories={materialCategories}
               isAuthenticated={isAuthenticated}
             />
           </UITabsContent>

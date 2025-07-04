@@ -1119,6 +1119,45 @@ class ApiClient {
     if (error) throw new Error(error.message);
     return data;
   }
+
+  async getMaterialCategories() {
+    const { data, error } = await supabase
+      .from('material_categories')
+      .select('id, name, image_url')
+      .order('name', { ascending: true });
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async addMaterialCategory(categoryData: { name: string; image_url?: string }) {
+    const { data, error } = await supabase
+      .from('material_categories')
+      .insert([categoryData])
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async updateMaterialCategory(categoryId: string, categoryData: { name: string; image_url?: string }) {
+    const { data, error } = await supabase
+      .from('material_categories')
+      .update(categoryData)
+      .eq('id', categoryId)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async deleteMaterialCategory(categoryId: string) {
+    const { error } = await supabase
+      .from('material_categories')
+      .delete()
+      .eq('id', categoryId);
+    if (error) throw new Error(error.message);
+    return { message: 'Material category deleted successfully' };
+  }
 }
 
 export const apiClient = new ApiClient();

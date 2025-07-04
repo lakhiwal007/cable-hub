@@ -19,13 +19,20 @@ interface SupplyFormData {
   is_urgent: boolean;
 }
 
+interface MaterialCategory {
+  id: string;
+  name: string;
+  image_url?: string;
+}
+
 interface SupplyFormProps {
   onSubmit: (data: SupplyFormData) => Promise<void>;
   categories: Array<{ value: string; label: string }>;
+  materialCategories: MaterialCategory[];
   isAuthenticated: boolean;
 }
 
-const SupplyForm = ({ onSubmit, categories, isAuthenticated }: SupplyFormProps) => {
+const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated }: SupplyFormProps) => {
   const [formData, setFormData] = useState<SupplyFormData>({
     title: '',
     description: '',
@@ -106,7 +113,12 @@ const SupplyForm = ({ onSubmit, categories, isAuthenticated }: SupplyFormProps) 
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Material Type *</label>
-                <Input name="material_type" value={formData.material_type} onChange={handleInput} required />
+                <select name="material_type" value={formData.material_type} onChange={handleInput} required className="w-full border rounded h-10 px-2">
+                  <option value="">Select material type</option>
+                  {materialCategories.map(material => (
+                    <option key={material.id} value={material.name}>{material.name}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Grade/Specification</label>

@@ -161,7 +161,7 @@ function aggregateHistory(data: any[], range: 'daily' | 'weekly' | 'monthly' | '
             >
               <div className="flex items-center h-full">
                 {priceData.concat(priceData).map((item, index) => (
-                  <div key={index} className="flex items-center space-x-4 px-8 cursor-pointer hover:bg-slate-700/20 rounded-lg transition-colors" onClick={() => handleMaterialClick(item)}>
+                  <div key={index} className="flex items-center space-x-4 p-8 cursor-pointer hover:bg-slate-700/20 rounded-lg transition-colors" onClick={() => handleMaterialClick(item)}>
                     <div className="text-center">
                       <p className="font-semibold text-sm mb-1">{item.material}</p>
                       <div className="flex items-center space-x-3">
@@ -206,9 +206,9 @@ function aggregateHistory(data: any[], range: 'daily' | 'weekly' | 'monthly' | '
               {['daily','weekly','monthly','yearly'].map(r => (
                 <button
                   key={r}
-                  className={`px-3 py-1 text-sm font-medium rounded-l-md focus:outline-none transition-colors ${historyRange===r ? 'bg-blue-600 text-white' : 'bg-slate-100 text-blue-700 hover:bg-blue-200'}`}
+                  className={`px-3 py-1 text-sm font-medium focus:outline-none transition-colors ${historyRange===r ? 'bg-blue-600 text-white' : 'bg-slate-100 text-blue-700 hover:bg-blue-200'}`}
                   onClick={() => setHistoryRange(r as any)}
-                  style={{borderRight: r!=='yearly'?'1px solid #e5e7eb':''}}
+                  
                 >
                   {r.charAt(0).toUpperCase()+r.slice(1)}
                 </button>

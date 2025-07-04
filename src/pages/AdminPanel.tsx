@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Users, Package, Trash2, Edit, Plus, Save, X, LogOut, Settings } from "lucide-react";
+import { Users, Package, Trash2, Edit, Plus, Save, X, LogOut, Settings, Tag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import Loader from "@/components/ui/loader";
+import MaterialCategoryList from "@/components/admin/MaterialCategoryList";
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -173,7 +174,7 @@ const AdminPanel = () => {
         )}
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 h-auto">
+          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 h-auto">
             <TabsTrigger value="users" className="flex items-center gap-2 py-3">
               <Users className="h-4 w-4" />
               <span className="text-sm sm:text-base">User Management</span>
@@ -181,6 +182,10 @@ const AdminPanel = () => {
             <TabsTrigger value="materials" className="flex items-center gap-2 py-3">
               <Package className="h-4 w-4" />
               <span className="text-sm sm:text-base">Material Pricing</span>
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="flex items-center gap-2 py-3">
+              <Tag className="h-4 w-4" />
+              <span className="text-sm sm:text-base">Material Categories</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2 py-3">
               <Settings className="h-4 w-4" />
@@ -407,6 +412,11 @@ const AdminPanel = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Material Categories Tab */}
+          <TabsContent value="categories">
+            <MaterialCategoryList />
           </TabsContent>
 
           {/* Calculation Settings Tab */}
