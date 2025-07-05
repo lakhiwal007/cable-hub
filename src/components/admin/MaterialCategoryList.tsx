@@ -137,49 +137,58 @@ const MaterialCategoryList = () => {
         )}
 
         {/* Categories List */}
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {categories.map((category) => (
-            <div key={category.id} className="flex items-center justify-between p-3 border rounded-lg">
+            <div key={category.id} className="border rounded-lg p-4 space-y-3">
               {editingId === category.id ? (
-                <form onSubmit={handleEdit} className="flex-1 flex items-center gap-4 flex-wrap">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                      value={editForm.name}
-                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                      required
-                    />
-                    <Input
-                      value={editForm.image_url}
-                      onChange={(e) => setEditForm({ ...editForm, image_url: e.target.value })}
-                      placeholder="Image URL"
-                    />
-                  </div>
-                  <div className="flex gap-2 flex-wrap">
-                    <Button type="submit" size="sm">Save</Button>
-                    <Button type="button" variant="outline" size="sm" onClick={() => setEditingId(null)}>
+                <form onSubmit={handleEdit} className="space-y-3">
+                  <Input
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                    placeholder="Category name"
+                    required
+                  />
+                  <Input
+                    value={editForm.image_url}
+                    onChange={(e) => setEditForm({ ...editForm, image_url: e.target.value })}
+                    placeholder="Image URL"
+                  />
+                  <div className="flex gap-2">
+                    <Button type="submit" size="sm" className="flex-1">
+                      Save
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setEditingId(null)}
+                      className="flex-1"
+                    >
                       Cancel
                     </Button>
                   </div>
                 </form>
               ) : (
-                <>
-                  <div className="flex items-center gap-3">
-                    {category.image_url ? (
-                      <img
-                        src={category.image_url}
-                        alt={category.name}
-                        className="w-8 h-8 rounded object-cover"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded bg-gray-200 flex items-center justify-center">
-                        <ImageIcon className="h-4 w-4 text-gray-400" />
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      {category.image_url ? (
+                        <img
+                          src={category.image_url}
+                          alt={category.name}
+                          className="w-12 h-12 rounded object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded bg-gray-200 flex items-center justify-center">
+                          <ImageIcon className="h-6 w-6 text-gray-400" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{category.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(category.created_at).toLocaleDateString()}
+                        </p>
                       </div>
-                    )}
-                    <div>
-                      <p className="font-medium">{category.name}</p>
-                      <p className="text-sm text-gray-500">
-                        Created: {new Date(category.created_at).toLocaleDateString()}
-                      </p>
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -187,18 +196,20 @@ const MaterialCategoryList = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => startEdit(category)}
+                      className="flex-1"
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="destructive"
                       size="sm"
                       onClick={() => handleDelete(category.id)}
+                      className="flex-1"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                </>
+                </div>
               )}
             </div>
           ))}

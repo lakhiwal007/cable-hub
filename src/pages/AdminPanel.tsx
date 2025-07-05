@@ -206,11 +206,11 @@ const AdminPanel = () => {
                 {loading ? (
                   <Loader/>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {users.map((user) => (
-                      <div key={user.id} className="border rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+                      <div key={user.id} className="border rounded-lg p-4 space-y-3">
                         {editingUser?.id === user.id ? (
-                          <div className="flex-1 space-y-3 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                          <div className="space-y-3">
                             <Input
                               value={editingUser.name}
                               onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
@@ -231,43 +231,36 @@ const AdminPanel = () => {
                               <option value="user">User</option>
                               <option value="admin">Admin</option>
                             </select>
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => handleEditUser(editingUser)} className="flex-1">
+                                <Save className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => setEditingUser(null)} className="flex-1">
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         ) : (
-                          <div className="flex-1">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                              <div className="min-w-0 flex-1">
-                                <div className="flex flex-row gap-2">
-                                <p className="font-medium text-sm sm:text-base truncate">{user.name}</p>
-                              <Badge variant={user.user_type === 'admin' ? 'destructive' : 'secondary'} className="self-start sm:self-auto">
-                                {user.user_type}
-                              </Badge>
-                                </div>
-                                <p className="text-xs sm:text-sm text-gray-500 truncate">{user.email}</p>
+                          <div className="space-y-3">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <p className="font-medium text-sm truncate">{user.name}</p>
+                                <Badge variant={user.user_type === 'admin' ? 'destructive' : 'secondary'} className="text-xs shrink-0">
+                                  {user.user_type}
+                                </Badge>
                               </div>
+                              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" onClick={() => setEditingUser(user)} className="flex-1">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleDeleteUser(user.id)} className="flex-1">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
                         )}
-                        <div className="flex gap-2 pt-2 sm:pt-0 justify-end sm:justify-start">
-                          {editingUser?.id === user.id ? (
-                            <>
-                              <Button size="sm" onClick={() => handleEditUser(editingUser)} className="min-w-[36px]">
-                                <Save className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => setEditingUser(null)} className="min-w-[36px]">
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button size="sm" variant="outline" onClick={() => setEditingUser(user)} className="min-w-[36px]">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="destructive" onClick={() => handleDeleteUser(user.id)} className="min-w-[36px]">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
                       </div>
                     ))}
                   </div>
@@ -340,11 +333,11 @@ const AdminPanel = () => {
                   <CardDescription>Manage existing material prices</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {materials.map((material) => (
-                      <div key={material.id} className="border rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+                      <div key={material.id} className="border rounded-lg p-4 space-y-3">
                         {editingMaterial?.id === material.id ? (
-                          <div className="flex-1 space-y-3 sm:space-y-0 sm:grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                          <div className="space-y-3">
                             <Input
                               value={editingMaterial.material}
                               onChange={(e) => setEditingMaterial({...editingMaterial, material: e.target.value})}
@@ -371,43 +364,36 @@ const AdminPanel = () => {
                               <option value="up">Up</option>
                               <option value="down">Down</option>
                             </select>
+                            <div className="flex gap-2">
+                              <Button size="sm" onClick={() => handleEditMaterial(editingMaterial)} className="flex-1">
+                                <Save className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => setEditingMaterial(null)} className="flex-1">
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         ) : (
-                          <div className="flex-1">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                              <div className="min-w-0 flex-1">
-                                <div className="flex flex-row gap-2">
-                                <p className="font-medium text-sm sm:text-base truncate">{material.material}</p>
-                                <Badge variant={material.trend === 'up' ? 'default' : 'destructive'} className="self-start sm:self-auto">
-                                {material.trend === 'up' ? '+' + material.change : '-' + material.change}
-                              </Badge>
-                                </div>
-                                <p className="text-lg font-bold">₹{material.price}</p>
+                          <div className="space-y-3">
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <p className="font-medium text-sm truncate">{material.material}</p>
+                                <Badge variant={material.trend === 'up' ? 'default' : 'destructive'} className="text-xs shrink-0">
+                                  {material.trend === 'up' ? '+' + material.change : '-' + material.change}
+                                </Badge>
                               </div>
+                              <p className="text-lg font-bold">₹{material.price}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" onClick={() => setEditingMaterial(material)} className="flex-1">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleDeleteMaterial(material.id)} className="flex-1">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
                         )}
-                        <div className="flex gap-2 pt-2 sm:pt-0 justify-end sm:justify-start">
-                          {editingMaterial?.id === material.id ? (
-                            <>
-                              <Button size="sm" onClick={() => handleEditMaterial(editingMaterial)} className="min-w-[36px]">
-                                <Save className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => setEditingMaterial(null)} className="min-w-[36px]">
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </>
-                          ) : (
-                            <>
-                              <Button size="sm" variant="outline" onClick={() => setEditingMaterial(material)} className="min-w-[36px]">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="destructive" onClick={() => handleDeleteMaterial(material.id)} className="min-w-[36px]">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
                       </div>
                     ))}
                   </div>
