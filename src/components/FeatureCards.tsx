@@ -34,7 +34,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       title: "Market Intelligence",
       description: "Real-time insights and pricing trends for informed decisions",
       action: "View Insights",
-      tab: "dashboard",
+      tab: "pricing",
       gradient: "from-blue-500 to-blue-600",
       bgGradient: "from-blue-50 to-blue-100",
       borderColor: "border-blue-200",
