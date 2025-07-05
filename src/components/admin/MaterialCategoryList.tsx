@@ -31,7 +31,7 @@ const MaterialCategoryList = () => {
     setError(null);
     try {
       const data = await apiClient.getMaterialCategories();
-      setCategories(data || []);
+      setCategories(data as MaterialCategory[]);
     } catch (err: any) {
       setError(err.message || "Failed to fetch material categories");
     } finally {
@@ -89,7 +89,7 @@ const MaterialCategoryList = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center flex-wrap gap-2">
           <div>
             <CardTitle>Material Categories</CardTitle>
             <CardDescription>Manage material categories and their images</CardDescription>
@@ -141,8 +141,8 @@ const MaterialCategoryList = () => {
           {categories.map((category) => (
             <div key={category.id} className="flex items-center justify-between p-3 border rounded-lg">
               {editingId === category.id ? (
-                <form onSubmit={handleEdit} className="flex-1 flex items-center gap-4">
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleEdit} className="flex-1 flex items-center gap-4 flex-wrap">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input
                       value={editForm.name}
                       onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
@@ -154,7 +154,7 @@ const MaterialCategoryList = () => {
                       placeholder="Image URL"
                     />
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     <Button type="submit" size="sm">Save</Button>
                     <Button type="button" variant="outline" size="sm" onClick={() => setEditingId(null)}>
                       Cancel

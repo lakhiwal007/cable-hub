@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Users, Package, Trash2, Edit, Plus, Save, X, LogOut, Settings, Tag } from "lucide-react";
+import { Users, Package, Trash2, Edit, Plus, Save, X, LogOut, Settings, Tag, Calculator } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import Loader from "@/components/ui/loader";
 import MaterialCategoryList from "@/components/admin/MaterialCategoryList";
+import CalculationConstantsManager from "@/components/admin/CalculationConstantsManager";
 
 const AdminPanel = () => {
   const navigate = useNavigate();
@@ -174,23 +175,24 @@ const AdminPanel = () => {
         )}
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 h-auto">
+          <TabsList className="grid w-full grid-cols-4 h-auto">
             <TabsTrigger value="users" className="flex items-center gap-2 py-3">
-              <Users className="h-4 w-4" />
-              <span className="text-sm sm:text-base">User Management</span>
+              <Users className="h-4 w-4 hidden md:block" />
+              <span className="text-[12px] sm:text-base text-wrap">User Management</span>
             </TabsTrigger>
             <TabsTrigger value="materials" className="flex items-center gap-2 py-3">
-              <Package className="h-4 w-4" />
-              <span className="text-sm sm:text-base">Material Pricing</span>
+              <Package className="h-4 w-4 hidden md:block" />
+              <span className="text-[12px] sm:text-base text-wrap">Material Pricing</span>
             </TabsTrigger>
             <TabsTrigger value="categories" className="flex items-center gap-2 py-3">
-              <Tag className="h-4 w-4" />
-              <span className="text-sm sm:text-base">Material Categories</span>
+              <Tag className="h-4 w-4 hidden md:block" />
+              <span className="text-[12px] sm:text-base text-wrap">Material Categories</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2 py-3">
-              <Settings className="h-4 w-4" />
-              <span className="text-sm sm:text-base">Calculation Settings</span>
+            <TabsTrigger value="constants" className="flex items-center gap-2 py-3">
+              <Calculator className="h-4 w-4 hidden md:block" />
+              <span className="text-[12px] sm:text-base text-wrap">Calculation Constants</span>
             </TabsTrigger>
+           
           </TabsList>
 
           {/* User Management Tab */}
@@ -420,195 +422,13 @@ const AdminPanel = () => {
           </TabsContent>
 
           {/* Calculation Settings Tab */}
+          <TabsContent value="constants">
+            <CalculationConstantsManager />
+          </TabsContent>
+
+          {/* Settings Tab */}
           <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg sm:text-xl">Calculation Settings</CardTitle>
-                <CardDescription>Configure calculation parameters</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {/* Material Densities */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base sm:text-lg">Material Densities</CardTitle>
-                      <CardDescription>Density of different materials (g/cm³)</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                        <div>
-                          <Label className="text-sm font-medium">Copper</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.materialDensities.copper}
-                            onChange={(e) => updateCalculationSetting('materialDensities', 'copper', Number(e.target.value))}
-                            placeholder="Density (g/cm³)"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Aluminum</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.materialDensities.aluminum}
-                            onChange={(e) => updateCalculationSetting('materialDensities', 'aluminum', Number(e.target.value))}
-                            placeholder="Density (g/cm³)"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">PVC</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.materialDensities.pvc}
-                            onChange={(e) => updateCalculationSetting('materialDensities', 'pvc', Number(e.target.value))}
-                            placeholder="Density (g/cm³)"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">XLPE</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.materialDensities.xlpe}
-                            onChange={(e) => updateCalculationSetting('materialDensities', 'xlpe', Number(e.target.value))}
-                            placeholder="Density (g/cm³)"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Rubber</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.materialDensities.rubber}
-                            onChange={(e) => updateCalculationSetting('materialDensities', 'rubber', Number(e.target.value))}
-                            placeholder="Density (g/cm³)"
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Cost Factors */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base sm:text-lg">Cost Factors</CardTitle>
-                      <CardDescription>Factors affecting cost calculation</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div>
-                          <Label className="text-sm font-medium">Labor Cost</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.costFactors.laborCost}
-                            onChange={(e) => updateCalculationSetting('costFactors', 'laborCost', Number(e.target.value))}
-                            placeholder="Factor"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Overhead Cost</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.costFactors.overheadCost}
-                            onChange={(e) => updateCalculationSetting('costFactors', 'overheadCost', Number(e.target.value))}
-                            placeholder="Factor"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Profit Margin</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.costFactors.profitMargin}
-                            onChange={(e) => updateCalculationSetting('costFactors', 'profitMargin', Number(e.target.value))}
-                            placeholder="Factor"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Waste Factor</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.costFactors.wasteFactor}
-                            onChange={(e) => updateCalculationSetting('costFactors', 'wasteFactor', Number(e.target.value))}
-                            placeholder="Factor"
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Calculation Constants */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base sm:text-lg">Calculation Constants</CardTitle>
-                      <CardDescription>Constants used in calculations</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div>
-                          <Label className="text-sm font-medium">Conductor Density Factor</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.calculationConstants.conductorDensityFactor}
-                            onChange={(e) => updateCalculationSetting('calculationConstants', 'conductorDensityFactor', Number(e.target.value))}
-                            placeholder="Factor"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Insulation Thickness Factor</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.calculationConstants.insulationThicknessFactor}
-                            onChange={(e) => updateCalculationSetting('calculationConstants', 'insulationThicknessFactor', Number(e.target.value))}
-                            placeholder="Factor"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Sheath Thickness Factor</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.calculationConstants.sheathThicknessFactor}
-                            onChange={(e) => updateCalculationSetting('calculationConstants', 'sheathThicknessFactor', Number(e.target.value))}
-                            placeholder="Factor"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-sm font-medium">Length Safety Factor</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={calculationSettings.calculationConstants.lengthSafetyFactor}
-                            onChange={(e) => updateCalculationSetting('calculationConstants', 'lengthSafetyFactor', Number(e.target.value))}
-                            placeholder="Factor"
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Settings content */}
           </TabsContent>
         </Tabs>
       </div>

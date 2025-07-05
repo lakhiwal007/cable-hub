@@ -168,8 +168,11 @@ class ApiClient {
       sheathMaterial = 'pvc',
     } = calculationData;
 
-    // Material densities (kg/m³)
-    const densities: Record<string, number> = {
+    // Fetch material densities from database
+    const densities = await this.getConstantsByCategory('material_densities');
+    
+    // Fallback to default densities if database values are not available
+    const defaultDensities: Record<string, number> = {
       copper: 8960,
       aluminum: 2700,
       pvc: 1380,
@@ -177,24 +180,26 @@ class ApiClient {
       rubber: 1200,
     };
 
+    const finalDensities = { ...defaultDensities, ...densities };
+
     // Calculate conductor volume and weight
     const conductorArea = (Math.PI * Math.pow(conductorSize / 2, 2)) / 1000000; // mm² to m²
     const conductorVolume = conductorArea * length;
-    const conductorWeight = conductorVolume * densities[conductorMaterial];
+    const conductorWeight = conductorVolume * finalDensities[conductorMaterial];
 
     // Calculate insulation volume and weight
     const outerRadius = conductorSize / 2 + insulationThickness;
     const insulationArea =
       (Math.PI * (Math.pow(outerRadius, 2) - Math.pow(conductorSize / 2, 2))) / 1000000;
     const insulationVolume = insulationArea * length;
-    const insulationWeight = insulationVolume * densities[insulationMaterial];
+    const insulationWeight = insulationVolume * finalDensities[insulationMaterial];
 
     // Calculate sheath volume and weight
     const sheathOuterRadius = outerRadius + sheathThickness;
     const sheathArea =
       (Math.PI * (Math.pow(sheathOuterRadius, 2) - Math.pow(outerRadius, 2))) / 1000000;
     const sheathVolume = sheathArea * length;
-    const sheathWeight = sheathVolume * densities[sheathMaterial];
+    const sheathWeight = sheathVolume * finalDensities[sheathMaterial];
 
     // Total weight
     const totalWeight = conductorWeight + insulationWeight + sheathWeight;
@@ -211,20 +216,21 @@ class ApiClient {
       else if (materialName.includes('xlpe')) prices['xlpe'] = price;
       else if (materialName.includes('rubber')) prices['rubber'] = price;
     });
-    const defaultPrices = {
+
+    // Fetch default prices from database
+    const defaultPrices = await this.getConstantsByCategory('default_prices');
+    
+    // Fallback to hardcoded default prices if database values are not available
+    const fallbackPrices = {
       copper: 485,
       aluminum: 162,
       pvc: 89,
       xlpe: 145,
       rubber: 120,
     };
-    const finalPrices = {
-      copper: prices.copper || defaultPrices.copper,
-      aluminum: prices.aluminum || defaultPrices.aluminum,
-      pvc: prices.pvc || defaultPrices.pvc,
-      xlpe: prices.xlpe || defaultPrices.xlpe,
-      rubber: prices.rubber || defaultPrices.rubber,
-    };
+
+    const finalPrices = { ...fallbackPrices, ...defaultPrices, ...prices };
+
     // Calculate costs
     const conductorCost = conductorWeight * (finalPrices[conductorMaterial] || 0);
     const insulationCost = insulationWeight * (finalPrices[insulationMaterial] || 0);
@@ -327,11 +333,18 @@ class ApiClient {
     }
     // Calculate power if not provided
     const calculatedPower = power || voltage * (current as number);
-    // Resistivity values (Ω·m)
-    const resistivity: Record<string, number> = {
+    
+    // Fetch resistivity values from database
+    const resistivityConstants = await this.getConstantsByCategory('electrical_constants');
+    
+    // Fallback to default resistivity values if database values are not available
+    const defaultResistivity: Record<string, number> = {
       copper: 1.68e-8,
       aluminum: 2.82e-8,
     };
+
+    const resistivity = { ...defaultResistivity, ...resistivityConstants };
+    
     // Calculate resistance
     const conductorArea = (Math.PI * Math.pow(conductorSize / 2, 2)) / 1000000; // mm² to m²
     const resistance = (resistivity[conductorMaterial] * length) / conductorArea;
@@ -1313,6 +1326,77 @@ class ApiClient {
       .eq('id', categoryId);
     if (error) throw new Error(error.message);
     return { message: 'Material category deleted successfully' };
+  }
+
+  // === CALCULATION CONSTANTS MANAGEMENT ===
+  async getCalculationConstants(category?: string) {
+    let query = supabase
+      .from('calculation_constants')
+      .select('*')
+      .eq('is_active', true)
+      .order('category', { ascending: true })
+      .order('name', { ascending: true });
+
+    if (category) {
+      query = query.eq('category', category);
+    }
+
+    const { data, error } = await query;
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async updateCalculationConstant(constantId: string, updateData: {
+    value: number;
+    unit?: string;
+    description?: string;
+  }) {
+    const { data, error } = await supabase
+      .from('calculation_constants')
+      .update({
+        ...updateData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', constantId)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async addCalculationConstant(constantData: {
+    category: string;
+    name: string;
+    value: number;
+    unit?: string;
+    description?: string;
+  }) {
+    const { data, error } = await supabase
+      .from('calculation_constants')
+      .insert([constantData])
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async deleteCalculationConstant(constantId: string) {
+    const { error } = await supabase
+      .from('calculation_constants')
+      .update({ is_active: false })
+      .eq('id', constantId);
+    if (error) throw new Error(error.message);
+    return { message: 'Calculation constant deactivated successfully' };
+  }
+
+  // Helper method to get constants by category as a record
+  async getConstantsByCategory(category: string): Promise<Record<string, number>> {
+    const constants = await this.getCalculationConstants(category);
+    const result: Record<string, number> = {};
+    constants?.forEach(constant => {
+      result[constant.name] = parseFloat(constant.value);
+    });
+    return result;
   }
 }
 
