@@ -1149,20 +1149,41 @@ class ApiClient {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Authentication required');
 
-    // Create or get existing chat room
-    const chatRoom = await this.createChatRoom({
-      listing_id: contactData.listing_id,
-      listing_type: contactData.listing_type,
-      supplier_id: contactData.supplier_id,
-      buyer_id: user.user.id,
-    });
+    // Check if chat room already exists for this listing and these participants
+    const { data: existingRoom } = await supabase
+      .from('chat_rooms')
+      .select('id')
+      .eq('listing_id', contactData.listing_id)
+      .eq('listing_type', contactData.listing_type)
+      .eq('supplier_id', contactData.supplier_id)
+      .eq('buyer_id', user.user.id)
+      .single();
 
-    // Send initial message
-    await this.sendMessage({
-      chat_room_id: chatRoom.id,
-      message_text: contactData.message,
-      message_type: 'text',
-    });
+    let chatRoom;
+    let isNewRoom = false;
+
+    if (existingRoom) {
+      // Chat room already exists, just return it
+      chatRoom = existingRoom;
+    } else {
+      // Create new chat room
+      chatRoom = await this.createChatRoom({
+        listing_id: contactData.listing_id,
+        listing_type: contactData.listing_type,
+        supplier_id: contactData.supplier_id,
+        buyer_id: user.user.id,
+      });
+      isNewRoom = true;
+    }
+
+    // Only send initial message if this is a new chat room
+    if (isNewRoom) {
+      await this.sendMessage({
+        chat_room_id: chatRoom.id,
+        message_text: contactData.message,
+        message_type: 'text',
+      });
+    }
 
     // Also create traditional contact record for backwards compatibility
     const contact = await this.contactSupplier({
@@ -1193,20 +1214,41 @@ class ApiClient {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Authentication required');
 
-    // Create or get existing chat room
-    const chatRoom = await this.createChatRoom({
-      listing_id: contactData.listing_id,
-      listing_type: contactData.listing_type,
-      supplier_id: user.user.id, // Current user (supplier)
-      buyer_id: contactData.buyer_id, // Buyer who created the demand
-    });
+    // Check if chat room already exists for this listing and these participants
+    const { data: existingRoom } = await supabase
+      .from('chat_rooms')
+      .select('id')
+      .eq('listing_id', contactData.listing_id)
+      .eq('listing_type', contactData.listing_type)
+      .eq('supplier_id', user.user.id)
+      .eq('buyer_id', contactData.buyer_id)
+      .single();
 
-    // Send initial message
-    await this.sendMessage({
-      chat_room_id: chatRoom.id,
-      message_text: contactData.message,
-      message_type: 'text',
-    });
+    let chatRoom;
+    let isNewRoom = false;
+
+    if (existingRoom) {
+      // Chat room already exists, just return it
+      chatRoom = existingRoom;
+    } else {
+      // Create new chat room
+      chatRoom = await this.createChatRoom({
+        listing_id: contactData.listing_id,
+        listing_type: contactData.listing_type,
+        supplier_id: user.user.id, // Current user (supplier)
+        buyer_id: contactData.buyer_id, // Buyer who created the demand
+      });
+      isNewRoom = true;
+    }
+
+    // Only send initial message if this is a new chat room
+    if (isNewRoom) {
+      await this.sendMessage({
+        chat_room_id: chatRoom.id,
+        message_text: contactData.message,
+        message_type: 'text',
+      });
+    }
 
     // Also create traditional contact record for backwards compatibility
     const contact = await this.contactSupplier({

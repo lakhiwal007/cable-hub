@@ -2,6 +2,8 @@ import React from "react";
 
 const navLinks = [
   { name: "Dashboard", to: "/" },
+  { name: "Marketplace", to: "/marketplace" },
+  { name: "Pricing", to: "/pricing" },
   { name: "Calculator", to: "/#calculator" },
   { name: "Privacy Policy", to: "/privacy-policy" },
   { name: "Terms & Conditions", to: "/terms" },

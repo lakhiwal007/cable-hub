@@ -2,6 +2,7 @@ import { MapPin, Calendar, Package, AlertCircle, Building, Star, ShoppingCart, E
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import type { SupplyListing } from "@/lib/types";
 
 interface MaterialCategory {
@@ -18,11 +19,16 @@ interface SupplyListingCardProps {
 }
 
 const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, materialCategories = [] }: SupplyListingCardProps) => {
+  const navigate = useNavigate();
   // Determine if the current user is the supplier
   const isOwnListing = currentUserId && listing.supplier_id === currentUserId;
   
   // Find the material category for this listing
   const materialCategory = materialCategories.find(cat => cat.name === listing.material_type);
+
+  const handleViewDetails = () => {
+    navigate(`/listing/supply/${listing.id}`);
+  };
 
   return (
     <Card className={`group transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
@@ -34,10 +40,11 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
           <img 
             src={materialCategory.image_url} 
             alt={materialCategory.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+            onClick={handleViewDetails}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 cursor-pointer" onClick={handleViewDetails}>
             <Package className="h-16 w-16 text-gray-400" />
           </div>
         )}
@@ -58,12 +65,12 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
           )}
         </div>
 
-        {/* Quick Actions Overlay
+        {/* Quick Actions Overlay */}
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <Button size="sm" variant="secondary" className="rounded-full shadow-lg">
+          <Button size="sm" variant="secondary" className="rounded-full shadow-lg" onClick={handleViewDetails}>
             <Eye className="h-4 w-4" />
           </Button>
-        </div> */}
+        </div>
       </div>
 
       {/* Product Info Section */}
@@ -80,7 +87,10 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
         </div>
 
         {/* Product Title */}
-        <CardTitle className="text-lg font-semibold mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+        <CardTitle 
+          className="text-lg font-semibold mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors cursor-pointer"
+          onClick={handleViewDetails}
+        >
           {listing.title}
         </CardTitle>
 
@@ -147,13 +157,21 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
 
         {/* Action Buttons */}
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handleViewDetails}
+            className="flex-1"
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            View Details
+          </Button>
           {!isOwnListing ? (
             <Button
               onClick={() => onContactSupplier(listing)}
               className="flex-1 bg-blue-600 hover:bg-blue-700 transition-colors"
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
-              Contact Supplier
+              Contact
             </Button>
           ) : (
             <Button variant="outline" className="flex-1" disabled>

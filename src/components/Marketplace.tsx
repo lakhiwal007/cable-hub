@@ -237,16 +237,7 @@ const Marketplace = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Raw Material Marketplace</h2>
             <p className="text-gray-600">Connect with suppliers and manufacturers across India</p>
           </div>
-          {isAuthenticated && (
-            <Button 
-              onClick={() => navigate('/my-chats')} 
-              variant="outline" 
-              className="mt-4 sm:mt-0 sm:ml-4"
-            >
-              <MessageCircle className="h-4 w-4 mr-2" />
-              My Chats
-            </Button>
-          )}
+         
         </div>
       </div>
 

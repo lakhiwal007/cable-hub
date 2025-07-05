@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import Loader from '@/components/ui/loader';
+import { ArrowLeft } from 'lucide-react';
 
 interface ChatRoomListItem {
   id: string;
@@ -56,7 +57,19 @@ const MyChats = () => {
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
-      <h2 className="text-2xl font-bold mb-6">My Chats</h2>
+      <div className='flex items-center gap-2 mb-4'>
+        <button
+          onClick={() => {
+            navigate('/marketplace');
+
+          }}
+          className="flex h-10 w-10 rounded-full items-center justify-center text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+        >
+          <ArrowLeft className="" />
+
+        </button>
+        <h2 className="text-2xl font-bold">My Chats</h2>
+      </div>
       {loading ? (
         <Loader className="py-12" />
       ) : error ? (
@@ -64,7 +77,7 @@ const MyChats = () => {
       ) : chatRooms.length === 0 ? (
         <div className="text-center text-gray-500 py-12">No chats found.</div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {chatRooms.map((room) => {
             const other = getOtherParty(room);
             return (

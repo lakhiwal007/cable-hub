@@ -15,6 +15,8 @@ import MarketplacePage from "@/pages/MarketplacePage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ChatRoom from "@/components/ChatRoom";
 import MyChats from "./pages/MyChats";
+import Pricing from "./pages/Pricing";
+import ListingDetails from "./pages/ListingDetails";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +72,16 @@ const App = () => (
           <Route path="/my-chats" element={
             <ProtectedRoute>
               <MyChats />
+            </ProtectedRoute>
+          } />
+          <Route path="/pricing" element={
+            <ProtectedRoute>
+              <Pricing />
+            </ProtectedRoute>
+          } />
+          <Route path="/listing/:listingType/:listingId" element={
+            <ProtectedRoute>
+              <ListingDetails />
             </ProtectedRoute>
           } />
           <Route path="/admin" element={

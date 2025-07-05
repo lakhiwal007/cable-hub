@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut } from "lucide-react";
+import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut, DollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PricingSlideshow from "@/components/PricingSlideshow";
 import RawMaterialCalculator from "@/components/RawMaterialCalculator";
@@ -40,6 +40,7 @@ const Index = () => {
     { id: "dashboard", name: "Dashboard", icon: TrendingUp },
     { id: "calculator", name: "Calculator", icon: Calculator },
     { id: "marketplace", name: "Marketplace", icon: Users },
+    { id: "pricing", name: "Pricing", icon: DollarSign },
     ...(userType === 'admin' ? [{ id: "admin", name: "Admin Panel", icon: Settings }] : []),
   ];
 
@@ -48,6 +49,8 @@ const Index = () => {
       navigate("/admin");
     } else if (tabId === "marketplace") {
       navigate("/marketplace");
+    } else if (tabId === "pricing") {
+      navigate("/pricing");
     } else {
       setActiveTab(tabId);
     }
@@ -84,7 +87,7 @@ const Index = () => {
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-gray-900">
@@ -148,6 +151,26 @@ const Index = () => {
                         </div>
                       </div>
                     ))}
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm cursor-pointer hover:shadow-xl transition-all duration-300" onClick={() => navigate("/pricing")}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-gray-900">
+                      <DollarSign className="h-5 w-5 text-purple-600" />
+                      Detailed Pricing
+                    </CardTitle>
+                    <CardDescription>Comprehensive market analysis and trends</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="text-center py-8">
+                      <DollarSign className="h-12 w-12 mx-auto mb-4 text-purple-600" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">View Complete Pricing Data</h3>
+                      <p className="text-gray-600 mb-4">Access detailed price history, trend analysis, and market insights for all materials</p>
+                      <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                        Explore Pricing
+                      </button>
+                    </div>
                   </CardContent>
                 </Card>
               </div>

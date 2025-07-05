@@ -1,11 +1,10 @@
-import { MapPin, Calendar, Package, AlertCircle, Building, Star, MessageCircle, Eye, Clock } from "lucide-react";
+import { MapPin, Calendar, Package, AlertCircle, Building, Star, MessageCircle, Eye, Clock, User, Mail, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { DemandListing } from "@/lib/types";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Mail, Phone, User } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from "@/lib/apiClient";
@@ -26,6 +25,10 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   
+  const handleViewDetails = () => {
+    navigate(`/listing/demand/${listing.id}`);
+  };
+
   const handleContactConsumer = async () => {
     if (!apiClient.isAuthenticated()) {
       // Redirect to login or show login prompt
@@ -43,7 +46,7 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
         listing_id: listing.id,
         listing_type: 'demand',
         buyer_id: listing.buyer_id,
-        supplier_name: currentUser.user_metadata?.name || currentUser.name || '',
+        supplier_name: currentUser.user_metadata?.name || '',
         supplier_email: currentUser.email || '',
         supplier_phone: '',
         message: "Hi, I'm interested in your demand listing!",
@@ -74,10 +77,11 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
             <img 
               src={materialCategory.image_url} 
               alt={materialCategory.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+              onClick={handleViewDetails}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-100">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-100 cursor-pointer" onClick={handleViewDetails}>
               <Package className="h-16 w-16 text-gray-400" />
             </div>
           )}
@@ -97,11 +101,11 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
           </div>
 
           {/* Quick Actions Overlay */}
-          {/* <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Button size="sm" variant="secondary" className="rounded-full shadow-lg">
+          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button size="sm" variant="secondary" className="rounded-full shadow-lg" onClick={handleViewDetails}>
               <Eye className="h-4 w-4" />
             </Button>
-          </div> */}
+          </div>
         </div>
 
         {/* Product Info Section */}
@@ -118,7 +122,10 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
           </div>
 
           {/* Product Title */}
-          <CardTitle className="text-lg font-semibold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+          <CardTitle 
+            className="text-lg font-semibold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors cursor-pointer"
+            onClick={handleViewDetails}
+          >
             {listing.title}
           </CardTitle>
 
@@ -190,12 +197,20 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
           {/* Action Buttons */}
           <div className="flex gap-2">
             <Button
+              variant="outline"
+              onClick={handleViewDetails}
+              className="flex-1"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              View Details
+            </Button>
+            <Button
               onClick={handleContactConsumer}
               disabled={loading}
               className="flex-1 bg-purple-600 hover:bg-purple-700 transition-colors"
             >
               <MessageCircle className="h-4 w-4 mr-2" />
-              {loading ? 'Opening Chat...' : 'Contact Consumer'}
+              {loading ? 'Opening Chat...' : 'Contact'}
             </Button>
           </div>
 
@@ -226,28 +241,34 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
                 </div>
               </div>
               
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <Mail className="h-5 w-5 text-gray-500" />
-                <div>
-                  <p className="font-medium">{consumer.email}</p>
-                  <p className="text-sm text-gray-600">Email</p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm">{consumer.email}</span>
                 </div>
+                {consumer.phone && (
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm">{consumer.phone}</span>
+                  </div>
+                )}
+                {consumer.company_name && (
+                  <div className="flex items-center gap-2">
+                    <Building className="h-4 w-4 text-gray-500" />
+                    <span className="text-sm">{consumer.company_name}</span>
+                  </div>
+                )}
               </div>
               
-              {consumer.phone && (
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Phone className="h-5 w-5 text-gray-500" />
-                  <div>
-                    <p className="font-medium">{consumer.phone}</p>
-                    <p className="text-sm text-gray-600">Phone</p>
-                  </div>
-                </div>
-              )}
-              
-              <Button onClick={handleContactConsumer} className="w-full" disabled={loading}>
-                <MessageCircle className="h-4 w-4 mr-2" />
-                {loading ? 'Opening Chat...' : 'Open Chat'}
-              </Button>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" onClick={() => setDialogOpen(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={handleContactConsumer} className="flex-1 bg-purple-600 hover:bg-purple-700">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Start Chat
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
