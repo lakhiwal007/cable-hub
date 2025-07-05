@@ -832,40 +832,97 @@ class ApiClient {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Authentication required');
 
+    // Get chat rooms without problematic joins
     const { data, error } = await supabase
       .from('chat_rooms')
-      .select(`
-        *,
-        listing:supply_listings(id, title, material_type, price_per_unit, unit),
-        supplier:users!supplier_id(id, name, email, user_type),
-        buyer:users!buyer_id(id, name, email, user_type)
-      `)
+      .select('*')
       .or(`supplier_id.eq.${user.user.id},buyer_id.eq.${user.user.id}`)
-      .eq('status', 'active')
-      .order('last_message_at', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
-    return data;
+    
+    // Fetch related data separately
+    const roomsWithData = await Promise.all((data || []).map(async (room) => {
+      // Get user data
+      const [supplier, buyer] = await Promise.all([
+        supabase.from('users').select('id, name, email, user_type').eq('id', room.supplier_id).single(),
+        supabase.from('users').select('id, name, email, user_type').eq('id', room.buyer_id).single()
+      ]);
+      
+      // Get listing data based on type
+      let listing = null;
+      if (room.listing_type === 'supply') {
+        const { data: supplyListing } = await supabase
+          .from('supply_listings')
+          .select('id, title, material_type, price_per_unit, unit')
+          .eq('id', room.listing_id)
+          .single();
+        listing = supplyListing;
+      } else if (room.listing_type === 'demand') {
+        const { data: demandListing } = await supabase
+          .from('demand_listings')
+          .select('id, title, material_type, budget_min, budget_max, unit')
+          .eq('id', room.listing_id)
+          .single();
+        listing = demandListing;
+      }
+      
+      return {
+        ...room,
+        supplier: supplier.data,
+        buyer: buyer.data,
+        listing
+      };
+    }));
+    
+    return roomsWithData;
   }
 
   async getChatRoom(roomId: string) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Authentication required');
 
+    // Get chat room without problematic joins
     const { data, error } = await supabase
       .from('chat_rooms')
-      .select(`
-        *,
-        listing:supply_listings(id, title, description, material_type, price_per_unit, unit, location),
-        supplier:users!supplier_id(id, name, email, user_type),
-        buyer:users!buyer_id(id, name, email, user_type)
-      `)
+      .select('*')
       .eq('id', roomId)
       .or(`supplier_id.eq.${user.user.id},buyer_id.eq.${user.user.id}`)
       .single();
 
     if (error) throw new Error(error.message);
-    return data;
+    if (!data) throw new Error('Chat room not found or access denied');
+    
+    // Fetch related data separately
+    const [supplier, buyer] = await Promise.all([
+      supabase.from('users').select('id, name, email, user_type').eq('id', data.supplier_id).single(),
+      supabase.from('users').select('id, name, email, user_type').eq('id', data.buyer_id).single()
+    ]);
+    
+    // Get listing data based on type
+    let listing = null;
+    if (data.listing_type === 'supply') {
+      const { data: supplyListing } = await supabase
+        .from('supply_listings')
+        .select('id, title, description, material_type, price_per_unit, unit, location')
+        .eq('id', data.listing_id)
+        .single();
+      listing = supplyListing;
+    } else if (data.listing_type === 'demand') {
+      const { data: demandListing } = await supabase
+        .from('demand_listings')
+        .select('id, title, description, material_type, budget_min, budget_max, unit, location')
+        .eq('id', data.listing_id)
+        .single();
+      listing = demandListing;
+    }
+    
+    return {
+      ...data,
+      supplier: supplier.data,
+      buyer: buyer.data,
+      listing
+    };
   }
 
   async createChatRoom(data: {
@@ -877,11 +934,12 @@ class ApiClient {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Authentication required');
 
-    // Check if chat room already exists
+    // Check if chat room already exists for this listing and these participants
     const { data: existingRoom } = await supabase
       .from('chat_rooms')
       .select('id')
       .eq('listing_id', data.listing_id)
+      .eq('listing_type', data.listing_type)
       .eq('supplier_id', data.supplier_id)
       .eq('buyer_id', data.buyer_id)
       .single();
@@ -916,18 +974,39 @@ class ApiClient {
 
     if (!room) throw new Error('Chat room not found or access denied');
 
+    // Get messages without the problematic join
     const { data, error } = await supabase
       .from('chat_messages')
-      .select(`
-        *,
-        sender:users!sender_id(id, name, email)
-      `)
+      .select('*')
       .eq('chat_room_id', roomId)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) throw new Error(error.message);
-    return data?.reverse() || [];
+    
+    // Get unique sender IDs to fetch user data
+    const senderIds = [...new Set(data?.map(msg => msg.sender_id) || [])];
+    
+    // Fetch user data separately to avoid relationship conflicts
+    let users: any[] = [];
+    if (senderIds.length > 0) {
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id, name, email')
+        .in('id', senderIds);
+      users = userData || [];
+    }
+    
+    // Combine messages with user data
+    const messagesWithUsers = data?.map(message => {
+      const sender = users.find(u => u.id === message.sender_id);
+      return {
+        ...message,
+        sender: sender ? { id: sender.id, name: sender.name, email: sender.email } : null
+      };
+    }) || [];
+    
+    return messagesWithUsers.reverse();
   }
 
   async sendMessage(data: {
@@ -976,15 +1055,6 @@ class ApiClient {
       .neq('sender_id', user.user.id);
 
     if (error) throw new Error(error.message);
-
-    // Update participant's last_read_at
-    const { error: participantError } = await supabase
-      .from('chat_participants')
-      .update({ last_read_at: new Date().toISOString() })
-      .eq('chat_room_id', roomId)
-      .eq('user_id', user.user.id);
-
-    if (participantError) throw new Error(participantError.message);
   }
 
   async getUnreadMessageCount(roomId?: string) {
@@ -1101,6 +1171,50 @@ class ApiClient {
       requester_name: contactData.requester_name,
       requester_email: contactData.requester_email,
       requester_phone: contactData.requester_phone,
+      message: contactData.message,
+    });
+
+    return {
+      chat_room: chatRoom,
+      contact: contact,
+    };
+  }
+
+  // === ENHANCED CONTACT CONSUMER WITH CHAT ===
+  async contactConsumerWithChat(contactData: {
+    listing_id: string;
+    listing_type: 'demand';
+    buyer_id: string;
+    supplier_name: string;
+    supplier_email: string;
+    supplier_phone: string;
+    message: string;
+  }) {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    // Create or get existing chat room
+    const chatRoom = await this.createChatRoom({
+      listing_id: contactData.listing_id,
+      listing_type: contactData.listing_type,
+      supplier_id: user.user.id, // Current user (supplier)
+      buyer_id: contactData.buyer_id, // Buyer who created the demand
+    });
+
+    // Send initial message
+    await this.sendMessage({
+      chat_room_id: chatRoom.id,
+      message_text: contactData.message,
+      message_type: 'text',
+    });
+
+    // Also create traditional contact record for backwards compatibility
+    const contact = await this.contactSupplier({
+      listing_id: contactData.listing_id,
+      listing_type: contactData.listing_type,
+      requester_name: contactData.supplier_name,
+      requester_email: contactData.supplier_email,
+      requester_phone: contactData.supplier_phone,
       message: contactData.message,
     });
 

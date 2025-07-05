@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Mail, Phone, User } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import apiClient from "@/lib/apiClient";
 
 interface MaterialCategory {
   id: string;
@@ -21,10 +23,42 @@ interface DemandListingCardProps {
 
 const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const handleStartChat = () => {
-    // Handle chat functionality
-    setDialogOpen(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleContactConsumer = async () => {
+    if (!apiClient.isAuthenticated()) {
+      // Redirect to login or show login prompt
+      navigate('/login');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Get current user (supplier)
+      const currentUser = await apiClient.getProfile();
+      
+      // Use the new contactConsumerWithChat method
+      const result = await apiClient.contactConsumerWithChat({
+        listing_id: listing.id,
+        listing_type: 'demand',
+        buyer_id: listing.buyer_id,
+        supplier_name: currentUser.user_metadata?.name || currentUser.name || '',
+        supplier_email: currentUser.email || '',
+        supplier_phone: '',
+        message: "Hi, I'm interested in your demand listing!",
+      });
+
+      setDialogOpen(false);
+      navigate(`/chat/${result.chat_room.id}`);
+    } catch (err: any) {
+      console.error('Failed to create chat:', err);
+      alert('Failed to create chat: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
   const consumer = listing.buyer;
   // Find the material category for this listing
   const materialCategory = materialCategories.find(cat => cat.name === listing.material_type);
@@ -156,11 +190,12 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
           {/* Action Buttons */}
           <div className="flex gap-2">
             <Button
-              onClick={() => setDialogOpen(true)}
+              onClick={handleContactConsumer}
+              disabled={loading}
               className="flex-1 bg-purple-600 hover:bg-purple-700 transition-colors"
             >
               <MessageCircle className="h-4 w-4 mr-2" />
-              Contact Consumer
+              {loading ? 'Opening Chat...' : 'Contact Consumer'}
             </Button>
           </div>
 
@@ -209,9 +244,9 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
                 </div>
               )}
               
-              <Button onClick={handleStartChat} className="w-full">
+              <Button onClick={handleContactConsumer} className="w-full" disabled={loading}>
                 <MessageCircle className="h-4 w-4 mr-2" />
-                Open Chat
+                {loading ? 'Opening Chat...' : 'Open Chat'}
               </Button>
             </div>
           )}
