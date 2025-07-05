@@ -72,7 +72,7 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
         listing.is_urgent ? 'border-orange-200 bg-gradient-to-br from-orange-50 to-white' : 'border-gray-200'
       }`}>
         {/* Product Image Section */}
-        <div className="relative overflow-hidden rounded-t-lg bg-gray-100 h-48">
+        <div className="relative overflow-hidden rounded-t-lg bg-gray-100 h-32 lg:h-48">
           {materialCategory?.image_url ? (
             <img 
               src={materialCategory.image_url} 
@@ -94,10 +94,7 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
                 Urgent
               </Badge>
             )}
-            <Badge className="bg-purple-600 text-white shadow-lg">
-              <Clock className="h-3 w-3 mr-1" />
-              Demand
-            </Badge>
+            
           </div>
 
           {/* Quick Actions Overlay */}
@@ -111,7 +108,7 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
         {/* Product Info Section */}
         <CardContent className="p-4">
           {/* Category & Buyer */}
-          <div className="flex items-center justify-between mb-2">
+          <div className="hidden md:flex items-center justify-between mb-2">
             <Badge variant="outline" className="text-xs">
               {listing.category}
             </Badge>
@@ -123,14 +120,14 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
 
           {/* Product Title */}
           <CardTitle 
-            className="text-lg font-semibold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors cursor-pointer"
+            className="text-md lg:text-lg font-semibold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors cursor-pointer"
             onClick={handleViewDetails}
           >
             {listing.title}
           </CardTitle>
 
           {/* Material Type with Image */}
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2">
             {materialCategory?.image_url && (
               <img 
                 src={materialCategory.image_url} 
@@ -138,24 +135,11 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
                 className="w-6 h-6 rounded-full object-cover border-2 border-gray-200"
               />
             )}
-            <Badge variant="secondary" className="text-sm">
+            <Badge variant="secondary" className="text-sm hidden md:flex">
               {listing.material_type}
             </Badge>
           </div>
 
-          {/* Product Description */}
-          <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-            {listing.description}
-          </p>
-
-          {/* Specifications */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {listing.specifications && (
-              <Badge variant="outline" className="text-xs">
-                {listing.specifications}
-              </Badge>
-            )}
-          </div>
 
           {/* Budget Section */}
           <div className="flex items-center justify-between mb-4">
@@ -172,7 +156,7 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
           </div>
 
           {/* Location & Deadline */}
-          <div className="flex items-center justify-between mb-4 text-sm text-gray-600">
+          <div className="hidden md:flex items-center justify-between mb-4 text-sm text-gray-600">
             <div className="flex items-center gap-1">
               <MapPin className="h-4 w-4" />
               <span>{listing.location}</span>

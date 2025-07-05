@@ -385,20 +385,28 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                 {/* Main Content */}
                 <div>
                     {/* Images Section */}
-                    {materialImage && (
-                        <Card>
-                            <CardContent className="p-4 md:p-6">
-                                <div className="aspect-square max-w-xs mx-auto bg-gray-100 rounded-lg overflow-hidden">
-                                    <img
-                                        src={materialImage}
+                    <Card>
+                        <CardContent className="p-4 md:p-6">
+                            <div className="aspect-square max-w-xs mx-auto bg-gray-100 rounded-lg overflow-hidden">
+                                {materialImage ? (
+                                    <img 
+                                        src={materialImage} 
                                         alt={isSupply ? supplyListing.material_type : demandListing.material_type}
                                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
                                         onClick={() => setSelectedImage(materialImage)}
                                     />
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
+                                ) : (
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 cursor-pointer hover:scale-105 transition-transform duration-300" onClick={() => setSelectedImage(null)}>
+                                        <Package className="h-16 w-16 text-gray-400 mb-2" />
+                                        <p className="text-sm text-gray-500 text-center px-4">
+                                            {isSupply ? supplyListing.material_type : demandListing.material_type}
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-1">No image available</p>
+                                    </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
                 <Card className='col-span-2'>
                     <CardHeader className="p-4">

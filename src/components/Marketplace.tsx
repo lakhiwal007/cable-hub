@@ -282,7 +282,7 @@ const Marketplace = () => {
                       No supply listings found. Try adjusting your search or filters.
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-4 md:p-0">
                       {filteredSupplyListings.map((listing) => (
                         <SupplyListingCard
                           key={listing.id}
@@ -304,7 +304,7 @@ const Marketplace = () => {
                       No demand listings found. Try adjusting your search or filters.
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-4 md:p-0">
                       {filteredDemandListings.map((listing) => (
                         <DemandListingCard 
                           key={listing.id} 

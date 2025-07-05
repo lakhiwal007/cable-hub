@@ -35,7 +35,7 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
       listing.is_urgent ? 'border-orange-200 bg-gradient-to-br from-orange-50 to-white' : 'border-gray-200'
     }`}>
       {/* Product Image Section */}
-      <div className="relative overflow-hidden rounded-t-lg bg-gray-100 h-48">
+      <div className="relative overflow-hidden rounded-t-lg bg-gray-100 h-32 lg:h-48">
         {materialCategory?.image_url ? (
           <img 
             src={materialCategory.image_url} 
@@ -76,7 +76,7 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
       {/* Product Info Section */}
       <CardContent className="p-4">
         {/* Category & Supplier */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="items-center justify-between mb-2 hidden md:flex">
           <Badge variant="outline" className="text-xs">
             {listing.category}
           </Badge>
@@ -88,79 +88,68 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
 
         {/* Product Title */}
         <CardTitle 
-          className="text-lg font-semibold mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors cursor-pointer"
+          className="text-md lg:text-lg font-semibold line-clamp-2 group-hover:text-blue-600 transition-colors cursor-pointer"
           onClick={handleViewDetails}
         >
           {listing.title}
         </CardTitle>
 
         {/* Material Type with Image */}
-        <div className="flex items-center mb-3">
+        <div className="items-center mb-3 hidden md:flex">
           <Badge variant="secondary" className="text-sm">
             {listing.material_type}
           </Badge>
         </div>
 
-        {/* Product Description */}
-        <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-          {listing.description}
-        </p>
-
-        {/* Specifications */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {listing.grade_specification && (
-            <Badge variant="outline" className="text-xs">
-              {listing.grade_specification}
-            </Badge>
-          )}
-          {listing.certification && (
-            <Badge variant="outline" className="text-xs">
-              ✓ {listing.certification}
-            </Badge>
-          )}
-        </div>
+       
 
         {/* Price Section */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 flex-wrap">
           <div>
-            <p className="text-2xl font-bold text-green-600">
+            <p className="text-lg md:text-2xl font-bold text-green-600">
               ₹{listing.price_per_unit.toLocaleString()}
             </p>
             <p className="text-sm text-gray-500">per {listing.unit}</p>
           </div>
-          <div className="text-right">
+          <div className="text-right flex flex-col">
             <p className="text-sm text-gray-600">Min Order</p>
             <p className="font-semibold">{listing.minimum_order} {listing.unit}</p>
           </div>
         </div>
 
         {/* Stock & Location */}
-        <div className="flex items-center justify-between mb-4 text-sm text-gray-600">
+        <div className="flex items-center justify-between mb-2 text-sm text-gray-600">
           <div className="flex items-center gap-1">
             <Package className="h-4 w-4" />
             <span>{listing.available_quantity} {listing.unit} available</span>
           </div>
           <div className="flex items-center gap-1">
-            <MapPin className="h-4 w-4" />
+            <MapPin className="h-4 w-4 text-pretty" />
             <span>{listing.location}</span>
           </div>
         </div>
 
         {/* Delivery Info */}
-        {listing.delivery_terms && (
+        {listing.delivery_terms ? (
           <div className="mb-4 p-2 bg-gray-50 rounded-lg">
             <p className="text-xs text-gray-600">
               <strong>Delivery:</strong> {listing.delivery_terms}
             </p>
           </div>
+        ):(
+          <div className="mb-4 p-2 bg-gray-50 rounded-lg">
+            <p className="text-xs text-gray-600">
+              <strong>Delivery:</strong> {"Not Available"}
+            </p>
+          </div>
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button
             variant="outline"
             onClick={handleViewDetails}
-            className="flex-1"
+            className="flex-1 w-full md:w-auto"
           >
             <Eye className="h-4 w-4 mr-2" />
             View Details
