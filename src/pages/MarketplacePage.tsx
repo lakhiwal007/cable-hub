@@ -62,6 +62,12 @@ const MarketplacePage = () => {
               >
                 My Chats
               </button>
+              <button
+                onClick={() => navigate('/used-dead-stock-listings')}
+                className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200 transition-all duration-200"
+              >
+                Used/Dead Stock
+              </button>
               {userType === 'admin' && (
                 <button
                   onClick={() => navigate('/admin')}
@@ -112,6 +118,15 @@ const MarketplacePage = () => {
                 className="flex items-center w-full px-3 py-2 rounded-lg text-base font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 border border-blue-200 transition-colors"
               >
                 My Chats
+              </button>
+              <button
+                onClick={() => {
+                  navigate('/used-dead-stock-listings');
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center w-full px-3 py-2 rounded-lg text-base font-medium text-green-600 hover:text-green-700 hover:bg-green-50 border border-green-200 transition-colors"
+              >
+                Used/Dead Stock
               </button>
               {userType === 'admin' && (
                 <button

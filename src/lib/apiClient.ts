@@ -1421,6 +1421,39 @@ class ApiClient {
     });
     return result;
   }
+
+  async uploadFileToStorage(file: File, folder: string): Promise<string> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+    const { data, error } = await supabase.storage.from('marketplace-files').upload(fileName, file, { upsert: false });
+    if (error) throw new Error(error.message);
+    const { publicUrl } = supabase.storage.from('marketplace-files').getPublicUrl(fileName).data;
+    return publicUrl;
+  }
+
+  async createUsedMachine(data: any) {
+    const { data: result, error } = await supabase.from('used_machines').insert([data]).select().single();
+    if (error) throw new Error(error.message);
+    return result;
+  }
+
+  async createDeadStock(data: any) {
+    const { data: result, error } = await supabase.from('dead_stock').insert([data]).select().single();
+    if (error) throw new Error(error.message);
+    return result;
+  }
+
+  async getUsedMachines() {
+    const { data, error } = await supabase.from('used_machines').select('*').order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getDeadStock() {
+    const { data, error } = await supabase.from('dead_stock').select('*').order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data;
+  }
 }
 
 export const apiClient = new ApiClient();

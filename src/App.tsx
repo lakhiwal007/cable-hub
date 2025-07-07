@@ -17,6 +17,8 @@ import ChatRoom from "@/components/ChatRoom";
 import MyChats from "./pages/MyChats";
 import Pricing from "./pages/Pricing";
 import ListingDetails from "./pages/ListingDetails";
+import SellUsedOrDeadStock from "./pages/SellUsedOrDeadStock";
+import UsedAndDeadStockListings from "./pages/UsedAndDeadStockListings";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +92,8 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/chat/:roomId" element={<ChatRoomWrapper />} />
+          <Route path="/sell-used-or-dead-stock" element={<ProtectedRoute><SellUsedOrDeadStock /></ProtectedRoute>} />
+          <Route path="/used-dead-stock-listings" element={<ProtectedRoute><UsedAndDeadStockListings /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
