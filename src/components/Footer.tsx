@@ -14,7 +14,7 @@ const Footer = () => (
     <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-8 text-gray-500 text-sm">
       {/* Logo and Brand */}
       <div className="flex flex-col items-center md:items-start gap-2">
-        <img src="/CableHubLogo.png" alt="Cable Hub Logo" className="h-20 w-auto" />
+        <img src="/cableCartLogo.png" alt="Cable Hub Logo" className="h-20 w-auto" />
       </div>
       {/* Navigation Links */}
       <nav className="flex flex-col items-center md:items-start gap-2">

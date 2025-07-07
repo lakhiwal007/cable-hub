@@ -175,7 +175,7 @@ const AdminPanel = () => {
         )}
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 h-auto">
+          <TabsList className="grid w-full grid-cols-3 h-auto">
             <TabsTrigger value="users" className="flex items-center gap-2 py-3">
               <Users className="h-4 w-4 hidden md:block" />
               <span className="text-[12px] sm:text-base text-wrap">User Management</span>
@@ -184,10 +184,10 @@ const AdminPanel = () => {
               <Package className="h-4 w-4 hidden md:block" />
               <span className="text-[12px] sm:text-base text-wrap">Material Pricing</span>
             </TabsTrigger>
-            <TabsTrigger value="categories" className="flex items-center gap-2 py-3">
+            {/* <TabsTrigger value="categories" className="flex items-center gap-2 py-3">
               <Tag className="h-4 w-4 hidden md:block" />
               <span className="text-[12px] sm:text-base text-wrap">Material Categories</span>
-            </TabsTrigger>
+            </TabsTrigger> */}
             <TabsTrigger value="constants" className="flex items-center gap-2 py-3">
               <Calculator className="h-4 w-4 hidden md:block" />
               <span className="text-[12px] sm:text-base text-wrap">Calculation Constants</span>

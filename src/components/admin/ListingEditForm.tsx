@@ -29,10 +29,6 @@ const ListingEditForm: React.FC<ListingEditFormProps> = ({ listing, onSave, onCa
         <input name="category" value={form.category} onChange={handleChange} className="border rounded px-2 py-1 w-full" />
       </div>
       <div>
-        <label>Material</label>
-        <input name="material_type" value={form.material_type} onChange={handleChange} className="border rounded px-2 py-1 w-full" />
-      </div>
-      <div>
         <label>Quantity</label>
         <input name="available_quantity" value={form.available_quantity || form.required_quantity} onChange={handleChange} className="border rounded px-2 py-1 w-full" />
       </div>

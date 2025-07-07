@@ -452,6 +452,29 @@ class ApiClient {
     return data;
   }
 
+  async uploadListingImage(file: File): Promise<string> {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.user.id}/${Date.now()}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+      .from('listing-images')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) throw new Error(error.message);
+
+    const { data: urlData } = supabase.storage
+      .from('listing-images')
+      .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
+  }
+
   async createSupplyListing(listingData: {
     title: string;
     description: string;
@@ -466,7 +489,7 @@ class ApiClient {
     location: string;
     delivery_terms: string;
     certification?: string;
-    images?: string[];
+    image_url?: string;
     is_urgent?: boolean;
     expires_at?: string;
   }) {
@@ -503,7 +526,7 @@ class ApiClient {
     location: string;
     delivery_terms: string;
     certification?: string;
-    images?: string[];
+    image_url?: string;
     is_urgent?: boolean;
     expires_at?: string;
   }>) {

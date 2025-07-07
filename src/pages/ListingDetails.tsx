@@ -30,7 +30,8 @@ import {
     Bookmark,
     Download,
     TrendingUp,
-    Minus
+    Minus,
+    Image as ImageIcon
 } from 'lucide-react';
 import { apiClient } from '@/lib/apiClient';
 
@@ -39,7 +40,6 @@ interface SupplyListing {
     title: string;
     description: string;
     category: string;
-    material_type: string;
     grade_specification: string;
     available_quantity: number;
     unit: string;
@@ -49,7 +49,7 @@ interface SupplyListing {
     location: string;
     delivery_terms: string;
     certification?: string;
-    images?: string[];
+    image_url?: string;
     is_urgent?: boolean;
     expires_at?: string;
     created_at: string;
@@ -71,7 +71,6 @@ interface DemandListing {
     title: string;
     description: string;
     category: string;
-    material_type: string;
     specifications: string;
     required_quantity: number;
     unit: string;
@@ -81,6 +80,7 @@ interface DemandListing {
     location: string;
     delivery_deadline: string;
     additional_requirements?: string;
+    image_url?: string;
     is_urgent?: boolean;
     expires_at?: string;
     created_at: string;
@@ -196,11 +196,14 @@ const ListingDetails = () => {
 
     const getMaterialImage = () => {
         if (!listing) return null;
-        const materialType = listingType === 'supply'
-            ? (listing as SupplyListing).material_type
-            : (listing as DemandListing).material_type;
-
-        const category = materialCategories.find(cat => cat.name === materialType);
+        
+        // First, try to use the listing's own image
+        if (listing.image_url) {
+            return listing.image_url;
+        }
+        
+        // Fallback to category image
+        const category = materialCategories.find(cat => cat.name === listing.category);
         return category?.image_url;
     };
 
@@ -255,9 +258,6 @@ Listing Details - ${listing.title}
 
 ${listingType === 'supply' ? 'Supply' : 'Demand'} Listing
 Category: ${listing.category}
-Material Type: ${listingType === 'supply'
-                ? (listing as SupplyListing).material_type
-                : (listing as DemandListing).material_type}
 
 Description:
 ${listing.description}
@@ -391,15 +391,15 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                 {materialImage ? (
                                     <img 
                                         src={materialImage} 
-                                        alt={isSupply ? supplyListing.material_type : demandListing.material_type}
+                                        alt={listing.title}
                                         className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
                                         onClick={() => setSelectedImage(materialImage)}
                                     />
                                 ) : (
                                     <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 cursor-pointer hover:scale-105 transition-transform duration-300" onClick={() => setSelectedImage(null)}>
-                                        <Package className="h-16 w-16 text-gray-400 mb-2" />
+                                        <ImageIcon className="h-16 w-16 text-gray-400 mb-2" />
                                         <p className="text-sm text-gray-500 text-center px-4">
-                                            {isSupply ? supplyListing.material_type : demandListing.material_type}
+                                            {listing.category}
                                         </p>
                                         <p className="text-xs text-gray-400 mt-1">No image available</p>
                                     </div>
@@ -427,12 +427,6 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                             <Package className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                             <span className="font-medium text-sm md:text-base">Category:</span>
                                             <Badge variant="outline" className="text-xs">{listing.category}</Badge>
-                                        </div>
-
-                                        <div className="flex items-center gap-2">
-                                            <Scale className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                                            <span className="font-medium text-sm md:text-base">Material Type:</span>
-                                            <span className="text-sm md:text-base">{isSupply ? supplyListing.material_type : demandListing.material_type}</span>
                                         </div>
 
                                         {isSupply ? (
@@ -613,8 +607,6 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
             </div>
 
             <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8'>
-
-
                 {/* Contact Information - Moved Below */}
                 <div className="mt-6">
                     <Card>

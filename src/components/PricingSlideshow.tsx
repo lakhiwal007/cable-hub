@@ -20,7 +20,8 @@ const PricingSlideshow = () => {
   const [historyError, setHistoryError] = useState<string | null>(null);
 
   // New state for time range
-  const [historyRange, setHistoryRange] = useState<'daily' | 'weekly' | 'monthly' | 'yearly'>('daily');
+  const [historyRange, setHistoryRange] = useState<'1d' | 'daily' | 'weekly' | 'monthly' | 'yearly'>('1d');
+  const [historyDay, setHistoryDay] = useState<string>(() => new Date().toISOString().slice(0, 10));
 
   useEffect(() => {
     async function fetchData() {
@@ -111,8 +112,15 @@ const handleMaterialClick = async (item: PricingData) => {
 };
 
 // Helper: Aggregate data by range
-function aggregateHistory(data: any[], range: 'daily' | 'weekly' | 'monthly' | 'yearly') {
+function aggregateHistory(data: any[], range: '1d' | 'daily' | 'weekly' | 'monthly' | 'yearly') {
   if (!data || data.length === 0) return [];
+  if (range === '1d') {
+    // Filter for the selected day and sort by time
+    return data
+      .filter(d => d.changed_at && d.changed_at.startsWith(historyDay))
+      .map(d => ({ ...d, new_price: Number(d.new_price) }))
+      .sort((a, b) => new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime());
+  }
   const parseDate = (d: string) => new Date(d);
   const formatKey = (date: Date) => {
     if (range === 'daily') return date.toISOString().split('T')[0];
@@ -141,19 +149,23 @@ function aggregateHistory(data: any[], range: 'daily' | 'weekly' | 'monthly' | '
   return Object.values(grouped).sort((a, b) => a.changed_at.localeCompare(b.changed_at));
 }
 
+const formatXAxis = (tick: string) => {
+  if (historyRange === '1d') {
+    const date = new Date(tick);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  return tick;
+};
+
   if (loading) return <Loader className="py-8" />;
   if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white py-4 sticky top-0 z-50 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full">
         <div className="flex items-center justify-between flex-wrap">
-          <div className="flex items-center space-x-3">
-            <TrendingUp className="h-5 w-5" />
-            <span className="text-sm font-semibold">Live Market Prices:</span>
-            <div className="hidden sm:block w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          </div>
-          <div className="flex-1 overflow-hidden relative mx-2 md:mx-6">
+          
+          <div className="flex-1 overflow-hidden relative">
             <div
               ref={marqueeRef}
               className="relative w-full h-14 overflow-x-auto scrollbar-hide hide-scrollbar"
@@ -180,20 +192,7 @@ function aggregateHistory(data: any[], range: 'daily' | 'weekly' | 'monthly' | '
               </div>
             </div>
           </div>
-          <div className="w-12 flex items-center space-x-2 justify-center">
-            <button
-              onClick={() => scrollBy(-200)}
-              className="p-2 hover:bg-blue-700 rounded-lg transition-colors"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => scrollBy(200)}
-              className="p-2 hover:bg-blue-700 rounded-lg transition-colors"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
+          
         </div>
       </div>
       {/* Price History Modal */}
@@ -201,19 +200,28 @@ function aggregateHistory(data: any[], range: 'daily' | 'weekly' | 'monthly' | '
         <DialogContent>
           <DialogTitle>Price History for {historyMaterial}</DialogTitle>
           {/* Time Range Tabs */}
-          <div className="mb-4 flex justify-center">
-            <div className="inline-flex rounded-md shadow-sm bg-slate-100">
-              {['daily','weekly','monthly','yearly'].map(r => (
+          <div className="mb-4 flex flex-col items-center">
+            <div className="inline-flex rounded-md shadow-sm bg-slate-100 mb-2">
+              {['1d','daily','weekly','monthly','yearly'].map(r => (
                 <button
                   key={r}
                   className={`px-3 py-1 text-sm font-medium focus:outline-none transition-colors ${historyRange===r ? 'bg-blue-600 text-white' : 'bg-slate-100 text-blue-700 hover:bg-blue-200'}`}
                   onClick={() => setHistoryRange(r as any)}
-                  
                 >
                   {r.charAt(0).toUpperCase()+r.slice(1)}
                 </button>
               ))}
             </div>
+            {/* Show date picker only for 1d view */}
+            {historyRange === '1d' && (
+              <input
+                type="date"
+                value={historyDay}
+                onChange={e => setHistoryDay(e.target.value)}
+                className="border rounded px-2 py-1 text-sm"
+                max={new Date().toISOString().slice(0, 10)}
+              />
+            )}
           </div>
           {historyLoading ? (
             <Loader className="py-8" />
@@ -225,10 +233,13 @@ function aggregateHistory(data: any[], range: 'daily' | 'weekly' | 'monthly' | '
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={aggregateHistory(historyData, historyRange)} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="changed_at" />
+                <XAxis dataKey="changed_at" tickFormatter={formatXAxis} />
                 <YAxis dataKey="new_price" />
                 <Tooltip formatter={(value, name) => [value, 'Price']} />
-                <Line type="monotone" dataKey="new_price"  stroke="#8884d8" dot={false} />
+                <Line type="monotone" dataKey="new_price"  stroke="#8b5cf6"
+                          strokeWidth={2}
+                          dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
+                          activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           )}

@@ -64,7 +64,7 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
 
   const consumer = listing.buyer;
   // Find the material category for this listing
-  const materialCategory = materialCategories.find(cat => cat.name === listing.material_type);
+  const materialCategory = materialCategories.find(cat => cat.name === listing.category);
 
   return (
     <>
@@ -73,7 +73,14 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
       }`}>
         {/* Product Image Section */}
         <div className="relative overflow-hidden rounded-t-lg bg-gray-100 h-32 lg:h-48">
-          {materialCategory?.image_url ? (
+          {listing.image_url ? (
+            <img 
+              src={listing.image_url} 
+              alt={listing.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+              onClick={handleViewDetails}
+            />
+          ) : materialCategory?.image_url ? (
             <img 
               src={materialCategory.image_url} 
               alt={materialCategory.name}
@@ -135,9 +142,7 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
                 className="w-6 h-6 rounded-full object-cover border-2 border-gray-200"
               />
             )}
-            <Badge variant="secondary" className="text-sm hidden md:flex">
-              {listing.material_type}
-            </Badge>
+            
           </div>
 
 
@@ -164,7 +169,7 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
             {listing.delivery_deadline && (
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
-                <span>{new Date(listing.delivery_deadline).toLocaleDateString()}</span>
+                <span>{listing.delivery_deadline}</span>
               </div>
             )}
           </div>

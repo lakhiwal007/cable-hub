@@ -24,7 +24,7 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
   const isOwnListing = currentUserId && listing.supplier_id === currentUserId;
   
   // Find the material category for this listing
-  const materialCategory = materialCategories.find(cat => cat.name === listing.material_type);
+  const materialCategory = materialCategories.find(cat => cat.name === listing.category);
 
   const handleViewDetails = () => {
     navigate(`/listing/supply/${listing.id}`);
@@ -36,7 +36,14 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
     }`}>
       {/* Product Image Section */}
       <div className="relative overflow-hidden rounded-t-lg bg-gray-100 h-32 lg:h-48">
-        {materialCategory?.image_url ? (
+        {listing.image_url ? (
+          <img 
+            src={listing.image_url} 
+            alt={listing.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+            onClick={handleViewDetails}
+          />
+        ) : materialCategory?.image_url ? (
           <img 
             src={materialCategory.image_url} 
             alt={materialCategory.name}
@@ -95,13 +102,16 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
         </CardTitle>
 
         {/* Material Type with Image */}
-        <div className="items-center mb-3 hidden md:flex">
-          <Badge variant="secondary" className="text-sm">
-            {listing.material_type}
-          </Badge>
+        <div className="flex items-center gap-2 mb-3">
+          {materialCategory?.image_url && (
+            <img 
+              src={materialCategory.image_url} 
+              alt={materialCategory.name}
+              className="w-6 h-6 rounded-full object-cover border-2 border-gray-200"
+            />
+          )}
+          
         </div>
-
-       
 
         {/* Price Section */}
         <div className="flex items-center justify-between mb-4 flex-wrap">

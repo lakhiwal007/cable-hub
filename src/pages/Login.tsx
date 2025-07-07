@@ -137,7 +137,7 @@ const Login = () => {
           
           <CardContent className="space-y-6">
             {/* Quick Login Buttons */}
-            <div className="flex gap-2 mb-4">
+            {/* <div className="flex gap-2 mb-4">
               <Button
                 type="button"
                 variant="outline"
@@ -158,7 +158,7 @@ const Login = () => {
                 <Shield className="h-3 w-3 mr-1" />
                 Admin Login
               </Button>
-            </div>
+            </div> */}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">

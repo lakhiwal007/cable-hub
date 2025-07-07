@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { Search, TrendingUp, TrendingDown, Minus, Filter, Download, RefreshCw } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, Minus, Filter, Download, RefreshCw, ArrowLeft } from 'lucide-react';
 import { apiClient } from '@/lib/apiClient';
+import { useNavigate } from 'react-router-dom';
 
 interface PricingData {
   id: string;
@@ -33,8 +34,9 @@ const Pricing = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPricingId, setSelectedPricingId] = useState<string | null>(null);
   const [priceHistory, setPriceHistory] = useState<MaterialPriceHistory[]>([]);
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
-
+  const [timeRange, setTimeRange] = useState<'1d' | '7d' | '30d' | '90d' | '1y'>('30d');
+  const [historyDay, setHistoryDay] = useState<string>(() => new Date().toISOString().slice(0, 10));
+  const navigate = useNavigate();
   useEffect(() => {
     fetchPricingData();
   }, []);
@@ -139,7 +141,17 @@ const Pricing = () => {
 
   const prepareChartData = () => {
     if (!priceHistory.length) return [];
-
+    if (timeRange === '1d') {
+      // Filter for the selected day and sort by minute
+      return priceHistory
+        .filter(item => item.changed_at && item.changed_at.startsWith(historyDay))
+        .map(item => ({
+          ...item,
+          time: new Date(item.changed_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          new_price: parseFloat(item.new_price)
+        }))
+        .sort((a, b) => new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime());
+    }
     // Group by date and calculate average price for each date
     const groupedData = priceHistory.reduce((acc: any, item) => {
       const date = new Date(item.changed_at).toLocaleDateString();
@@ -153,14 +165,12 @@ const Pricing = () => {
       acc[date].prices.push(parseFloat(item.new_price));
       return acc;
     }, {});
-
     // Calculate average price for each date
     Object.keys(groupedData).forEach(date => {
       const prices = groupedData[date].prices;
       groupedData[date].avgPrice = prices.reduce((a: number, b: number) => a + b, 0) / prices.length;
     });
-
-    return Object.values(groupedData).sort((a: any, b: any) => 
+    return Object.values(groupedData).sort((a: any, b: any) =>
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
   };
@@ -199,9 +209,21 @@ const Pricing = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Market Pricing</h1>
-        <p className="text-gray-600">Track real-time pricing trends and market data for cable materials</p>
+      <div className="mb-8 flex items-start">
+        <div className="flex items-center mt-2">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center text-gray-600 hover:text-gray-900 mr-4 transition-colors"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+
+          </button>
+
+        </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Market Pricing</h1>
+          <p className="text-gray-600">Track real-time pricing trends and market data for cable materials</p>
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -280,9 +302,8 @@ const Pricing = () => {
                 {filteredData.map((item) => (
                   <Card
                     key={item.id}
-                    className={`cursor-pointer transition-all hover:shadow-md hover:scale-105 ${
-                      selectedPricingId === item.id ? 'ring-2 ring-purple-500' : ''
-                    }`}
+                    className={`cursor-pointer transition-all hover:shadow-md hover:scale-105 ${selectedPricingId === item.id ? 'ring-2 ring-purple-500' : ''
+                      }`}
                     onClick={() => handleMaterialClick(item.id)}
                   >
                     <CardContent className="p-4">
@@ -290,27 +311,27 @@ const Pricing = () => {
                         <h3 className="font-semibold text-lg">{item.material}</h3>
                         {getTrendIcon(item.trend)}
                       </div>
-                      
+
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">Current Price:</span>
                           <span className="font-bold text-lg">{formatPrice(item.price)}</span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">Change:</span>
                           <span className={`font-semibold ${getChangeColor(item.change)}`}>
                             {item.change}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center justify-between">
                           <span className="text-gray-600">Trend:</span>
                           <Badge className={getTrendColor(item.trend)}>
                             {item.trend}
                           </Badge>
                         </div>
-                        
+
                         <div className="text-xs text-gray-500 mt-2">
                           Updated: {formatDate(item.created_at)}
                         </div>
@@ -319,7 +340,7 @@ const Pricing = () => {
                   </Card>
                 ))}
               </div>
-              
+
               {filteredData.length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   No pricing data found matching your criteria.
@@ -339,8 +360,8 @@ const Pricing = () => {
               {selectedPricingId && priceHistory.length > 0 ? (
                 <div className="space-y-4">
                   {/* Time Range Selector */}
-                  <div className="flex gap-2">
-                    {(['7d', '30d', '90d', '1y'] as const).map((range) => (
+                  <div className="flex gap-2 flex-wrap">
+                    {(['1d', '7d', '30d', '90d', '1y'] as const).map((range) => (
                       <Button
                         key={range}
                         variant={timeRange === range ? 'default' : 'outline'}
@@ -350,6 +371,15 @@ const Pricing = () => {
                         {range}
                       </Button>
                     ))}
+                    {timeRange === '1d' && (
+                      <input
+                        type="date"
+                        value={historyDay}
+                        onChange={e => setHistoryDay(e.target.value)}
+                        className="border rounded px-2 py-1 text-sm"
+                        max={new Date().toISOString().slice(0, 10)}
+                      />
+                    )}
                   </div>
 
                   {/* Chart */}
@@ -357,25 +387,25 @@ const Pricing = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={prepareChartData()}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis 
-                          dataKey="date" 
+                        <XAxis
+                          dataKey={timeRange === '1d' ? 'time' : 'date'}
                           tick={{ fontSize: 12 }}
                           angle={-45}
                           textAnchor="end"
                         />
-                        <YAxis 
+                        <YAxis
                           tick={{ fontSize: 12 }}
                           tickFormatter={(value) => `₹${value}`}
                         />
-                        <Tooltip 
+                        <Tooltip
                           formatter={(value: any) => [`₹${value}`, 'Price']}
-                          labelFormatter={(label) => `Date: ${label}`}
+                          labelFormatter={(label) => timeRange === '1d' ? `Time: ${label}` : `Date: ${label}`}
                         />
                         <Legend />
-                        <Line 
-                          type="monotone" 
-                          dataKey="avgPrice" 
-                          stroke="#8b5cf6" 
+                        <Line
+                          type="monotone"
+                          dataKey={timeRange === '1d' ? 'new_price' : 'avgPrice'}
+                          stroke="#8b5cf6"
                           strokeWidth={2}
                           dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
                           activeDot={{ r: 6 }}

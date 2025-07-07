@@ -73,8 +73,8 @@ const Index = () => {
       default:
         return (
           <div className="space-y-12">
-            <HeroSection onGetStarted={() => navigate("/marketplace")} />
             <FeatureCards onNavigate={handleNavigation} />
+            <HeroSection onGetStarted={() => navigate("/marketplace")} />
             
             {/* Market Intelligence Section */}
             <section className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-3xl p-8 md:p-12">
@@ -191,7 +191,7 @@ const Index = () => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                Cable Hub
+                Cable Cart
               </h1>
               <span className="ml-3 text-sm text-gray-500 font-medium">Manufacturing Solutions</span>
             </div>

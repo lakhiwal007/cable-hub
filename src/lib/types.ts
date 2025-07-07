@@ -58,7 +58,7 @@ export type PricingData = {
     location: string;
     delivery_terms: string;
     certification?: string;
-    images?: string[];
+    image_url?: string;
     is_active: boolean;
     is_verified: boolean;
     is_urgent: boolean;
@@ -84,6 +84,7 @@ export type PricingData = {
     location: string;
     delivery_deadline: string;
     additional_requirements?: string;
+    image_url?: string;
     is_active: boolean;
     is_urgent: boolean;
     expires_at?: string;

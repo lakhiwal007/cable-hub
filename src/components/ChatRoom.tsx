@@ -240,7 +240,6 @@ const ChatRoom: React.FC<ChatRoomProps> = ({ roomId, onBack }) => {
               <CardContent className="space-y-3">
                 <h4 className="font-medium break-words">{listing.title}</h4>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline">{listing.material_type}</Badge>
                   <Badge variant="outline">{listing.category}</Badge>
                 </div>
                 <div className="space-y-2">

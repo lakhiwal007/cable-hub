@@ -43,14 +43,10 @@ const Marketplace = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [browseTab, setBrowseTab] = useState<'supply' | 'demand'>('supply');
 
+  // Create categories array from fetched material categories
   const categories = [
     { value: "all", label: "All Categories" },
-    { value: "copper", label: "Copper" },
-    { value: "aluminum", label: "Aluminum" },
-    { value: "pvc", label: "PVC" },
-    { value: "steel", label: "Steel" },
-    { value: "rubber", label: "Rubber" },
-    { value: "xlpe", label: "XLPE" }
+    ...materialCategories.map(cat => ({ value: cat.name, label: cat.name }))
   ];
 
   const navigate = useNavigate();
@@ -91,12 +87,14 @@ const Marketplace = () => {
       setMaterialCategories(categories || []);
     } catch (err: any) {
       console.error('Failed to fetch material categories:', err);
+      // Set empty array to prevent undefined errors
+      setMaterialCategories([]);
     }
   };
 
   const filteredSupplyListings = supplyListings.filter((listing) => {
     const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         listing.material_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         listing.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (listing.supplier?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === "all" || listing.category === filterCategory;
     return matchesSearch && matchesCategory;
@@ -104,7 +102,7 @@ const Marketplace = () => {
 
   const filteredDemandListings = demandListings.filter((listing) => {
     const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         listing.material_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         listing.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (listing.buyer?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === "all" || listing.category === filterCategory;
     return matchesSearch && matchesCategory;
@@ -325,6 +323,7 @@ const Marketplace = () => {
               categories={categories}
               materialCategories={materialCategories}
               isAuthenticated={isAuthenticated}
+              onCategoryAdded={fetchMaterialCategories}
             />
           </UITabsContent>
 
@@ -334,6 +333,7 @@ const Marketplace = () => {
               categories={categories}
               materialCategories={materialCategories}
               isAuthenticated={isAuthenticated}
+              onCategoryAdded={fetchMaterialCategories}
             />
           </UITabsContent>
         </UITabs>
