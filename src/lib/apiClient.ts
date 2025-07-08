@@ -1454,6 +1454,18 @@ class ApiClient {
     if (error) throw new Error(error.message);
     return data;
   }
+
+  async getConsultants() {
+    const { data, error } = await supabase.from('consultants').select('*');
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getConsultingRequests() {
+    const { data, error } = await supabase.from('consulting_requests').select('*');
+    if (error) throw new Error(error.message);
+    return data;
+  }
 }
 
 export const apiClient = new ApiClient();
