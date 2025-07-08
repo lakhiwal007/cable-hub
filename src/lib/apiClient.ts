@@ -1487,6 +1487,36 @@ class ApiClient {
     if (error) throw new Error(error.message);
     return data;
   }
+
+  async getMachineTypes() {
+    const { data, error } = await supabase.from('machine_types').select('*').order('name');
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getSellMachines() {
+    const { data, error } = await supabase.from('sell_machines').select('*').order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getBuyMachines() {
+    const { data, error } = await supabase.from('buy_machines').select('*').order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async createSellMachine(machineData: any) {
+    const { data, error } = await supabase.from('sell_machines').insert([machineData]).select().single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async createBuyMachine(machineData: any) {
+    const { data, error } = await supabase.from('buy_machines').insert([machineData]).select().single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
 }
 
 export const apiClient = new ApiClient();

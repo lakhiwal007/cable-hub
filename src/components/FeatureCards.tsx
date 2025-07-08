@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, TrendingUp, Users, Zap, Shield, BarChart3, MessageCircle, PackageSearch } from "lucide-react";
+import { Calculator, TrendingUp, Users, Zap, Shield, BarChart3, MessageCircle, PackageSearch, Settings } from "lucide-react";
 
 interface FeatureCardsProps {
   onNavigate: (tab: string) => void;
@@ -37,6 +37,16 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       gradient: "from-amber-400 to-yellow-500",
       bgGradient: "from-yellow-50 to-yellow-100",
       borderColor: "border-yellow-200",
+    },
+    {
+      icon: Settings,
+      title: "Machines Marketplace",
+      description: "Buy and sell industrial machines and equipment",
+      action: "Browse Machines",
+      tab: "machines",
+      gradient: "from-indigo-500 to-purple-600",
+      bgGradient: "from-indigo-50 to-purple-100",
+      borderColor: "border-indigo-200",
     },
     {
       icon: TrendingUp,

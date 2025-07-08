@@ -55,6 +55,8 @@ const Index = () => {
       navigate("/paid-expert-consulting");
     } else if (tabId === "used-dead-stock") {
       navigate("/used-dead-stock-listings");
+    } else if (tabId === "machines") {
+      navigate("/machines-marketplace");
     } else {
       setActiveTab(tabId);
     }

@@ -21,6 +21,8 @@ import SellUsedOrDeadStock from "./pages/SellUsedOrDeadStock";
 import UsedAndDeadStockListings from "./pages/UsedAndDeadStockListings";
 import PaidExpertConsulting from "./pages/PaidExpertConsulting";
 import ConsultingListings from "./pages/ConsultingListings";
+import MachinesMarketplace from "./pages/MachinesMarketplace";
+import MachinesListings from "./pages/MachinesListings";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +100,8 @@ const App = () => (
           <Route path="/used-dead-stock-listings" element={<ProtectedRoute><UsedAndDeadStockListings /></ProtectedRoute>} />
           <Route path="/paid-expert-consulting" element={<ProtectedRoute><PaidExpertConsulting /></ProtectedRoute>} />
           <Route path="/consulting-listings" element={<ProtectedRoute><ConsultingListings /></ProtectedRoute>} />
+          <Route path="/machines-marketplace" element={<ProtectedRoute><MachinesMarketplace /></ProtectedRoute>} />
+          <Route path="/machines-listings" element={<ProtectedRoute><MachinesListings /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
