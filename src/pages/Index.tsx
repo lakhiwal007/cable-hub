@@ -196,9 +196,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                Cable Cart
-              </h1>
+            <img src={"/cableCartLogo.png"} alt="Logo" className="h-auto w-28 mr-3 select-none" />
               <span className="ml-3 text-sm text-gray-500 font-medium">Manufacturing Solutions</span>
             </div>
 
