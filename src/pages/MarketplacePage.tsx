@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Marketplace from "@/components/Marketplace";
 import apiClient from "@/lib/apiClient";
 import Header from '@/components/Header';
+import RawMaterialBuyForm from "@/components/marketplace/RawMaterialBuyForm";
+import RawMaterialSellForm from "@/components/marketplace/RawMaterialSellForm";
 
 const MarketplacePage = () => {
   const navigate = useNavigate();

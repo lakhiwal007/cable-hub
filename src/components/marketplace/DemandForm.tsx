@@ -36,25 +36,38 @@ interface DemandFormProps {
 }
 
 const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated, onCategoryAdded }: DemandFormProps) => {
-  const [formData, setFormData] = useState<DemandFormData>({
-    title: '',
-    description: '',
-    category: '',
-    specifications: '',
-    required_quantity: '',
-    unit: 'kg',
-    budget_min: '',
-    budget_max: '',
-    location: '',
-    delivery_deadline: '',
-    additional_requirements: '',
-    is_urgent: false,
-    image_url: '',
+  const [formData, setFormData] = useState<DemandFormData & {
+    rm?: string;
+    type?: string;
+    delivery_days?: string;
+    payment_terms?: string;
+    whatsapp?: string;
+  }>({
+    ...{
+      title: '',
+      description: '',
+      category: '',
+      specifications: '',
+      required_quantity: '',
+      unit: 'kg',
+      budget_min: '',
+      budget_max: '',
+      location: '',
+      delivery_deadline: '',
+      additional_requirements: '',
+      is_urgent: false,
+      image_url: '',
+    },
+    rm: '',
+    type: '',
+    delivery_days: '',
+    payment_terms: '',
+    whatsapp: '',
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [addCategoryMode, setAddCategoryMode] = useState(false);
 
@@ -79,8 +92,8 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setImageFile(e.target.files[0]);
+    if (e.target.files) {
+      setImageFiles(Array.from(e.target.files));
     }
   };
 
@@ -123,15 +136,20 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     setLoading(true);
     try {
       let imageUrl = '';
-      if (imageFile) {
-        imageUrl = await apiClient.uploadListingImage(imageFile);
+      if (imageFiles.length > 0) {
+        imageUrl = await apiClient.uploadListingImage(imageFiles[0]);
       }
       await onSubmit({ ...formData, image_url: imageUrl });
       setSuccess('Demand posted successfully!');
       setFormData({
         title: '', description: '', category: '', specifications: '', required_quantity: '', unit: 'kg', budget_min: '', budget_max: '', location: '', delivery_deadline: '', additional_requirements: '', is_urgent: false, image_url: '',
+        rm: '',
+        type: '',
+        delivery_days: '',
+        payment_terms: '',
+        whatsapp: '',
       });
-      setImageFile(null);
+      setImageFiles([]);
     } catch (err: any) {
       setError(err.message || 'Failed to post demand listing.');
     } finally {
@@ -151,6 +169,16 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Choose RM *</label>
+                <select name="rm" value={formData.rm} onChange={handleInput} required className="w-full border rounded h-10 px-2">
+                  <option value="">Select</option>
+                  <option value="Cu">Cu</option>
+                  <option value="Al">Al</option>
+                  <option value="PVC">PVC</option>
+                  <option value="XLPE">XLPE</option>
+                </select>
+              </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Title *</label>
                 <Input name="title" value={formData.title} onChange={handleInput} required />
@@ -179,6 +207,10 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                     <Button type="button" variant="outline" onClick={() => setAddCategoryMode(false)}>Cancel</Button>
                   </div>
                 )}
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Type</label>
+                <Input name="type" value={formData.type} onChange={handleInput} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Specifications</label>
@@ -213,13 +245,36 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                 <Input name="delivery_deadline" value={formData.delivery_deadline} onChange={handleInput} />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Reference Image</label>
-                <Input type="file" accept="image/*" onChange={handleImageChange} />
-                {imageFile && <span className="text-xs text-gray-500">{imageFile.name}</span>}
+                <label className="text-sm font-medium">Delivery Days</label>
+                <Input name="delivery_days" value={formData.delivery_days} onChange={handleInput} type="number" min="0" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Payment Terms</label>
+                <Input name="payment_terms" value={formData.payment_terms} onChange={handleInput} />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Reference Image(s)</label>
+                <Input type="file" accept="image/*" onChange={handleImageChange} multiple />
+                {imageFiles.length > 0 && (
+                  <div className="flex gap-2 flex-wrap mt-2">
+                    {imageFiles.map((file, idx) => (
+                      <img key={idx} src={URL.createObjectURL(file)} alt={`Preview ${idx + 1}`} className="h-24 rounded border object-contain" />
+                    ))}
+                  </div>
+                )}
+                {imageFiles.length > 0 && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    {imageFiles.map((file, idx) => file.name).join(', ')}
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-2 mt-6">
                 <input type="checkbox" name="is_urgent" checked={formData.is_urgent} onChange={handleInput} />
                 <label className="text-sm">Mark as urgent</label>
+              </div>
+              <div className="">
+                <label className="block text-sm font-medium mb-1">Enter your WhatsApp no</label>
+                <Input name="whatsapp" value={formData.whatsapp} onChange={handleInput} required type="tel" pattern="[0-9]{10,15}" />
               </div>
             </div>
             <div className="space-y-2">

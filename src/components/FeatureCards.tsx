@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, TrendingUp, Users, Zap, Shield, BarChart3, MessageCircle, PackageSearch, Settings } from "lucide-react";
+import { Calculator, TrendingUp, Users, Zap, Shield, BarChart3, MessageCircle, PackageSearch, Settings, Users2 } from "lucide-react";
 
 interface FeatureCardsProps {
   onNavigate: (tab: string) => void;
@@ -67,6 +67,26 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       gradient: "from-purple-500 to-purple-600",
       bgGradient: "from-purple-50 to-purple-100",
       borderColor: "border-purple-200",
+    },
+    {
+      icon: Users2,
+      title: "Create Team",
+      description: "Create your own team of experts to work on your projects",
+      action: "Create Team",
+      tab: "team",
+      gradient: "from-cyan-500 to-cyan-600",
+      bgGradient: "from-blue-50 to-blue-100",
+      borderColor: "border-cyan-200",
+    },
+    {
+      icon: Users2,
+      title: "Find Specs",
+      description: "Find the specifications of the machines or information you are looking for",
+      action: "Find Specs",
+      tab: "specs",
+      gradient: "from-rose-500 to-rose-600",
+      bgGradient: "from-rose-50 to-rose-100",
+      borderColor: "border-rose-200",
     },
   ];
 

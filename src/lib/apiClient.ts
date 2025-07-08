@@ -486,9 +486,11 @@ class ApiClient {
     location: string;
     delivery_terms: string;
     certification?: string;
-    image_url?: string;
+    image_url?: string[];
     is_urgent?: boolean;
     expires_at?: string;
+    spec_doc_url?: string;
+    whatsapp_number?: string;
   }) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Authentication required');
@@ -502,6 +504,9 @@ class ApiClient {
         is_active: true,
         is_verified: false,
         is_urgent: listingData.is_urgent || false,
+        whatsapp_number: listingData.whatsapp_number,
+        spec_doc_url: listingData.spec_doc_url,
+        image_url: listingData.image_url,
       }])
       .select()
       .single();
@@ -522,9 +527,11 @@ class ApiClient {
     location: string;
     delivery_terms: string;
     certification?: string;
-    image_url?: string;
+    image_url?: string[];
     is_urgent?: boolean;
     expires_at?: string;
+    spec_doc_url?: string;
+    whatsapp_number?: string;
   }>) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Authentication required');
@@ -620,6 +627,9 @@ class ApiClient {
     additional_requirements?: string;
     is_urgent?: boolean;
     expires_at?: string;
+    spec_doc_url?: string;
+    image_url?: string[];
+    whatsapp_number?: string;
   }) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Authentication required');
@@ -632,6 +642,9 @@ class ApiClient {
         currency: listingData.currency || 'INR',
         is_active: true,
         is_urgent: listingData.is_urgent || false,
+        whatsapp_number: listingData.whatsapp_number,
+        spec_doc_url: listingData.spec_doc_url,
+        image_url: listingData.image_url,
       }])
       .select()
       .single();
@@ -654,6 +667,9 @@ class ApiClient {
     additional_requirements?: string;
     is_urgent?: boolean;
     expires_at?: string;
+    spec_doc_url?: string;
+    image_url?: string[];
+    whatsapp_number?: string;
   }>) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Authentication required');
