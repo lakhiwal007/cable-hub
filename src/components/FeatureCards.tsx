@@ -1,7 +1,6 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, TrendingUp, Users, Zap, Shield, BarChart3 } from "lucide-react";
+import { Calculator, TrendingUp, Users, Zap, Shield, BarChart3, MessageCircle, PackageSearch, Settings } from "lucide-react";
 
 interface FeatureCardsProps {
   onNavigate: (tab: string) => void;
@@ -30,6 +29,26 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       borderColor: "border-green-200",
     },
     {
+      icon: PackageSearch,
+      title: "Used & Dead Stock",
+      description: "Buy and sell used machines and surplus stock with ease",
+      action: "Browse Used/Dead Stock",
+      tab: "used-dead-stock",
+      gradient: "from-amber-400 to-yellow-500",
+      bgGradient: "from-yellow-50 to-yellow-100",
+      borderColor: "border-yellow-200",
+    },
+    {
+      icon: Settings,
+      title: "Machines Marketplace",
+      description: "Buy and sell industrial machines and equipment",
+      action: "Browse Machines",
+      tab: "machines",
+      gradient: "from-indigo-500 to-purple-600",
+      bgGradient: "from-indigo-50 to-purple-100",
+      borderColor: "border-indigo-200",
+    },
+    {
       icon: TrendingUp,
       title: "Market Intelligence",
       description: "Real-time insights and pricing trends for informed decisions",
@@ -38,6 +57,16 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       gradient: "from-blue-500 to-blue-600",
       bgGradient: "from-blue-50 to-blue-100",
       borderColor: "border-blue-200",
+    },
+    {
+      icon: MessageCircle,
+      title: "Expert Consulting",
+      description: "Get professional advice from industry experts or offer your expertise",
+      action: "Find Experts",
+      tab: "consulting",
+      gradient: "from-purple-500 to-purple-600",
+      bgGradient: "from-purple-50 to-purple-100",
+      borderColor: "border-purple-200",
     },
   ];
 
@@ -72,7 +101,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (

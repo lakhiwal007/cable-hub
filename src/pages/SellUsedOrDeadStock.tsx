@@ -111,8 +111,8 @@ export default function SellUsedOrDeadStock({ onSuccess }: Props) {
 
   return (
     <div className="container mx-auto py-8">
-      <Tabs defaultValue="used" className="w-full">
-        <TabsList>
+      <Tabs defaultValue="used" className="w-full flex-wrap">
+        <TabsList className='flex-wrap mb-8 sm:mb-0'>
           <TabsTrigger value="used">Sell Used Machines</TabsTrigger>
           <TabsTrigger value="dead">Sell Dead Stock</TabsTrigger>
         </TabsList>

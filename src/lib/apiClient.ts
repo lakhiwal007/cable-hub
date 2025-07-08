@@ -405,7 +405,6 @@ class ApiClient {
     location?: string;
     price_min?: number;
     price_max?: number;
-    material_type?: string;
     verified_only?: boolean;
     urgent_only?: boolean;
     search?: string;
@@ -424,12 +423,11 @@ class ApiClient {
       if (filters.location) query = query.ilike('location', `%${filters.location}%`);
       if (filters.price_min) query = query.gte('price_per_unit', filters.price_min);
       if (filters.price_max) query = query.lte('price_per_unit', filters.price_max);
-      if (filters.material_type) query = query.eq('material_type', filters.material_type);
       if (filters.verified_only) query = query.eq('is_verified', true);
       if (filters.urgent_only) query = query.eq('is_urgent', true);
       if (filters.search) {
         query = query.or(
-          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,material_type.ilike.%${filters.search}%`
+          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`
         );
       }
     }
@@ -479,7 +477,6 @@ class ApiClient {
     title: string;
     description: string;
     category: string;
-    material_type: string;
     grade_specification: string;
     available_quantity: number;
     unit: string;
@@ -517,7 +514,6 @@ class ApiClient {
     title: string;
     description: string;
     category: string;
-    material_type: string;
     grade_specification: string;
     available_quantity: number;
     unit: string;
@@ -565,7 +561,6 @@ class ApiClient {
     location?: string;
     budget_min?: number;
     budget_max?: number;
-    material_type?: string;
     urgent_only?: boolean;
     search?: string;
   }) {
@@ -583,11 +578,11 @@ class ApiClient {
       if (filters.location) query = query.ilike('location', `%${filters.location}%`);
       if (filters.budget_min) query = query.gte('budget_min', filters.budget_min);
       if (filters.budget_max) query = query.lte('budget_max', filters.budget_max);
-      if (filters.material_type) query = query.eq('material_type', filters.material_type);
+      
       if (filters.urgent_only) query = query.eq('is_urgent', true);
       if (filters.search) {
         query = query.or(
-          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%,material_type.ilike.%${filters.search}%`
+          `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`
         );
       }
     }
@@ -614,7 +609,6 @@ class ApiClient {
     title: string;
     description: string;
     category: string;
-    material_type: string;
     specifications: string;
     required_quantity: number;
     unit: string;
@@ -650,7 +644,6 @@ class ApiClient {
     title: string;
     description: string;
     category: string;
-    material_type: string;
     specifications: string;
     required_quantity: number;
     unit: string;
@@ -826,7 +819,7 @@ class ApiClient {
           supplier:users!supplier_id(name, email, user_type)
         `)
         .eq('is_active', true)
-        .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,material_type.ilike.%${searchTerm}%`)
+        .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
         .limit(10);
       results.supply = supplyData || [];
     }
@@ -839,7 +832,7 @@ class ApiClient {
           buyer:users!buyer_id(name, email, user_type)
         `)
         .eq('is_active', true)
-        .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,material_type.ilike.%${searchTerm}%`)
+        .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`)
         .limit(10);
       results.demand = demandData || [];
     }
@@ -890,14 +883,14 @@ class ApiClient {
       if (room.listing_type === 'supply') {
         const { data: supplyListing } = await supabase
           .from('supply_listings')
-          .select('id, title, material_type, price_per_unit, unit')
+          .select('id, title, price_per_unit, unit')
           .eq('id', room.listing_id)
           .single();
         listing = supplyListing;
       } else if (room.listing_type === 'demand') {
         const { data: demandListing } = await supabase
           .from('demand_listings')
-          .select('id, title, material_type, budget_min, budget_max, unit')
+          .select('id, title, budget_min, budget_max, unit')
           .eq('id', room.listing_id)
           .single();
         listing = demandListing;
@@ -940,14 +933,14 @@ class ApiClient {
     if (data.listing_type === 'supply') {
       const { data: supplyListing } = await supabase
         .from('supply_listings')
-        .select('id, title, description, material_type, price_per_unit, unit, location')
+        .select('id, title, description,  price_per_unit, unit, location')
         .eq('id', data.listing_id)
         .single();
       listing = supplyListing;
     } else if (data.listing_type === 'demand') {
       const { data: demandListing } = await supabase
         .from('demand_listings')
-        .select('id, title, description, material_type, budget_min, budget_max, unit, location')
+        .select('id, title, description,  budget_min, budget_max, unit, location')
         .eq('id', data.listing_id)
         .single();
       listing = demandListing;
@@ -1455,14 +1448,72 @@ class ApiClient {
     return data;
   }
 
+  async createConsultingRequest(data: {
+    whatsapp_number: string;
+    expertise_needed: string[];
+    description: string;
+    budget_min?: number;
+    budget_max?: number;
+    urgency: 'low' | 'medium' | 'high';
+  }) {
+    const { data: result, error } = await supabase.from('consulting_requests').insert([data]).select().single();
+    if (error) throw new Error(error.message);
+    return result;
+  }
+
+  async registerConsultant(data: {
+    name: string;
+    whatsapp_number: string;
+    is_incognito: boolean;
+    expertise_areas: string[];
+    cable_product_types?: string[];
+    hourly_rate?: number;
+    experience_years?: number;
+    description: string;
+  }) {
+    const { data: result, error } = await supabase.from('consultants').insert([data]).select().single();
+    if (error) throw new Error(error.message);
+    return result;
+  }
+
   async getConsultants() {
-    const { data, error } = await supabase.from('consultants').select('*');
+    const { data, error } = await supabase.from('consultants').select('*').eq('is_active', true).order('created_at', { ascending: false });
     if (error) throw new Error(error.message);
     return data;
   }
 
   async getConsultingRequests() {
-    const { data, error } = await supabase.from('consulting_requests').select('*');
+    const { data, error } = await supabase.from('consulting_requests').select('*').order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getMachineTypes() {
+    const { data, error } = await supabase.from('machine_types').select('*').order('name');
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getSellMachines() {
+    const { data, error } = await supabase.from('sell_machines').select('*').order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getBuyMachines() {
+    const { data, error } = await supabase.from('buy_machines').select('*').order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async createSellMachine(machineData: any) {
+    const { data, error } = await supabase.from('sell_machines').insert([machineData]).select().single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async createBuyMachine(machineData: any) {
+    const { data, error } = await supabase.from('buy_machines').insert([machineData]).select().single();
     if (error) throw new Error(error.message);
     return data;
   }
