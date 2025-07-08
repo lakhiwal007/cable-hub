@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import Loader from '@/components/ui/loader';
 import { ArrowLeft } from 'lucide-react';
+import Header from '@/components/Header';
 
 interface ChatRoomListItem {
   id: string;
@@ -56,66 +57,56 @@ const MyChats = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4">
-      <div className='flex items-center gap-2 mb-4'>
-        <button
-          onClick={() => {
-            navigate('/marketplace');
-
-          }}
-          className="flex h-10 w-10 rounded-full items-center justify-center text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-        >
-          <ArrowLeft className="" />
-
-        </button>
-        <h2 className="text-2xl font-bold">My Chats</h2>
-      </div>
-      {loading ? (
-        <Loader className="py-12" />
-      ) : error ? (
-        <div className="text-red-500 text-center py-8">{error}</div>
-      ) : chatRooms.length === 0 ? (
-        <div className="text-center text-gray-500 py-12">No chats found.</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {chatRooms.map((room) => {
-            const other = getOtherParty(room);
-            return (
-              <Card key={room.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/chat/${room.id}`)}>
-                <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback className="bg-blue-100 text-blue-600">
-                      {other?.name?.charAt(0) || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="truncate text-base">{other?.name || 'Unknown'}</CardTitle>
-                    <div className="text-xs text-gray-500 truncate">{room.listing?.title || 'No listing title'}</div>
-                  </div>
-                  {room.last_message && (
-                    <div className="text-xs text-gray-400 min-w-fit">
-                      {new Date(room.last_message.created_at).toLocaleString()}
+    <>
+      <Header title="My Chats" onBack={() => navigate('/marketplace')} logoSrc='cableCartLogo.png' />
+      <div className="max-w-3xl mx-auto py-8 px-4">
+        {loading ? (
+          <Loader className="py-12" />
+        ) : error ? (
+          <div className="text-red-500 text-center py-8">{error}</div>
+        ) : chatRooms.length === 0 ? (
+          <div className="text-center text-gray-500 py-12">No chats found.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {chatRooms.map((room) => {
+              const other = getOtherParty(room);
+              return (
+                <Card key={room.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate(`/chat/${room.id}`)}>
+                  <CardHeader className="flex flex-row items-center gap-4 pb-2">
+                    <Avatar className="h-10 w-10">
+                      <AvatarFallback className="bg-blue-100 text-blue-600">
+                        {other?.name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="truncate text-base">{other?.name || 'Unknown'}</CardTitle>
+                      <div className="text-xs text-gray-500 truncate">{room.listing?.title || 'No listing title'}</div>
                     </div>
-                  )}
-                </CardHeader>
-                <CardContent className="flex items-center gap-2 pt-0 pb-3">
-                  {room.last_message ? (
-                    <>
-                      <span className="truncate flex-1 text-sm text-gray-700">{room.last_message.message_text}</span>
-                      {room.last_message.is_read === false && (
-                        <Badge variant="destructive">Unread</Badge>
-                      )}
-                    </>
-                  ) : (
-                    <span className="text-xs text-gray-400">No messages yet</span>
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-    </div>
+                    {room.last_message && (
+                      <div className="text-xs text-gray-400 min-w-fit">
+                        {new Date(room.last_message.created_at).toLocaleString()}
+                      </div>
+                    )}
+                  </CardHeader>
+                  <CardContent className="flex items-center gap-2 pt-0 pb-3">
+                    {room.last_message ? (
+                      <>
+                        <span className="truncate flex-1 text-sm text-gray-700">{room.last_message.message_text}</span>
+                        {room.last_message.is_read === false && (
+                          <Badge variant="destructive">Unread</Badge>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-xs text-gray-400">No messages yet</span>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

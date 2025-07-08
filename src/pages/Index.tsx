@@ -51,6 +51,10 @@ const Index = () => {
       navigate("/marketplace");
     } else if (tabId === "pricing") {
       navigate("/pricing");
+    } else if (tabId === "consulting") {
+      navigate("/paid-expert-consulting");
+    } else if (tabId === "used-dead-stock") {
+      navigate("/used-dead-stock-listings");
     } else {
       setActiveTab(tabId);
     }
