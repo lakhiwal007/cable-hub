@@ -118,4 +118,36 @@ CREATE POLICY "Users can update their own buy machines" ON buy_machines
   FOR UPDATE USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete their own buy machines" ON buy_machines
-  FOR DELETE USING (auth.uid() = user_id); 
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- Add spec_doc_url to supply_listings and demand_listings
+ALTER TABLE IF EXISTS supply_listings ADD COLUMN IF NOT EXISTS spec_doc_url TEXT;
+ALTER TABLE IF EXISTS demand_listings ADD COLUMN IF NOT EXISTS spec_doc_url TEXT;
+
+DROP TABLE IF EXISTS demand_listings CASCADE;
+
+CREATE TABLE demand_listings (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  buyer_id UUID REFERENCES auth.users(id) ON DELETE CASCADE, -- User who created the demand
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  category VARCHAR(100) NOT NULL,
+  material_type VARCHAR(100),
+  specifications TEXT,
+  required_quantity NUMERIC NOT NULL,
+  unit VARCHAR(20) DEFAULT 'kg',
+  budget_min NUMERIC NOT NULL,
+  budget_max NUMERIC NOT NULL,
+  currency VARCHAR(3) DEFAULT 'INR',
+  location VARCHAR(255) NOT NULL,
+  delivery_deadline VARCHAR(100),
+  additional_requirements TEXT,
+  image_url TEXT[],         -- Array of image URLs
+  spec_doc_url TEXT,        -- Document upload
+  whatsapp_number VARCHAR(20),
+  is_active BOOLEAN DEFAULT TRUE,
+  is_urgent BOOLEAN DEFAULT FALSE,
+  expires_at TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+); 

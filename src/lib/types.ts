@@ -66,6 +66,8 @@ export type PricingData = {
     created_at: string;
     updated_at: string;
     supplier?: SupplierContact;
+    whatsapp_number?: string;
+    spec_doc_url?: string;
   };
 
   export type DemandListing = {
@@ -97,6 +99,8 @@ export type PricingData = {
       phone: string;
       company_name: string;
     };
+    whatsapp_number?: string;
+    spec_doc_url?: string;
   };
 
   export type MarketplaceContact = {
