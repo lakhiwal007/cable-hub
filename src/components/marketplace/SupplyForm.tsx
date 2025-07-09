@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import apiClient from "@/lib/apiClient";
+import { useNavigate } from "react-router-dom";
 
 interface SupplyFormData {
   title: string;
@@ -176,6 +177,8 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     }
   };
 
+  const navigate = useNavigate();
+
   return (
     <Card>
       <CardHeader>
@@ -186,7 +189,9 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
         {!isAuthenticated ? (
           <div className="text-center space-y-4">
             <div className="text-gray-500">You must be logged in to post a supply listing.</div>
-            <Button onClick={() => window.location.href = '/login'} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={() => {
+              navigate('/login');
+            }} className="bg-blue-600 hover:bg-blue-700">
               Login to Post Supply
             </Button>
           </div>

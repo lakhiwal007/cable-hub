@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +31,7 @@ const ContactDialog = ({
   onSubmit, 
   submitting 
 }: ContactDialogProps) => {
+  const navigate = useNavigate();
   if (!listing) return null;
 
   return (
@@ -79,7 +81,7 @@ const ContactDialog = ({
               <Button 
                 type="button" 
                 variant="outline" 
-                onClick={() => window.location.href = '/login'}
+                onClick={() => navigate('/login')}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 Login to Chat

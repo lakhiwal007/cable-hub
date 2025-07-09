@@ -234,7 +234,7 @@ const ListingDetails = () => {
     };
 
     const shareListing = () => {
-        const url = window.location.href;
+        const url = window.location.origin + location.pathname;
         if (navigator.share) {
             navigator.share({
                 title: listing?.title || 'Cable Hub Listing',
