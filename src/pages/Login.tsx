@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock, LogIn, User, Shield } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, LogIn, User, Shield, Phone } from "lucide-react";
 import apiClient from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,14 +34,20 @@ const Login = () => {
   }, [navigate, from]);
 
   const validateForm = () => {
-    if (!email) {
-      setError("Email is required");
+    if (!identifier) {
+      setError("Email or mobile number is required");
       return false;
     }
-    if (!email.includes("@")) {
-      setError("Please enter a valid email address");
+    
+    // Check if it's an email or mobile number
+    const isEmail = identifier.includes("@");
+    const isMobile = /^[6-9]\d{9}$/.test(identifier.replace(/\s/g, ''));
+    
+    if (!isEmail && !isMobile) {
+      setError("Please enter a valid email address or 10-digit mobile number");
       return false;
     }
+    
     if (!password) {
       setError("Password is required");
       return false;
@@ -55,13 +61,13 @@ const Login = () => {
 
   // Quick login handlers
   const handleQuickUserLogin = () => {
-    setEmail("nojic853@exitbit.com");
+    setIdentifier("nojic853@exitbit.com");
     setPassword("Admin@123");
     setError("");
   };
 
   const handleQuickAdminLogin = () => {
-    setEmail("nojic85339@exitbit.com");
+    setIdentifier("nojic85339@exitbit.com");
     setPassword("Admin@123");
     setError("");
   };
@@ -77,7 +83,13 @@ const Login = () => {
     setLoading(true);
     
     try {
-      const response = await apiClient.login({ email, password });
+      // Determine if identifier is email or mobile
+      const isEmail = identifier.includes("@");
+      const loginData = isEmail 
+        ? { email: identifier, password }
+        : { mobile: identifier.replace(/\s/g, ''), password };
+      
+      const response = await apiClient.login(loginData);
       // Store access token in localStorage
       if (response.session?.access_token) {
         localStorage.setItem('authToken', response.session.access_token);
@@ -162,17 +174,17 @@ const Login = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email Address
+                <Label htmlFor="identifier" className="text-sm font-medium text-gray-700">
+                  Email or Mobile Number
                 </Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    id="identifier"
+                    type="text"
+                    placeholder="Enter your email or mobile number"
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
                     className="pl-10 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     required
                     autoComplete="email"
@@ -200,7 +212,7 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>

@@ -23,6 +23,8 @@ import PaidExpertConsulting from "./pages/PaidExpertConsulting";
 import ConsultingListings from "./pages/ConsultingListings";
 import MachinesMarketplace from "./pages/MachinesMarketplace";
 import MachinesListings from "./pages/MachinesListings";
+import Team from "./pages/Team";
+import TeamListings from "./pages/TeamListings";
 
 const queryClient = new QueryClient();
 
@@ -77,6 +79,8 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/team-listings" element={<TeamListings />} />
           <Route path="/listing/:listingType/:listingId" element={<ListingDetails />} />
           <Route path="/admin" element={
             <ProtectedRoute adminOnly={true}>

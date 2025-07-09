@@ -398,7 +398,7 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                                                 <img 
                                                                     src={imageUrl} 
                                                                     alt={`${listing.title} - Image ${index + 1}`}
-                                                                    className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                                                                    className="w-full h-full aspect-video cursor-pointer hover:scale-105 transition-transform duration-300"
                                                                     onClick={() => setSelectedImage(imageUrl)}
                                                                 />
                                                             </CarouselItem>

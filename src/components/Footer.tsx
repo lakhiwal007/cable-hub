@@ -4,7 +4,6 @@ const navLinks = [
   { name: "Dashboard", to: "/" },
   { name: "Marketplace", to: "/marketplace" },
   { name: "Pricing", to: "/pricing" },
-  { name: "Calculator", to: "/#calculator" },
   { name: "Privacy Policy", to: "/privacy-policy" },
   { name: "Terms & Conditions", to: "/terms" },
 ];
@@ -26,7 +25,7 @@ const Footer = () => (
         
       </nav>
       {/* Company Info */}
-      <div className="flex flex-col items-center md:items-start gap-2 text-xs text-gray-500 min-w-[180px]">
+      <div className="flex flex-col items-center md:items-start gap-2 text-sm text-gray-500 min-w-[180px]">
         <span className="font-semibold text-gray-700">Cable Hub Connect Pvt. Ltd.</span>
         <span>123 Industrial Park, Sector 45</span>
         <span>New Delhi, India 110001</span>
