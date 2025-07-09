@@ -18,7 +18,7 @@ interface DemandFormData {
   delivery_deadline: string;
   additional_requirements: string;
   is_urgent: boolean;
-  image_url?: string;
+  image_url?: string | string[];
 }
 
 interface MaterialCategory {
@@ -39,9 +39,8 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
   const [formData, setFormData] = useState<DemandFormData & {
     rm?: string;
     type?: string;
-    delivery_days?: string;
     payment_terms?: string;
-    whatsapp?: string;
+    whatsapp_number?: string;
   }>({
     ...{
       title: '',
@@ -60,9 +59,8 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     },
     rm: '',
     type: '',
-    delivery_days: '',
     payment_terms: '',
-    whatsapp: '',
+    whatsapp_number: '',
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -135,19 +133,26 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     
     setLoading(true);
     try {
-      let imageUrl = '';
+      let imageUrls: string[] = [];
       if (imageFiles.length > 0) {
-        imageUrl = await apiClient.uploadListingImage(imageFiles[0]);
+        try {
+          imageUrls = await Promise.all(
+            imageFiles.map(file => apiClient.uploadListingImage(file))
+          );
+        } catch (uploadErr: any) {
+          setError('Failed to upload one or more images: ' + (uploadErr.message || uploadErr));
+          setLoading(false);
+          return;
+        }
       }
-      await onSubmit({ ...formData, image_url: imageUrl });
+      await onSubmit({ ...formData, image_url: imageUrls });
       setSuccess('Demand posted successfully!');
       setFormData({
         title: '', description: '', category: '', specifications: '', required_quantity: '', unit: 'kg', budget_min: '', budget_max: '', location: '', delivery_deadline: '', additional_requirements: '', is_urgent: false, image_url: '',
         rm: '',
         type: '',
-        delivery_days: '',
         payment_terms: '',
-        whatsapp: '',
+        whatsapp_number: '',
       });
       setImageFiles([]);
     } catch (err: any) {
@@ -249,10 +254,7 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                 <label className="text-sm font-medium">Delivery Deadline</label>
                 <Input name="delivery_deadline" value={formData.delivery_deadline} onChange={handleInput} />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Delivery Days</label>
-                <Input name="delivery_days" value={formData.delivery_days} onChange={handleInput} type="number" min="0" />
-              </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Payment Terms</label>
                 <Input name="payment_terms" value={formData.payment_terms} onChange={handleInput} />
@@ -278,8 +280,8 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                 <label className="text-sm">Mark as urgent</label>
               </div>
               <div className="">
-                <label className="block text-sm font-medium mb-1">Enter your WhatsApp no</label>
-                <Input name="whatsapp" value={formData.whatsapp} onChange={handleInput} required type="tel" pattern="[0-9]{10,15}" />
+                <label className="block text-sm font-medium mb-1">Enter your whatsapp_number no</label>
+                <Input name="whatsapp_number" value={formData.whatsapp_number} onChange={handleInput} required type="tel" pattern="[0-9]{10,15}" />
               </div>
             </div>
             <div className="space-y-2">
