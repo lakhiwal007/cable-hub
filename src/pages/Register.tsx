@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Mail, Lock, User, UserPlus, Check, X } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, UserPlus, Check, X, Phone } from "lucide-react";
 import apiClient from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -62,6 +63,16 @@ const Register = () => {
       setError("Please enter a valid email address");
       return false;
     }
+    if (!mobile) {
+      setError("Mobile number is required");
+      return false;
+    }
+    // Basic mobile number validation for Indian numbers
+    const mobileRegex = /^[6-9]\d{9}$/;
+    if (!mobileRegex.test(mobile.replace(/\s/g, ''))) {
+      setError("Please enter a valid 10-digit mobile number");
+      return false;
+    }
     if (!password) {
       setError("Password is required");
       return false;
@@ -105,6 +116,7 @@ const Register = () => {
       const response = await apiClient.register({ 
         name: name.trim(), 
         email: email.toLowerCase().trim(), 
+        mobile: mobile.trim(),
         password: password,
         userType: 'user'
       });
@@ -259,6 +271,25 @@ const Register = () => {
                     className="pl-10 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     required
                     autoComplete="email"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mobile" className="text-sm font-medium text-gray-700">
+                  Mobile Number
+                </Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    id="mobile"
+                    type="tel"
+                    placeholder="Enter your mobile number"
+                    value={mobile}
+                    onChange={(e) => setMobile(e.target.value)}
+                    className="pl-10 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                    required
+                    autoComplete="tel"
                   />
                 </div>
               </div>

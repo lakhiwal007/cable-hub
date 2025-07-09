@@ -21,6 +21,7 @@ class ApiClient {
     email: string;
     password: string;
     name: string;
+    mobile?: string;
     userType?: string;
   }) {
     const headers: HeadersInit = {
@@ -44,11 +45,40 @@ class ApiClient {
   }
 
   // All other methods use the direct Supabase client
-  async login(credentials: { email: string; password: string }) {
-    const { data, error } = await supabase.auth.signInWithPassword(credentials);
-    if (error) throw new Error(error.message);
-    if (data.session) await supabase.auth.setSession(data.session);
-    return data;
+  async login(credentials: { email?: string; mobile?: string; password: string }) {
+    // If mobile number is provided, we need to find the user by mobile first
+    if (credentials.mobile) {
+      // First, find the user by mobile number in the users table
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('email')
+        .eq('phone', credentials.mobile)
+        .single();
+      
+      if (userError || !userData) {
+        throw new Error('No account found with this mobile number');
+      }
+      
+      // Use the email to login
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: userData.email,
+        password: credentials.password
+      });
+      if (error) throw new Error(error.message);
+      if (data.session) await supabase.auth.setSession(data.session);
+      return data;
+    } else if (credentials.email) {
+      // Standard email login
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: credentials.email,
+        password: credentials.password
+      });
+      if (error) throw new Error(error.message);
+      if (data.session) await supabase.auth.setSession(data.session);
+      return data;
+    } else {
+      throw new Error('Email or mobile number is required');
+    }
   }
 
   async logout() {

@@ -57,6 +57,8 @@ const Index = () => {
       navigate("/used-dead-stock-listings");
     } else if (tabId === "machines") {
       navigate("/machines-listings");
+    } else if (tabId === "team") {
+      navigate("/team-listings");
     } else {
       setActiveTab(tabId);
     }

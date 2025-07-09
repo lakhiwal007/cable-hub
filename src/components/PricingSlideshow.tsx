@@ -23,6 +23,9 @@ const PricingSlideshow = () => {
   const [historyRange, setHistoryRange] = useState<'1d' | 'daily' | 'weekly' | 'monthly' | 'yearly'>('1d');
   const [historyDay, setHistoryDay] = useState<string>(() => new Date().toISOString().slice(0, 10));
 
+  // New state for pausing animation
+  const [isPaused, setIsPaused] = useState(false);
+
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
@@ -49,6 +52,7 @@ const PricingSlideshow = () => {
     const speed = 40; // px per second
   
     const step = (timestamp: number) => {
+      if (isPaused) return;
       if (start === null) start = timestamp;
       const elapsed = timestamp - start;
       marquee.scrollLeft = (marquee.scrollLeft + speed * (elapsed / 1000)) % (marquee.scrollWidth / 2);
@@ -63,36 +67,16 @@ const PricingSlideshow = () => {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [priceData]);
+  }, [priceData, isPaused]);
   
 
   // Button scroll handlers
-  const pauseDuration = 3000; 
-
+  // Remove pauseDuration and animation restart logic
 const scrollBy = (amount: number) => {
   const marquee = marqueeRef.current;
   if (marquee) {
     marquee.scrollBy({ left: amount, behavior: "smooth" });
-
-    // Stop animation
-    if (animationFrameRef.current !== null) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-
-    // Restart after pause
-    setTimeout(() => {
-      let start: number | null = null;
-      const speed = 40;
-      const step = (timestamp: number) => {
-        if (start === null) start = timestamp;
-        const elapsed = timestamp - start;
-        marquee.scrollLeft = (marquee.scrollLeft + speed * (elapsed / 1000)) % (marquee.scrollWidth / 2);
-        start = timestamp;
-        animationFrameRef.current = requestAnimationFrame(step);
-      };
-      animationFrameRef.current = requestAnimationFrame(step);
-    }, pauseDuration);
+    // Do not pause or restart animation
   }
 };
 
@@ -170,6 +154,8 @@ const formatXAxis = (tick: string) => {
               ref={marqueeRef}
               className="relative w-full h-14 overflow-x-auto scrollbar-hide hide-scrollbar"
               style={{ whiteSpace: "nowrap" }}
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
             >
               <div className="flex items-center h-full">
                 {priceData.concat(priceData).map((item, index) => (
