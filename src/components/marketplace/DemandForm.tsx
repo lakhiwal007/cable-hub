@@ -165,7 +165,12 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
       </CardHeader>
       <CardContent className="space-y-4">
         {!isAuthenticated ? (
-          <div className="text-center text-gray-500">You must be logged in to post a demand listing.</div>
+          <div className="text-center space-y-4">
+            <div className="text-gray-500">You must be logged in to post a demand listing.</div>
+            <Button onClick={() => window.location.href = '/login'} className="bg-purple-600 hover:bg-purple-700">
+              Login to Post Demand
+            </Button>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

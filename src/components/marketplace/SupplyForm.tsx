@@ -20,6 +20,7 @@ interface SupplyFormData {
   is_urgent: boolean;
   image_url?: string[];
   spec_doc_url?: string;
+  whatsapp_number?: string;
 }
 
 interface MaterialCategory {
@@ -40,7 +41,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
   const [formData, setFormData] = useState<SupplyFormData & {
     rm?: string;
     type?: string;
-    whatsapp?: string;
+    whatsapp_number?: string;
   }>({
     ...{
       title: '',
@@ -58,7 +59,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     },
     rm: '',
     type: '',
-    whatsapp: '',
+    whatsapp_number: '',
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
@@ -164,7 +165,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
         title: '', description: '', category: '', grade_specification: '', available_quantity: '', unit: 'kg', price_per_unit: '', minimum_order: '', location: '', delivery_terms: '', certification: '', is_urgent: false,
         rm: '',
         type: '',
-        whatsapp: '',
+        whatsapp_number: '',
       });
       setImageFiles([]);
       setSpecFile(null);
@@ -183,7 +184,12 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
       </CardHeader>
       <CardContent className="space-y-4">
         {!isAuthenticated ? (
-          <div className="text-center text-gray-500">You must be logged in to post a supply listing.</div>
+          <div className="text-center space-y-4">
+            <div className="text-gray-500">You must be logged in to post a supply listing.</div>
+            <Button onClick={() => window.location.href = '/login'} className="bg-blue-600 hover:bg-blue-700">
+              Login to Post Supply
+            </Button>
+          </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -300,7 +306,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
               </div>
               <div className="">
                 <label className="block text-sm font-medium mb-1">Enter your WhatsApp no</label>
-                <Input name="whatsapp" value={formData.whatsapp} onChange={handleInput} required type="tel" pattern="[0-9]{10,15}" />
+                <Input name="whatsapp_number" value={formData.whatsapp_number} onChange={handleInput} required type="tel" pattern="[0-9]{10,15}" />
               </div>
             </div>
             <div className="space-y-2">

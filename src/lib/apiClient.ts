@@ -98,6 +98,12 @@ class ApiClient {
     return data;
   }
 
+  async getUserById(userId: string) {
+    const { data, error } = await supabase.from('users').select('id, name, email, user_type, phone, company_name, company_address, created_at, last_login, is_active').eq('id', userId).single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
   async updateUser(userId: string, userData: any) {
     const { data, error } = await supabase.from('users').update(userData).eq('id', userId).select().single();
     if (error) throw new Error(error.message);
@@ -411,10 +417,7 @@ class ApiClient {
   }) {
     let query = supabase
       .from('supply_listings')
-      .select(`
-        *,
-        supplier:users!supplier_id(id, name, email, user_type)
-      `)
+      .select('*')
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
@@ -434,19 +437,51 @@ class ApiClient {
 
     const { data, error } = await query;
     if (error) throw new Error(error.message);
+
+    // Fetch user information for each listing
+    if (data && data.length > 0) {
+      const userIds = [...new Set(data.map(listing => listing.supplier_id))];
+      const { data: users, error: usersError } = await supabase
+        .from('users')
+        .select('id, name, email, user_type')
+        .in('id', userIds);
+
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+      } else {
+        const userMap = new Map(users?.map(user => [user.id, user]) || []);
+        data.forEach(listing => {
+          listing.supplier = userMap.get(listing.supplier_id);
+        });
+      }
+    }
+
     return data;
   }
 
   async getSupplyListingById(id: string) {
     const { data, error } = await supabase
       .from('supply_listings')
-      .select(`
-        *,
-        supplier:users!supplier_id(*)
-      `)
+      .select('*')
       .eq('id', id)
       .single();
     if (error) throw new Error(error.message);
+
+    // Fetch user information for the listing
+    if (data && data.supplier_id) {
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('id, name, email, user_type')
+        .eq('id', data.supplier_id)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user:', userError);
+      } else {
+        data.supplier = user;
+      }
+    }
+
     return data;
   }
 
@@ -573,10 +608,7 @@ class ApiClient {
   }) {
     let query = supabase
       .from('demand_listings')
-      .select(`
-        *,
-        buyer:users!buyer_id(id, name, email, user_type)
-      `)
+      .select('*')
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
@@ -596,19 +628,51 @@ class ApiClient {
 
     const { data, error } = await query;
     if (error) throw new Error(error.message);
+
+    // Fetch user information for each listing
+    if (data && data.length > 0) {
+      const userIds = [...new Set(data.map(listing => listing.buyer_id))];
+      const { data: users, error: usersError } = await supabase
+        .from('users')
+        .select('id, name, email, user_type')
+        .in('id', userIds);
+
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+      } else {
+        const userMap = new Map(users?.map(user => [user.id, user]) || []);
+        data.forEach(listing => {
+          listing.buyer = userMap.get(listing.buyer_id);
+        });
+      }
+    }
+
     return data;
   }
 
   async getDemandListingById(id: string) {
     const { data, error } = await supabase
       .from('demand_listings')
-      .select(`
-        *,
-        buyer:users!buyer_id(*)
-      `)
+      .select('*')
       .eq('id', id)
       .single();
     if (error) throw new Error(error.message);
+
+    // Fetch user information for the listing
+    if (data && data.buyer_id) {
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('id, name, email, user_type')
+        .eq('id', data.buyer_id)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user:', userError);
+      } else {
+        data.buyer = user;
+      }
+    }
+
     return data;
   }
 

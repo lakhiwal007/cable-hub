@@ -14,17 +14,17 @@ const Index = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userType, setUserType] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    
     const storedUserType = localStorage.getItem('userType');
-    
     if (storedUserType) {
       setUserType(storedUserType);
-      // Try to get user profile for email
       fetchUserProfile();
     }
+    // Check for logged-in user
+    apiClient.getProfile().then(setUser).catch(() => setUser(null));
   }, []);
 
   const fetchUserProfile = async () => {
@@ -52,11 +52,11 @@ const Index = () => {
     } else if (tabId === "pricing") {
       navigate("/pricing");
     } else if (tabId === "consulting") {
-      navigate("/paid-expert-consulting");
+      navigate("/consulting-listings");
     } else if (tabId === "used-dead-stock") {
       navigate("/used-dead-stock-listings");
     } else if (tabId === "machines") {
-      navigate("/machines-marketplace");
+      navigate("/machines-listings");
     } else {
       setActiveTab(tabId);
     }
@@ -224,14 +224,16 @@ const Index = () => {
                   </button>
                 );
               })}
-              {/* Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </button>
+              {/* Logout Button (Desktop) */}
+              {user && (
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </button>
+              )}
             </nav>
 
             {/* Mobile menu button */}
@@ -272,16 +274,18 @@ const Index = () => {
                 );
               })}
               {/* Mobile Logout Button */}
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setMobileMenuOpen(false);
-                }}
-                className="flex items-center w-full px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-              >
-                <LogOut className="h-5 w-5 mr-3" />
-                Logout
-              </button>
+              {user && (
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex items-center w-full px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                >
+                  <LogOut className="h-5 w-5 mr-3" />
+                  Logout
+                </button>
+              )}
             </div>
           </div>
         )}

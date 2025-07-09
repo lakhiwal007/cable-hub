@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import Header from '@/components/Header';
+
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import { ArrowLeft, MessageCircle, User, DollarSign, Clock, MapPin, Phone } from
 
 function ConsultantCard({ consultant }: { consultant: any }) {
   return (
-    <Card className="mb-6 hover:shadow-lg transition-shadow">
+    <Card className="mb-4 sm:mb-6 hover:shadow-lg transition-shadow">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
@@ -106,7 +107,7 @@ function ConsultingRequestCard({ request }: { request: any }) {
   };
 
   return (
-    <Card className="mb-6 hover:shadow-lg transition-shadow">
+    <Card className="mb-4 sm:mb-6 hover:shadow-lg transition-shadow">
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
@@ -194,70 +195,81 @@ const ConsultingListings: React.FC = () => {
   }, []);
 
   return (
-    <ProtectedRoute>
-      <div className="container mx-auto py-8">
-        <Button variant="ghost" className="mb-4" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-5 w-5 mr-2" /> Back
-        </Button>
+    <>
+      <Header 
+        title="Consulting Services" 
+        onBack={() => navigate("/")} 
+        logoSrc='cableCartLogo.png'
         
-        <h1 className="text-2xl font-bold mb-6">Consulting Services</h1>
+      />
+      <div className="container mx-auto py-4 sm:py-8 px-4 sm:px-6">
+      <Button 
+            onClick={() => navigate('/paid-expert-consulting')}
+            className="bg-blue-600 hover:bg-blue-700 mb-2"
+          >
+            Post Consulting Request
+          </Button>
+      
+      <Tabs value={tab} onValueChange={setTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 h-auto">
+          <TabsTrigger value="consultants" className="flex items-center gap-2 py-3">
+            <span className="text-[12px] sm:text-base">Available Consultants</span>
+          </TabsTrigger>
+          <TabsTrigger value="requests" className="flex items-center gap-2 py-3">
+            <span className="text-[12px] sm:text-base">Consulting Requests</span>
+          </TabsTrigger>
+        </TabsList>
         
-        <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="consultants">Available Consultants</TabsTrigger>
-            <TabsTrigger value="requests">Consulting Requests</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="consultants" className="mt-6">
-            {loading ? (
-              <div>Loading consultants...</div>
-            ) : consultants.length === 0 ? (
-              <div className="text-center py-12">
-                <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No consultants available</h3>
-                <p className="text-gray-600">Be the first to register as a consultant!</p>
-                <Button 
-                  className="mt-4"
-                  onClick={() => navigate('/paid-expert-consulting')}
-                >
-                  Register as Consultant
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {consultants.map(consultant => (
-                  <ConsultantCard key={consultant.id} consultant={consultant} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="requests" className="mt-6">
-            {loading ? (
-              <div>Loading requests...</div>
-            ) : requests.length === 0 ? (
-              <div className="text-center py-12">
-                <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No consulting requests</h3>
-                <p className="text-gray-600">Be the first to submit a consulting request!</p>
-                <Button 
-                  className="mt-4"
-                  onClick={() => navigate('/paid-expert-consulting')}
-                >
-                  Submit Request
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {requests.map(request => (
-                  <ConsultingRequestCard key={request.id} request={request} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
+        <TabsContent value="consultants" className="mt-6">
+          {loading ? (
+            <div>Loading consultants...</div>
+          ) : consultants.length === 0 ? (
+            <div className="text-center py-12">
+              <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No consultants available</h3>
+              <p className="text-gray-600">Be the first to register as a consultant!</p>
+              <Button 
+                className="mt-4"
+                onClick={() => navigate('/paid-expert-consulting')}
+              >
+                Register as Consultant
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {consultants.map(consultant => (
+                <ConsultantCard key={consultant.id} consultant={consultant} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="requests" className="mt-6">
+          {loading ? (
+            <div>Loading requests...</div>
+          ) : requests.length === 0 ? (
+            <div className="text-center py-12">
+              <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No consulting requests</h3>
+              <p className="text-gray-600">Be the first to submit a consulting request!</p>
+              <Button 
+                className="mt-4"
+                onClick={() => navigate('/paid-expert-consulting')}
+              >
+                Submit Request
+              </Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {requests.map(request => (
+                <ConsultingRequestCard key={request.id} request={request} />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
       </div>
-    </ProtectedRoute>
+    </>
   );
 };
 

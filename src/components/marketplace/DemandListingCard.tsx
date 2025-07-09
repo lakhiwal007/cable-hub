@@ -18,12 +18,17 @@ interface MaterialCategory {
 interface DemandListingCardProps {
   listing: DemandListing;
   materialCategories?: MaterialCategory[];
+  currentUserId?: string;
+  isAuthenticated?: boolean;
 }
 
-const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCardProps) => {
+const DemandListingCard = ({ listing, materialCategories = [], currentUserId, isAuthenticated }: DemandListingCardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  
+  // Determine if the current user is the buyer
+  const isOwnListing = currentUserId && listing.buyer_id === currentUserId;
   
   const handleViewDetails = () => {
     navigate(`/listing/demand/${listing.id}`);
@@ -193,14 +198,30 @@ const DemandListingCard = ({ listing, materialCategories = [] }: DemandListingCa
               <Eye className="h-4 w-4 mr-2" />
               View Details
             </Button>
-            <Button
-              onClick={handleContactConsumer}
-              disabled={loading}
-              className="flex-1 bg-purple-600 hover:bg-purple-700 transition-colors"
-            >
-              <MessageCircle className="h-4 w-4 mr-2" />
-              {loading ? 'Opening Chat...' : 'Contact'}
-            </Button>
+            {!isOwnListing ? (
+              isAuthenticated ? (
+                <Button
+                  onClick={handleContactConsumer}
+                  disabled={loading}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 transition-colors"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  {loading ? 'Opening Chat...' : 'Contact'}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => navigate('/login')}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 transition-colors"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Login to Contact
+                </Button>
+              )
+            ) : (
+              <Button variant="outline" className="flex-1" disabled>
+                Your Listing
+              </Button>
+            )}
           </div>
 
           {/* Posted Date */}

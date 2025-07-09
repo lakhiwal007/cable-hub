@@ -291,6 +291,7 @@ const Marketplace = () => {
                           onContactSupplier={handleContactSupplier}
                           currentUserId={userProfileRef.current?.id}
                           materialCategories={materialCategories}
+                          isAuthenticated={isAuthenticated}
                         />
                       ))}
                     </div>
@@ -311,6 +312,8 @@ const Marketplace = () => {
                           key={listing.id} 
                           listing={listing} 
                           materialCategories={materialCategories}
+                          currentUserId={userProfileRef.current?.id}
+                          isAuthenticated={isAuthenticated}
                         />
                       ))}
                     </div>

@@ -64,32 +64,20 @@ const App = () => (
         <BackButtonHandler />
         <Routes>
           <Route path="/" element={
-            <ProtectedRoute>
+            
               <Index />
-            </ProtectedRoute>
+            
           } />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/marketplace" element={
-            <ProtectedRoute>
-              <MarketplacePage />
-            </ProtectedRoute>
-          } />
+          <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/my-chats" element={
             <ProtectedRoute>
               <MyChats />
             </ProtectedRoute>
           } />
-          <Route path="/pricing" element={
-            <ProtectedRoute>
-              <Pricing />
-            </ProtectedRoute>
-          } />
-          <Route path="/listing/:listingType/:listingId" element={
-            <ProtectedRoute>
-              <ListingDetails />
-            </ProtectedRoute>
-          } />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/listing/:listingType/:listingId" element={<ListingDetails />} />
           <Route path="/admin" element={
             <ProtectedRoute adminOnly={true}>
               <AdminPanel />
@@ -97,11 +85,11 @@ const App = () => (
           } />
           <Route path="/chat/:roomId" element={<ChatRoomWrapper />} />
           <Route path="/sell-used-or-dead-stock" element={<ProtectedRoute><SellUsedOrDeadStock /></ProtectedRoute>} />
-          <Route path="/used-dead-stock-listings" element={<ProtectedRoute><UsedAndDeadStockListings /></ProtectedRoute>} />
+          <Route path="/used-dead-stock-listings" element={<UsedAndDeadStockListings />} />
           <Route path="/paid-expert-consulting" element={<ProtectedRoute><PaidExpertConsulting /></ProtectedRoute>} />
-          <Route path="/consulting-listings" element={<ProtectedRoute><ConsultingListings /></ProtectedRoute>} />
+          <Route path="/consulting-listings" element={<ConsultingListings />} />
           <Route path="/machines-marketplace" element={<ProtectedRoute><MachinesMarketplace /></ProtectedRoute>} />
-          <Route path="/machines-listings" element={<ProtectedRoute><MachinesListings /></ProtectedRoute>} />
+          <Route path="/machines-listings" element={<MachinesListings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
