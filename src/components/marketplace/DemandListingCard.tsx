@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from "@/lib/apiClient";
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 
 interface MaterialCategory {
   id: string;
@@ -78,25 +79,58 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
       }`}>
         {/* Product Image Section */}
         <div className="relative overflow-hidden rounded-t-lg bg-gray-100 h-32 lg:h-48">
-          {listing.image_url ? (
-            <img 
-              src={listing.image_url} 
-              alt={listing.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
-              onClick={handleViewDetails}
-            />
-          ) : materialCategory?.image_url ? (
-            <img 
-              src={materialCategory.image_url} 
-              alt={materialCategory.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
-              onClick={handleViewDetails}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-100 cursor-pointer" onClick={handleViewDetails}>
-              <Package className="h-16 w-16 text-gray-400" />
-            </div>
-          )}
+          {(() => {
+            // Handle multiple images (array) or single image (string)
+            const images = Array.isArray(listing.image_url) ? listing.image_url : (listing.image_url ? [listing.image_url] : []);
+            
+            if (images.length > 0) {
+              return (
+                <div className="relative w-full h-full">
+                  <Carousel className="w-full h-full" opts={{ loop: true }}>
+                    <CarouselContent>
+                      {images.map((imageUrl, index) => (
+                        <CarouselItem key={index}>
+                          <img 
+                            src={imageUrl} 
+                            alt={`${listing.title} - Image ${index + 1}`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+                            onClick={handleViewDetails}
+                          />
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    {images.length > 1 && (
+                      <>
+                        <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </>
+                    )}
+                  </Carousel>
+                  {/* Image counter */}
+                  {images.length > 1 && (
+                    <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                      {images.length} images
+                    </div>
+                  )}
+                </div>
+              );
+            } else if (materialCategory?.image_url) {
+              return (
+                <img 
+                  src={materialCategory.image_url} 
+                  alt={materialCategory.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+                  onClick={handleViewDetails}
+                />
+              );
+            } else {
+              return (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-50 to-pink-100 cursor-pointer" onClick={handleViewDetails}>
+                  <Package className="h-16 w-16 text-gray-400" />
+                </div>
+              );
+            }
+          })()}
           
           {/* Badges Overlay */}
           <div className="absolute top-3 left-3 flex items-center justify-between gap-2">
@@ -256,18 +290,7 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
                   <Mail className="h-4 w-4 text-gray-500" />
                   <span className="text-sm">{consumer.email}</span>
                 </div>
-                {consumer.phone && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm">{consumer.phone}</span>
-                  </div>
-                )}
-                {consumer.company_name && (
-                  <div className="flex items-center gap-2">
-                    <Building className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm">{consumer.company_name}</span>
-                  </div>
-                )}
+                
               </div>
               
               <div className="flex gap-3 pt-4">

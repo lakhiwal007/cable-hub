@@ -33,6 +33,7 @@ import {
     Minus,
     Image as ImageIcon
 } from 'lucide-react';
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { apiClient } from '@/lib/apiClient';
 
 interface SupplyListing {
@@ -49,7 +50,7 @@ interface SupplyListing {
     location: string;
     delivery_terms: string;
     certification?: string;
-    image_url?: string;
+    image_url?: string | string[];
     is_urgent?: boolean;
     expires_at?: string;
     created_at: string;
@@ -76,7 +77,7 @@ interface DemandListing {
     location: string;
     delivery_deadline: string;
     additional_requirements?: string;
-    image_url?: string;
+    image_url?: string | string[];
     is_urgent?: boolean;
     expires_at?: string;
     created_at: string;
@@ -381,24 +382,64 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                 <div>
                     {/* Images Section */}
                     <Card>
-                        <CardContent className="p-4 md:p-6">
-                            <div className="aspect-square max-w-xs mx-auto bg-gray-100 rounded-lg overflow-hidden">
-                                {materialImage ? (
-                                    <img 
-                                        src={materialImage} 
-                                        alt={listing.title}
-                                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
-                                        onClick={() => setSelectedImage(materialImage)}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 cursor-pointer hover:scale-105 transition-transform duration-300" onClick={() => setSelectedImage(null)}>
-                                        <ImageIcon className="h-16 w-16 text-gray-400 mb-2" />
-                                        <p className="text-sm text-gray-500 text-center px-4">
-                                            {listing.category}
-                                        </p>
-                                        <p className="text-xs text-gray-400 mt-1">No image available</p>
-                                    </div>
-                                )}
+                        <CardContent className="p-4">
+                            <div className="aspect-video max-w-xs mx-auto bg-gray-100 rounded-lg overflow-hidden">
+                                {(() => {
+                                    // Handle multiple images (array) or single image (string)
+                                    const images = Array.isArray(listing.image_url) ? listing.image_url : (listing.image_url ? [listing.image_url] : []);
+                                    
+                                    if (images.length > 0) {
+                                        return (
+                                            <div className="relative w-full h-full">
+                                                <Carousel className="w-full h-full" opts={{ loop: true }}>
+                                                    <CarouselContent>
+                                                        {images.map((imageUrl, index) => (
+                                                            <CarouselItem key={index}>
+                                                                <img 
+                                                                    src={imageUrl} 
+                                                                    alt={`${listing.title} - Image ${index + 1}`}
+                                                                    className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                                                                    onClick={() => setSelectedImage(imageUrl)}
+                                                                />
+                                                            </CarouselItem>
+                                                        ))}
+                                                    </CarouselContent>
+                                                    {images.length > 1 && (
+                                                        <>
+                                                            <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8" />
+                                                            <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8" />
+                                                        </>
+                                                    )}
+                                                </Carousel>
+                                                {/* Image counter */}
+                                                {images.length > 1 && (
+                                                    <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                                                        {images.length} images
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    } else if (materialImage && typeof materialImage === 'string') {
+                                        return (
+                                            <img 
+                                                src={materialImage} 
+                                                alt={listing.title}
+                                                className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                                                onClick={() => setSelectedImage(materialImage)}
+                                            />
+                                        );
+                                    } else {
+                                        return (
+                                            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 cursor-pointer hover:scale-105 transition-transform duration-300" onClick={() => setSelectedImage(null)}>
+                                                <ImageIcon className="h-16 w-16 text-gray-400 mb-2" />
+                                                <p className="text-sm text-gray-500 text-center px-4">
+                                                    {listing.category}
+                                                </p>
+                                                <p className="text-xs text-gray-400 mt-1">No image available</p>
+                                            </div>
+                                        );
+                                    }
+                                })()}
                             </div>
                         </CardContent>
                     </Card>
@@ -465,7 +506,7 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                                 <div className="flex items-center gap-2">
                                                     <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                                     <span className="font-medium text-sm md:text-base">Delivery Deadline:</span>
-                                                    <span className="text-sm md:text-base">{formatDate(demandListing.delivery_deadline)}</span>
+                                                    <span className="text-sm md:text-base">{demandListing.delivery_deadline}</span>
                                                 </div>
                                             </>
                                         )}
@@ -579,11 +620,11 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                         <div>
                                             <h4 className="font-semibold mb-2 text-sm md:text-base">Delivery Deadline</h4>
                                             <p className="text-base md:text-lg font-semibold text-red-600">
-                                                {formatDate(demandListing.delivery_deadline)}
+                                                {demandListing.delivery_deadline}
                                             </p>
-                                            <p className="text-sm text-gray-600">
+                                            {/* <p className="text-sm text-gray-600">
                                                 {getDaysRemaining(demandListing.delivery_deadline)} days remaining
-                                            </p>
+                                            </p> */}
                                         </div>
                                         {demandListing.additional_requirements && (
                                             <div>

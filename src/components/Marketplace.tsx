@@ -239,7 +239,7 @@ const Marketplace = () => {
         </div>
       </div>
 
-      {/* {loading ? (
+      {loading ? (
         <Loader className="py-12" />
       ) : error ? (
         <div className="text-red-500 text-center py-8">
@@ -250,8 +250,6 @@ const Marketplace = () => {
         </div>
       ) : (
         
-      )} */}
-
 <UITabs value={activeTab} onValueChange={setActiveTab}>
           <UITabsList className="grid w-full grid-cols-3">
             <UITabsTrigger value="browse">Browse Listings</UITabsTrigger>
@@ -343,6 +341,8 @@ const Marketplace = () => {
             />
           </UITabsContent>
         </UITabs>
+      )}
+
 
       {/* Supplier Details Dialog */}
       <SupplierDetailsDialog
