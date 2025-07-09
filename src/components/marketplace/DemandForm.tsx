@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +37,7 @@ interface DemandFormProps {
 }
 
 const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated, onCategoryAdded }: DemandFormProps) => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<DemandFormData & {
     rm?: string;
     type?: string;
@@ -172,7 +174,7 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
         {!isAuthenticated ? (
           <div className="text-center space-y-4">
             <div className="text-gray-500">You must be logged in to post a demand listing.</div>
-            <Button onClick={() => window.location.href = '/login'} className="bg-purple-600 hover:bg-purple-700">
+            <Button onClick={() => navigate('/login')} className="bg-purple-600 hover:bg-purple-700">
               Login to Post Demand
             </Button>
           </div>

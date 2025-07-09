@@ -148,29 +148,7 @@ const Login = () => {
           </CardHeader>
           
           <CardContent className="space-y-6">
-            {/* Quick Login Buttons */}
-            {/* <div className="flex gap-2 mb-4">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleQuickUserLogin}
-                className="flex-1 h-9 text-xs border-blue-200 hover:bg-blue-50 hover:border-blue-300"
-              >
-                <User className="h-3 w-3 mr-1" />
-                User Login
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleQuickAdminLogin}
-                className="flex-1 h-9 text-xs border-red-200 hover:bg-red-50 hover:border-red-300"
-              >
-                <Shield className="h-3 w-3 mr-1" />
-                Admin Login
-              </Button>
-            </div> */}
+            
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
