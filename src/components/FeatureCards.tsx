@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, TrendingUp, Users, Zap, Shield, BarChart3, MessageCircle, PackageSearch, Settings, Users2 } from "lucide-react";
+import { Calculator, TrendingUp, Users, Zap, Shield, BarChart3, MessageCircle, PackageSearch, Settings, Users2, HeartHandshake, LucideHeartHandshake, CpuIcon } from "lucide-react";
 
 interface FeatureCardsProps {
   onNavigate: (tab: string) => void;
@@ -19,7 +19,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       borderColor: "border-orange-200",
     },
     {
-      icon: Users,
+      icon: LucideHeartHandshake,
       title: "Verified Marketplace",
       description: "Connect with trusted suppliers and manufacturers nationwide",
       action: "Explore Marketplace",
@@ -79,7 +79,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       borderColor: "border-cyan-200",
     },
     {
-      icon: Users2,
+      icon: CpuIcon,
       title: "Find Specs",
       description: "Find the specifications of the machines or information you are looking for",
       action: "Find Specs",
