@@ -54,16 +54,24 @@ const MachinesListings: React.FC = () => {
   return (
     <>
       <Header title="Machines Listings" onBack={() => navigate('/machines-marketplace')} logoSrc='cableCartLogo.png' />
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto py-4 sm:py-8 px-4 sm:px-6">
+        <div className="flex justify-end mb-4 sm:mb-6">
+          <Button 
+            onClick={() => navigate('/machines-marketplace')}
+            className="bg-green-600 hover:bg-green-700 text-sm sm:text-base px-3 sm:px-4 py-2"
+          >
+            Post Machine Listing
+          </Button>
+        </div>
         <Tabs value={tab} onValueChange={setTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="sell" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Machines for Sale
+          <TabsList className="grid w-full grid-cols-2 mb-4 sm:mb-6 h-auto">
+            <TabsTrigger value="sell" className="flex items-center gap-1 sm:gap-2 py-3">
+              <Package className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-[12px] sm:text-base">Machines for Sale</span>
             </TabsTrigger>
-            <TabsTrigger value="buy" className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              Buy Requests
+            <TabsTrigger value="buy" className="flex items-center gap-1 sm:gap-2 py-3">
+              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-[12px] sm:text-base">Buy Requests</span>
             </TabsTrigger>
           </TabsList>
 
@@ -73,7 +81,7 @@ const MachinesListings: React.FC = () => {
             ) : sellMachines.length === 0 ? (
               <div className="text-center text-gray-500 py-12">No machines for sale yet.</div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {sellMachines.map(machine => {
                   const images = machine.production_image_urls || [];
                   const video = machine.video_url || "";
@@ -146,7 +154,7 @@ const MachinesListings: React.FC = () => {
             ) : buyMachines.length === 0 ? (
               <div className="text-center text-gray-500 py-12">No buy requests yet.</div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {buyMachines.map(machine => {
                   const images = machine.production_image_urls || [];
                   const video = machine.video_url || "";

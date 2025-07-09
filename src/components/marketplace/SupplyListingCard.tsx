@@ -16,9 +16,10 @@ interface SupplyListingCardProps {
   onContactSupplier: (listing: SupplyListing) => void;
   currentUserId?: string;
   materialCategories?: MaterialCategory[];
+  isAuthenticated?: boolean;
 }
 
-const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, materialCategories = [] }: SupplyListingCardProps) => {
+const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, materialCategories = [], isAuthenticated }: SupplyListingCardProps) => {
   const navigate = useNavigate();
   // Determine if the current user is the supplier
   const isOwnListing = currentUserId && listing.supplier_id === currentUserId;
@@ -165,13 +166,23 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
             View Details
           </Button>
           {!isOwnListing ? (
-            <Button
-              onClick={() => onContactSupplier(listing)}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 transition-colors"
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Contact
-            </Button>
+            isAuthenticated ? (
+              <Button
+                onClick={() => onContactSupplier(listing)}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 transition-colors"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Contact
+              </Button>
+            ) : (
+              <Button
+                onClick={() => navigate('/login')}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 transition-colors"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Login to Contact
+              </Button>
+            )
           ) : (
             <Button variant="outline" className="flex-1" disabled>
               Your Listing

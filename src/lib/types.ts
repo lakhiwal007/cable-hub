@@ -65,7 +65,12 @@ export type PricingData = {
     expires_at?: string;
     created_at: string;
     updated_at: string;
-    supplier?: SupplierContact;
+    supplier?: {
+      id: string;
+      name: string;
+      email: string;
+      user_type?: string;
+    };
     whatsapp_number?: string;
     spec_doc_url?: string;
   };
@@ -96,8 +101,7 @@ export type PricingData = {
       id: string;
       name: string;
       email: string;
-      phone: string;
-      company_name: string;
+      user_type?: string;
     };
     whatsapp_number?: string;
     spec_doc_url?: string;

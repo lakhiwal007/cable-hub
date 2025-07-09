@@ -75,13 +75,23 @@ const ContactDialog = ({
                 required
               />
             </div>
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+            <div className="flex justify-between items-center">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => window.location.href = '/login'}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Login to Chat
               </Button>
-              <Button type="submit" disabled={submitting}>
-                {submitting ? 'Sending...' : 'Send Message'}
-              </Button>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? 'Sending...' : 'Send Message'}
+                </Button>
+              </div>
             </div>
           </form>
         </div>

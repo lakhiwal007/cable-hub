@@ -53,16 +53,12 @@ interface SupplyListing {
     is_urgent?: boolean;
     expires_at?: string;
     created_at: string;
+    whatsapp_number?: string;
     supplier: {
         id: string;
         name: string;
         email: string;
-        phone?: string;
-        company_name?: string;
-        company_address?: string;
-        gst_number?: string;
-        website?: string;
-        description?: string;
+        user_type?: string;
     };
 }
 
@@ -84,13 +80,12 @@ interface DemandListing {
     is_urgent?: boolean;
     expires_at?: string;
     created_at: string;
+    whatsapp_number?: string;
     buyer: {
         id: string;
         name: string;
         email: string;
-        phone?: string;
-        company_name?: string;
-        company_address?: string;
+        user_type?: string;
     };
 }
 
@@ -624,8 +619,10 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                 <h3 className="font-semibold text-base md:text-lg">
                                     {isSupply ? supplyListing.supplier.name : demandListing.buyer.name}
                                 </h3>
-                                {isSupply && supplyListing.supplier.company_name && (
-                                    <p className="text-gray-600 text-sm">{supplyListing.supplier.company_name}</p>
+                                {(isSupply ? supplyListing.supplier.user_type : demandListing.buyer.user_type) && (
+                                    <Badge variant="outline" className="mt-1 text-xs">
+                                        {isSupply ? supplyListing.supplier.user_type : demandListing.buyer.user_type}
+                                    </Badge>
                                 )}
                             </div>
 
@@ -639,48 +636,45 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                     </span>
                                 </div>
 
-                                {(isSupply ? supplyListing.supplier.phone : demandListing.buyer.phone) && (
+
+
+                                {(isSupply ? supplyListing.whatsapp_number : demandListing.whatsapp_number) && (
                                     <div className="flex items-center gap-2">
-                                        <Phone className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                                        <span className="text-xs md:text-sm">
-                                            {isSupply ? supplyListing.supplier.phone : demandListing.buyer.phone}
+                                        <Phone className="h-4 w-4 text-green-500 flex-shrink-0" />
+                                        <span className="text-xs md:text-sm text-green-600 font-medium">
+                                            WhatsApp: {isSupply ? supplyListing.whatsapp_number : demandListing.whatsapp_number}
                                         </span>
                                     </div>
                                 )}
 
-                                {isSupply && supplyListing.supplier.website && (
-                                    <div className="flex items-center gap-2">
-                                        <Globe className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                                        <a
-                                            href={supplyListing.supplier.website}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-xs md:text-sm text-blue-600 hover:underline break-all"
-                                        >
-                                            {supplyListing.supplier.website}
-                                        </a>
-                                    </div>
-                                )}
 
-                                {(isSupply ? supplyListing.supplier.company_address : demandListing.buyer.company_address) && (
-                                    <div className="flex items-start gap-2">
-                                        <MapPin className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                                        <span className="text-xs md:text-sm">
-                                            {isSupply ? supplyListing.supplier.company_address : demandListing.buyer.company_address}
-                                        </span>
-                                    </div>
-                                )}
+
+
                             </div>
 
                             <Separator />
 
-                            <Button
-                                onClick={() => setContactDialogOpen(true)}
-                                className="w-full bg-purple-600 hover:bg-purple-700 text-sm md:text-base"
-                            >
-                                <MessageCircle className="h-4 w-4 mr-2" />
-                                {isSupply ? 'Contact Supplier' : 'Contact Buyer'}
-                            </Button>
+                            {apiClient.isAuthenticated() ? (
+                                <Button
+                                    onClick={() => setContactDialogOpen(true)}
+                                    className="w-full bg-purple-600 hover:bg-purple-700 text-sm md:text-base"
+                                >
+                                    <MessageCircle className="h-4 w-4 mr-2" />
+                                    {isSupply ? 'Contact Supplier' : 'Contact Buyer'}
+                                </Button>
+                            ) : (
+                                <div className="space-y-3">
+                                    <div className="text-center text-sm text-gray-600">
+                                        Login to contact {isSupply ? 'supplier' : 'buyer'}
+                                    </div>
+                                    <Button
+                                        onClick={() => navigate('/login')}
+                                        className="w-full bg-blue-600 hover:bg-blue-700 text-sm md:text-base"
+                                    >
+                                        Login to Contact
+                                    </Button>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
@@ -748,6 +742,36 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                     : `${demandListing.required_quantity.toLocaleString()} ${demandListing.unit} required`
                                 }
                             </p>
+                        </div>
+
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                            <h4 className="font-semibold mb-2 text-blue-800">
+                                {isSupply ? 'Supplier Details' : 'Buyer Details'}
+                            </h4>
+                            <div className="space-y-2 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <Building className="h-4 w-4 text-blue-600" />
+                                    <span className="font-medium">
+                                        {isSupply ? supplyListing.supplier.name : demandListing.buyer.name}
+                                    </span>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <Mail className="h-4 w-4 text-blue-600" />
+                                    <span className="text-gray-600">
+                                        {isSupply ? supplyListing.supplier.email : demandListing.buyer.email}
+                                    </span>
+                                </div>
+
+                                {(isSupply ? supplyListing.whatsapp_number : demandListing.whatsapp_number) && (
+                                    <div className="flex items-center gap-2">
+                                        <Phone className="h-4 w-4 text-green-600" />
+                                        <span className="text-green-600 font-medium">
+                                            WhatsApp: {isSupply ? supplyListing.whatsapp_number : demandListing.whatsapp_number}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <div className="flex gap-3">

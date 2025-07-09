@@ -12,6 +12,7 @@ const MarketplacePage = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userType, setUserType] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const storedUserType = localStorage.getItem('userType');
@@ -19,6 +20,8 @@ const MarketplacePage = () => {
       setUserType(storedUserType);
       fetchUserProfile();
     }
+    // Check for logged-in user
+    apiClient.getProfile().then(setUser).catch(() => setUser(null));
   }, []);
 
   const fetchUserProfile = async () => {
@@ -69,13 +72,15 @@ const MarketplacePage = () => {
                 Admin Panel
               </button>
             )}
-            <button
-              onClick={handleLogout}
-              className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </button>
+            {user && (
+              <button
+                onClick={handleLogout}
+                className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </button>
+            )}
           </>
         }
       />
