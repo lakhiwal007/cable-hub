@@ -26,7 +26,7 @@ const Footer = () => (
       </nav>
       {/* Company Info */}
       <div className="flex flex-col items-center md:items-start gap-2 text-sm text-gray-500 min-w-[180px]">
-        <span className="font-semibold text-gray-700">Cable Hub Connect Pvt. Ltd.</span>
+        <span className="font-semibold text-gray-700">Cable Kart Connect Pvt. Ltd.</span>
         <span>123 Industrial Park, Sector 45</span>
         <span>New Delhi, India 110001</span>
         <span>Email: <a href="mailto:info@cablehub.com" className="text-blue-600 hover:underline">info@cablehub.com</a></span>

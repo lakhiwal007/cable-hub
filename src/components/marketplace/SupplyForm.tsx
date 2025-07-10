@@ -68,6 +68,8 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [addCategoryMode, setAddCategoryMode] = useState(false);
+  const [newRM, setNewRM] = useState('');
+  const [addRMMode, setAddRMMode] = useState(false);
   const [specFile, setSpecFile] = useState<File | null>(null);
 
   // Fallback categories for testing if none are loaded
@@ -80,6 +82,18 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
   ];
 
   const categoriesToUse = categories.length > 0 ? categories : fallbackCategories;
+
+  // RM options with fallback
+  const rmOptions = [
+    { value: "Cu", label: "Copper (Cu)" },
+    { value: "Al", label: "Aluminum (Al)" },
+    { value: "PVC", label: "PVC" },
+    { value: "XLPE", label: "XLPE" },
+    { value: "Rubber", label: "Rubber" },
+    { value: "Steel", label: "Steel" },
+    { value: "Brass", label: "Brass" },
+    { value: "Fiber", label: "Fiber" },
+  ];
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -128,11 +142,37 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     }
   };
 
+  const handleRMChange = (value: string) => {
+    if (value === "__add_new__") {
+      setAddRMMode(true);
+      setFormData((prev) => ({ ...prev, rm: "" }));
+    } else {
+      setFormData((prev) => ({ ...prev, rm: value }));
+      setAddRMMode(false);
+    }
+  };
+
+  const handleAddRM = async () => {
+    if (!newRM.trim()) return;
+    try {
+      setLoading(true);
+      // Add the new RM to the options
+      rmOptions.push({ value: newRM, label: newRM });
+      setFormData((prev) => ({ ...prev, rm: newRM }));
+      setAddRMMode(false);
+      setNewRM('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to add RM');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (!formData.title || !formData.category || !formData.available_quantity || !formData.price_per_unit || !formData.minimum_order || !formData.location) {
+    if (!formData.title || !formData.category || !formData.rm || !formData.available_quantity || !formData.price_per_unit || !formData.minimum_order || !formData.location) {
       setError('Please fill all required fields.');
       return;
     }
@@ -181,11 +221,11 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Post Your Supply</CardTitle>
-        <CardDescription>List your raw materials for manufacturers to discover</CardDescription>
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg sm:text-xl">Post Your Supply</CardTitle>
+        <CardDescription className="text-sm">List your raw materials for manufacturers to discover</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 px-3 sm:px-6">
         {!isAuthenticated ? (
           <div className="text-center space-y-4">
             <div className="text-gray-500">You must be logged in to post a supply listing.</div>
@@ -197,16 +237,29 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Choose RM *</label>
-                <select name="rm" value={formData.rm} onChange={handleInput} required className="w-full border rounded h-10 px-2">
-                  <option value="">Select</option>
-                  <option value="Cu">Cu</option>
-                  <option value="Al">Al</option>
-                  <option value="PVC">PVC</option>
-                  <option value="XLPE">XLPE</option>
-                </select>
+                <SearchableSelect
+                  options={rmOptions}
+                  value={formData.rm}
+                  onValueChange={handleRMChange}
+                  placeholder="Select RM"
+                  searchPlaceholder="Search RM..."
+                  emptyText="No RM found."
+                  showAddNew={true}
+                  onAddNew={() => setAddRMMode(true)}
+                  disabled={loading}
+                />
+                {addRMMode && (
+                  <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                    <Input value={newRM} onChange={e => setNewRM(e.target.value)} placeholder="New RM name" className="flex-1" />
+                    <div className="flex gap-2">
+                      <Button type="button" onClick={handleAddRM} disabled={loading} className="flex-1 sm:flex-none">Add</Button>
+                      <Button type="button" variant="outline" onClick={() => setAddRMMode(false)} className="flex-1 sm:flex-none">Cancel</Button>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Title *</label>
@@ -230,10 +283,12 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                   />
                 )}
                 {addCategoryMode && (
-                  <div className="flex gap-2 mt-2">
-                    <Input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="New category name" />
-                    <Button type="button" onClick={handleAddCategory} disabled={loading}>Add</Button>
-                    <Button type="button" variant="outline" onClick={() => setAddCategoryMode(false)}>Cancel</Button>
+                  <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                    <Input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="New category name" className="flex-1" />
+                    <div className="flex gap-2">
+                      <Button type="button" onClick={handleAddCategory} disabled={loading} className="flex-1 sm:flex-none">Add</Button>
+                      <Button type="button" variant="outline" onClick={() => setAddCategoryMode(false)} className="flex-1 sm:flex-none">Cancel</Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -305,11 +360,11 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2 mt-6">
+              <div className="flex items-center gap-2 mt-6 col-span-1 sm:col-span-2 lg:col-span-3">
                 <input type="checkbox" name="is_urgent" checked={formData.is_urgent} onChange={handleInput} />
                 <label className="text-sm">Mark as urgent</label>
               </div>
-              <div className="">
+              <div className="col-span-1 sm:col-span-2 lg:col-span-3">
                 <label className="block text-sm font-medium mb-1">Enter your WhatsApp no</label>
                 <Input name="whatsapp_number" value={formData.whatsapp_number} onChange={handleInput} required type="tel" pattern="[0-9]{10,15}" />
               </div>

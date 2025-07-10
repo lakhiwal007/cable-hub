@@ -20,19 +20,19 @@ const SearchAndFilter = ({
 }: SearchAndFilterProps) => {
   return (
     <Card>
-      <CardContent className="pt-6">
-        <div className="flex flex-col md:flex-row gap-4">
+      <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search materials, suppliers, or locations..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10"
+              className="pl-10 h-10 sm:h-11 text-sm sm:text-base"
             />
           </div>
           <Select value={filterCategory} onValueChange={onFilterChange}>
-            <SelectTrigger className="w-full md:w-48">
+            <SelectTrigger className="w-full sm:w-48 h-10 sm:h-11 text-sm sm:text-base">
               <Filter className="h-4 w-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
