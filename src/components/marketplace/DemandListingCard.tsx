@@ -76,9 +76,9 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
     <>
       <Card className={`group transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
         listing.is_urgent ? 'border-orange-200 bg-gradient-to-br from-orange-50 to-white' : 'border-gray-200'
-      }`}>
+      } h-full`}>
         {/* Product Image Section */}
-        <div className="relative overflow-hidden rounded-t-lg bg-gray-100 h-32 lg:h-48">
+        <div className="relative overflow-hidden rounded-t-lg bg-gray-100 h-40 sm:h-32 lg:h-48">
           {(() => {
             // Handle multiple images (array) or single image (string)
             const images = Array.isArray(listing.image_url) ? listing.image_url : (listing.image_url ? [listing.image_url] : []);
@@ -133,9 +133,9 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
           })()}
           
           {/* Badges Overlay */}
-          <div className="absolute top-3 left-3 flex items-center justify-between gap-2">
+          <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center justify-between gap-1 sm:gap-2">
             {listing.is_urgent && (
-              <Badge variant="destructive" className="animate-pulse shadow-lg">
+              <Badge variant="destructive" className="animate-pulse shadow-lg text-xs px-2 py-1">
                 <AlertCircle className="h-3 w-3 mr-1" />
                 Urgent
               </Badge>
@@ -144,15 +144,15 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
           </div>
 
           {/* Quick Actions Overlay */}
-          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Button size="sm" variant="secondary" className="rounded-full shadow-lg" onClick={handleViewDetails}>
-              <Eye className="h-4 w-4" />
+          <div className="absolute top-2 sm:top-3 right-2 sm:right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button size="sm" variant="secondary" className="rounded-full shadow-lg h-8 w-8 sm:h-9 sm:w-9" onClick={handleViewDetails}>
+              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>
 
         {/* Product Info Section */}
-        <CardContent className="p-4">
+        <CardContent className="p-3 sm:p-4">
           {/* Category & Buyer */}
           <div className="hidden md:flex items-center justify-between mb-2">
             <Badge variant="outline" className="text-xs">
@@ -166,7 +166,7 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
 
           {/* Product Title */}
           <CardTitle 
-            className="text-md lg:text-lg font-semibold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors cursor-pointer"
+            className="text-sm sm:text-md lg:text-lg font-semibold mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors cursor-pointer"
             onClick={handleViewDetails}
           >
             {listing.title}
@@ -186,36 +186,36 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
 
 
           {/* Budget Section */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-2">
             <div>
-              <p className="text-lg font-bold text-purple-600">
+              <p className="text-base sm:text-lg font-bold text-purple-600">
                 ₹{listing.budget_min.toLocaleString()} - ₹{listing.budget_max.toLocaleString()}
               </p>
-              <p className="text-sm text-gray-500">Budget Range</p>
+              <p className="text-xs sm:text-sm text-gray-500">Budget Range</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-600">Required</p>
-              <p className="font-semibold">{listing.required_quantity} {listing.unit}</p>
+              <p className="text-xs sm:text-sm text-gray-600">Required</p>
+              <p className="text-sm sm:text-base font-semibold">{listing.required_quantity} {listing.unit}</p>
             </div>
           </div>
 
           {/* Location & Deadline */}
-          <div className="hidden md:flex items-center justify-between mb-4 text-sm text-gray-600">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 text-xs sm:text-sm text-gray-600 gap-1 sm:gap-0">
             <div className="flex items-center gap-1">
-              <MapPin className="h-4 w-4" />
-              <span>{listing.location}</span>
+              <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="truncate">{listing.location}</span>
             </div>
             {listing.delivery_deadline && (
               <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                <span>{listing.delivery_deadline}</span>
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="truncate">{listing.delivery_deadline}</span>
               </div>
             )}
           </div>
 
           {/* Additional Requirements */}
           {listing.additional_requirements && (
-            <div className="mb-4 p-2 bg-gray-50 rounded-lg">
+            <div className="mb-3 sm:mb-4 p-2 bg-gray-50 rounded-lg">
               <p className="text-xs text-gray-600 line-clamp-2">
                 <strong>Requirements:</strong> {listing.additional_requirements}
               </p>
@@ -223,11 +223,11 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
           )}
 
           {/* Action Buttons */}
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={handleViewDetails}
-              className="flex-1"
+              className="w-full sm:flex-1 h-10 sm:h-9 text-sm"
             >
               <Eye className="h-4 w-4 mr-2" />
               View Details
@@ -237,7 +237,7 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
                 <Button
                   onClick={handleContactConsumer}
                   disabled={loading}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 transition-colors"
+                  className="w-full sm:flex-1 bg-purple-600 hover:bg-purple-700 transition-colors h-10 sm:h-9 text-sm"
                 >
                   <MessageCircle className="h-4 w-4 mr-2" />
                   {loading ? 'Opening Chat...' : 'Contact'}
@@ -245,21 +245,21 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
               ) : (
                 <Button
                   onClick={() => navigate('/login')}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 transition-colors"
+                  className="w-full sm:flex-1 bg-purple-600 hover:bg-purple-700 transition-colors h-10 sm:h-9 text-sm"
                 >
                   <MessageCircle className="h-4 w-4 mr-2" />
                   Login to Contact
                 </Button>
               )
             ) : (
-              <Button variant="outline" className="flex-1" disabled>
+              <Button variant="outline" className="w-full sm:flex-1 h-10 sm:h-9 text-sm" disabled>
                 Your Listing
               </Button>
             )}
           </div>
 
           {/* Posted Date */}
-          <div className="mt-3 text-xs text-gray-500 text-center">
+          <div className="mt-2 sm:mt-3 text-xs text-gray-500 text-center">
             Posted {new Date(listing.created_at).toLocaleDateString()}
           </div>
         </CardContent>

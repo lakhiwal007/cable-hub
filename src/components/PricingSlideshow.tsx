@@ -50,12 +50,23 @@ const PricingSlideshow = () => {
   
     let start: number | null = null;
     const speed = 40; // px per second
+    const itemWidth = marquee.scrollWidth / 2; // Width of one complete set of items
   
     const step = (timestamp: number) => {
       if (isPaused) return;
       if (start === null) start = timestamp;
       const elapsed = timestamp - start;
-      marquee.scrollLeft = (marquee.scrollLeft + speed * (elapsed / 1000)) % (marquee.scrollWidth / 2);
+      
+      // Calculate new scroll position
+      const newScrollLeft = marquee.scrollLeft + speed * (elapsed / 1000);
+      
+      // If we've scrolled past the first set of items, reset to the beginning
+      if (newScrollLeft >= itemWidth) {
+        marquee.scrollLeft = newScrollLeft - itemWidth;
+      } else {
+        marquee.scrollLeft = newScrollLeft;
+      }
+      
       start = timestamp;
       animationFrameRef.current = requestAnimationFrame(step);
     };
@@ -69,16 +80,6 @@ const PricingSlideshow = () => {
     };
   }, [priceData, isPaused]);
   
-
-  // Button scroll handlers
-  // Remove pauseDuration and animation restart logic
-const scrollBy = (amount: number) => {
-  const marquee = marqueeRef.current;
-  if (marquee) {
-    marquee.scrollBy({ left: amount, behavior: "smooth" });
-    // Do not pause or restart animation
-  }
-};
 
 const handleMaterialClick = async (item: PricingData) => {
   setShowHistory(true);
@@ -145,36 +146,43 @@ const formatXAxis = (tick: string) => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white py-4 sticky top-0 z-50 shadow-lg">
+    <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white sticky top-0 z-50 shadow-lg">
       <div className="w-full">
         <div className="flex items-center justify-between flex-wrap">
           
           <div className="flex-1 overflow-hidden relative">
             <div
               ref={marqueeRef}
-              className="relative w-full h-14 overflow-x-auto scrollbar-hide hide-scrollbar"
+              className="relative w-full overflow-x-auto scrollbar-hide hide-scrollbar"
               style={{ whiteSpace: "nowrap" }}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
             >
               <div className="flex items-center h-full">
-                {priceData.concat(priceData).map((item, index) => (
-                  <div key={index} className="flex items-center space-x-4 p-8 cursor-pointer hover:bg-slate-700/20 rounded-lg transition-colors" onClick={() => handleMaterialClick(item)}>
-                    <div className="text-center">
-                      <p className="font-semibold text-sm mb-1">{item.material}</p>
-                      <div className="flex items-center space-x-3">
-                        <span className="text-lg font-bold">{item.price}</span>
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                          item.trend === 'up' 
-                            ? 'bg-green-500/20 text-green-200 border border-green-400/30' 
-                            : 'bg-red-500/20 text-red-200 border border-red-400/30'
-                        }`}>
-                          {item.trend === 'up'? '+' + item.change: '-' + item.change}
-                        </span>
+                {/* Create multiple copies for seamless infinite scroll */}
+                {Array.from({ length: 4 }, (_, copyIndex) => 
+                  priceData.map((item, index) => (
+                    <div 
+                      key={`${copyIndex}-${index}`} 
+                      className="flex items-center p-4 cursor-pointer hover:bg-white/10 rounded-lg transition-colors" 
+                      onClick={() => handleMaterialClick(item)}
+                    >
+                      <div className="text-center">
+                        <p className="font-semibold text-sm mb-1">{item.material}</p>
+                        <div className="flex items-center space-x-3">
+                          <span className="text-lg font-bold">{item.price}</span>
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                            item.trend === 'up' 
+                              ? 'bg-green-500/20 text-green-200 border border-green-400/30' 
+                              : 'bg-red-500/20 text-red-200 border border-red-400/30'
+                          }`}>
+                            {item.trend === 'up'? '+' + item.change: '-' + item.change}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>

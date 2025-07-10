@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import Header from '@/components/Header';
 import {
     ArrowLeft,
     MapPin,
@@ -313,42 +314,13 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
     const materialImage = getMaterialImage();
 
     return (
-        <div className="container mx-auto px-4 py-4 md:py-8">
-            {/* Header */}
-            <div className="mb-4 md:mb-6">
-                <Button
-                    variant="ghost"
-                    onClick={() => navigate('/marketplace')}
-                    className="mb-4"
-                >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Marketplace
-                </Button>
-
-                <div className="flex items-start justify-between flex-wrap gap-4">
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 md:gap-3 mb-2 flex-wrap">
-                            <Badge variant={isSupply ? "default" : "secondary"} className="text-xs">
-                                {isSupply ? 'Supply' : 'Demand'}
-                            </Badge>
-                            {listing.is_urgent && (
-                                <Badge variant="destructive" className="animate-pulse text-xs">
-                                    <AlertCircle className="h-3 w-3 mr-1" />
-                                    Urgent
-                                </Badge>
-                            )}
-                            {listing.expires_at && getDaysRemaining(listing.expires_at) <= 7 && (
-                                <Badge variant="outline" className="text-orange-600 border-orange-200 text-xs">
-                                    <Clock className="h-3 w-3 mr-1" />
-                                    Expires Soon
-                                </Badge>
-                            )}
-                        </div>
-                        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2 break-words">{listing.title}</h1>
-                        <p className="text-gray-600 text-sm md:text-lg">{listing.description}</p>
-                    </div>
-
-                    <div className="flex gap-2 flex-shrink-0">
+        <>
+            <Header 
+                title={`${isSupply ? 'Supply' : 'Demand'} Listing`}
+                onBack={() => navigate('/marketplace')}
+                logoSrc='/cableCartLogo.png'
+                rightContent={
+                    <div className="flex gap-2">
                         <Button variant="outline" size="sm" onClick={shareListing} className="hidden sm:flex">
                             <Share2 className="h-4 w-4 mr-2" />
                             Share
@@ -361,6 +333,35 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                             <Download className="h-4 w-4 mr-2" />
                             Export
                         </Button>
+                    </div>
+                }
+            />
+            <div className="container mx-auto px-4 py-4 md:py-8">
+                {/* Listing Header */}
+                <div className="mb-4 md:mb-6">
+                    <div className="flex items-start justify-between flex-wrap gap-4">
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 md:gap-3 mb-2 flex-wrap">
+                                <Badge variant={isSupply ? "default" : "secondary"} className="text-xs">
+                                    {isSupply ? 'Supply' : 'Demand'}
+                                </Badge>
+                                {listing.is_urgent && (
+                                    <Badge variant="destructive" className="animate-pulse text-xs">
+                                        <AlertCircle className="h-3 w-3 mr-1" />
+                                        Urgent
+                                    </Badge>
+                                )}
+                                {listing.expires_at && getDaysRemaining(listing.expires_at) <= 7 && (
+                                    <Badge variant="outline" className="text-orange-600 border-orange-200 text-xs">
+                                        <Clock className="h-3 w-3 mr-1" />
+                                        Expires Soon
+                                    </Badge>
+                                )}
+                            </div>
+                            <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2 break-words">{listing.title}</h1>
+                            <p className="text-gray-600 text-sm md:text-lg">{listing.description}</p>
+                        </div>
+
                         {/* Mobile action buttons */}
                         <div className="flex gap-1 sm:hidden">
                             <Button variant="outline" size="sm" onClick={shareListing}>
@@ -375,7 +376,6 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                         </div>
                     </div>
                 </div>
-            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
                 {/* Main Content */}
@@ -841,6 +841,7 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                 </DialogContent>
             </Dialog>
         </div>
+        </>
     );
 };
 

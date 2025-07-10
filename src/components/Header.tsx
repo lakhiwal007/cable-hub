@@ -25,8 +25,14 @@ const Header: React.FC<HeaderProps> = ({ title, onBack, showBack = true, logoSrc
               <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           )}
-          <img src={logoSrc} alt="Logo" className="h-auto w-16 sm:w-20 lg:w-24 mr-2 sm:mr-3 select-none" />
-          <span className="text-lg sm:text-xl font-bold text-gray-900 truncate">{title}</span>
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity cursor-pointer"
+            aria-label="Go to Home"
+          >
+            <img src={logoSrc} alt="Logo" className="h-auto w-16 sm:w-20 lg:w-24 select-none" />
+            <span className="text-lg sm:text-xl font-bold text-gray-900 truncate">{title}</span>
+          </button>
         </div>
         {rightContent && (
           <div className="flex items-center gap-1 sm:gap-2">{rightContent}</div>

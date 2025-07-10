@@ -228,12 +228,12 @@ const Marketplace = () => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 sm:space-y-8">
       <div className="text-center">
         <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
           <div className="flex-1">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Raw Material Marketplace</h2>
-            <p className="text-gray-600">Connect with suppliers and manufacturers across India</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Raw Material Marketplace</h2>
+            <p className="text-sm sm:text-base text-gray-600">Connect with suppliers and manufacturers across India</p>
           </div>
          
         </div>
@@ -250,14 +250,14 @@ const Marketplace = () => {
         </div>
       ) : (
         
-<UITabs value={activeTab} onValueChange={setActiveTab}>
-          <UITabsList className="grid w-full grid-cols-3">
-            <UITabsTrigger value="browse">Browse Listings</UITabsTrigger>
-            <UITabsTrigger value="post-supply">Post Supply</UITabsTrigger>
-            <UITabsTrigger value="post-demand">Post Demand</UITabsTrigger>
+        <UITabs value={activeTab} onValueChange={setActiveTab}>
+          <UITabsList className="grid w-full grid-cols-3 gap-1 sm:gap-2">
+            <UITabsTrigger value="browse" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Browse</UITabsTrigger>
+            <UITabsTrigger value="post-supply" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Sell Raw Materials</UITabsTrigger>
+            <UITabsTrigger value="post-demand" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Buy Raw Materials</UITabsTrigger>
           </UITabsList>
 
-          <UITabsContent value="browse" className="space-y-6">
+          <UITabsContent value="browse" className="space-y-4 sm:space-y-6">
             {/* Search and Filter */}
             <SearchAndFilter
               searchTerm={searchTerm}
@@ -269,19 +269,19 @@ const Marketplace = () => {
 
             {/* Sub-tabs for Supply/Demand */}
             <UITabs value={browseTab} onValueChange={v => setBrowseTab(v as 'supply' | 'demand')} className="w-full">
-              <UITabsList className="w-full grid grid-cols-2 mb-4">
-                <UITabsTrigger value="supply">Supply</UITabsTrigger>
-                <UITabsTrigger value="demand">Demand</UITabsTrigger>
+              <UITabsList className="w-full grid grid-cols-2 mb-4 gap-1 sm:gap-2">
+                <UITabsTrigger value="supply" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Sell Raw Materials</UITabsTrigger>
+                <UITabsTrigger value="demand" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Buy Raw Materials</UITabsTrigger>
               </UITabsList>
               <UITabsContent value="supply">
                 <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-gray-900">Supply Listings</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Supply Listings</h3>
                   {filteredSupplyListings.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-gray-500 text-sm sm:text-base">
                       No supply listings found. Try adjusting your search or filters.
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-4 md:p-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                       {filteredSupplyListings.map((listing) => (
                         <SupplyListingCard
                           key={listing.id}
@@ -298,13 +298,13 @@ const Marketplace = () => {
               </UITabsContent>
               <UITabsContent value="demand">
                 <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-gray-900">Demand Listings</h3>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Demand Listings</h3>
                   {filteredDemandListings.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-gray-500 text-sm sm:text-base">
                       No demand listings found. Try adjusting your search or filters.
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 px-4 md:p-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                       {filteredDemandListings.map((listing) => (
                         <DemandListingCard 
                           key={listing.id} 
@@ -321,7 +321,7 @@ const Marketplace = () => {
             </UITabs>
           </UITabsContent>
 
-          <UITabsContent value="post-supply" className="space-y-6">
+          <UITabsContent value="post-supply" className="space-y-4 sm:space-y-6">
             <SupplyForm
               onSubmit={handleSupplySubmit}
               categories={categories}
@@ -331,7 +331,7 @@ const Marketplace = () => {
             />
           </UITabsContent>
 
-          <UITabsContent value="post-demand" className="space-y-6">
+          <UITabsContent value="post-demand" className="space-y-4 sm:space-y-6">
             <DemandForm
               onSubmit={handleDemandSubmit}
               categories={categories}

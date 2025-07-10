@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut, DollarSign } from "lucide-react";
+import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut, DollarSign, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PricingSlideshow from "@/components/PricingSlideshow";
 import RawMaterialCalculator from "@/components/RawMaterialCalculator";
@@ -226,14 +226,22 @@ const Index = () => {
                   </button>
                 );
               })}
-              {/* Logout Button (Desktop) */}
-              {user && (
+              {/* Login/Logout Button (Desktop) */}
+              {user ? (
                 <button
                   onClick={handleLogout}
                   className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate('/login')}
+                  className="flex items-center px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-600/25"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Login
                 </button>
               )}
             </nav>
@@ -275,8 +283,8 @@ const Index = () => {
                   </button>
                 );
               })}
-              {/* Mobile Logout Button */}
-              {user && (
+              {/* Mobile Login/Logout Button */}
+              {user ? (
                 <button
                   onClick={() => {
                     handleLogout();
@@ -286,6 +294,17 @@ const Index = () => {
                 >
                   <LogOut className="h-5 w-5 mr-3" />
                   Logout
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    navigate('/login');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="flex items-center w-full px-3 py-2 rounded-lg text-base font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                >
+                  <LogIn className="h-5 w-5 mr-3" />
+                  Login
                 </button>
               )}
             </div>
