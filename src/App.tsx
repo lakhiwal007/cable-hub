@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useNavigate, useLocation, useParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { App as CapacitorApp } from '@capacitor/app';
 import Index from "./pages/Index";
@@ -17,12 +17,10 @@ import ChatRoom from "@/components/ChatRoom";
 import MyChats from "./pages/MyChats";
 import Pricing from "./pages/Pricing";
 import ListingDetails from "./pages/ListingDetails";
-import SellUsedOrDeadStock from "./pages/SellUsedOrDeadStock";
 import UsedAndDeadStockListings from "./pages/UsedAndDeadStockListings";
 import PaidExpertConsulting from "./pages/PaidExpertConsulting";
 import ConsultingListings from "./pages/ConsultingListings";
 import MachinesMarketplace from "./pages/MachinesMarketplace";
-import MachinesListings from "./pages/MachinesListings";
 import Team from "./pages/Team";
 import TeamListings from "./pages/TeamListings";
 import SpecsMarketplace from "./pages/SpecsMarketplace";
@@ -89,12 +87,11 @@ const App = () => (
             </ProtectedRoute>
           } />
           <Route path="/chat/:roomId" element={<ChatRoomWrapper />} />
-          <Route path="/sell-used-or-dead-stock" element={<ProtectedRoute><SellUsedOrDeadStock /></ProtectedRoute>} />
           <Route path="/used-dead-stock-listings" element={<UsedAndDeadStockListings />} />
           <Route path="/paid-expert-consulting" element={<ProtectedRoute><PaidExpertConsulting /></ProtectedRoute>} />
           <Route path="/consulting-listings" element={<ConsultingListings />} />
           <Route path="/machines-marketplace" element={<ProtectedRoute><MachinesMarketplace /></ProtectedRoute>} />
-          <Route path="/machines-listings" element={<MachinesListings />} />
+          
           <Route path="/specs-marketplace" element={<SpecsMarketplace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
