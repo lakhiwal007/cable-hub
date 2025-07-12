@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { apiClient } from '@/lib/apiClient';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageCircle, User, DollarSign, Clock, MapPin, Phone } from 'lucide-react';
+import { WhatsAppContact } from '@/components/ui/whatsapp-contact';
 
 function ConsultantCard({ consultant }: { consultant: any }) {
   return (
@@ -70,10 +71,15 @@ function ConsultantCard({ consultant }: { consultant: any }) {
         </div>
         
         <div className="flex gap-2">
-          <Button size="sm" className="flex items-center gap-2">
-            <MessageCircle className="h-4 w-4" />
+          <WhatsAppContact
+            phoneNumber={consultant.whatsapp_number}
+            consultantName={consultant.name}
+            size="sm"
+            className="flex items-center"
+          >
+            
             Contact via WhatsApp
-          </Button>
+          </WhatsAppContact>
           {!consultant.isIncognito && (
             <Button size="sm" variant="outline">
               View Profile
@@ -154,10 +160,15 @@ function ConsultingRequestCard({ request }: { request: any }) {
         </div>
         
         <div className="flex gap-2">
-          <Button size="sm" className="flex items-center gap-2">
+          <WhatsAppContact
+            phoneNumber={request.whatsappNumber}
+            consultantName="Requester"
+            size="sm"
+            className="flex items-center gap-2"
+          >
             <MessageCircle className="h-4 w-4" />
             Contact Requester
-          </Button>
+          </WhatsAppContact>
           <Button size="sm" variant="outline">
             View Details
           </Button>

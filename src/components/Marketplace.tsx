@@ -252,9 +252,9 @@ const Marketplace = () => {
         
         <UITabs value={activeTab} onValueChange={setActiveTab}>
           <UITabsList className="grid w-full grid-cols-3 gap-1 sm:gap-2">
-            <UITabsTrigger value="browse" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Browse</UITabsTrigger>
-            <UITabsTrigger value="post-supply" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Sell Raw Materials</UITabsTrigger>
-            <UITabsTrigger value="post-demand" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Buy Raw Materials</UITabsTrigger>
+            <UITabsTrigger value="browse" className="text-xs sm:text-sm">Browse</UITabsTrigger>
+            <UITabsTrigger value="post-supply" className="text-xs sm:text-sm">Sell Raw Materials</UITabsTrigger>
+            <UITabsTrigger value="post-demand" className="text-xs sm:text-sm">Buy Raw Materials</UITabsTrigger>
           </UITabsList>
 
           <UITabsContent value="browse" className="space-y-4 sm:space-y-6">
@@ -270,8 +270,8 @@ const Marketplace = () => {
             {/* Sub-tabs for Supply/Demand */}
             <UITabs value={browseTab} onValueChange={v => setBrowseTab(v as 'supply' | 'demand')} className="w-full">
               <UITabsList className="w-full grid grid-cols-2 mb-4 gap-1 sm:gap-2">
-                <UITabsTrigger value="supply" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Sell Raw Materials</UITabsTrigger>
-                <UITabsTrigger value="demand" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Buy Raw Materials</UITabsTrigger>
+                <UITabsTrigger value="supply" className="text-xs sm:text-sm">Sell Raw Materials</UITabsTrigger>
+                <UITabsTrigger value="demand" className="text-xs sm:text-sm">Buy Raw Materials</UITabsTrigger>
               </UITabsList>
               <UITabsContent value="supply">
                 <div className="space-y-4">

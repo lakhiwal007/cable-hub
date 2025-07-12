@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiClient from "@/lib/apiClient";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { WhatsAppContact } from "@/components/ui/whatsapp-contact";
 
 interface MaterialCategory {
   id: string;
@@ -185,16 +186,10 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
           </div>
 
 
-          {/* Budget Section */}
+          {/* Quantity Section */}
           <div className="flex items-center justify-between mb-4 gap-2">
-            <div>
-              <p className="text-base sm:text-lg font-bold text-purple-600">
-                ₹{listing.budget_min.toLocaleString()} - ₹{listing.budget_max.toLocaleString()}
-              </p>
-              <p className="text-xs sm:text-sm text-gray-500">Budget Range</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs sm:text-sm text-gray-600">Required</p>
+            <div className="flex flex-col">
+              <p className="text-xs sm:text-sm text-gray-600">Required Quantity</p>
               <p className="text-sm sm:text-base font-semibold">{listing.required_quantity} {listing.unit}</p>
             </div>
           </div>
@@ -223,36 +218,47 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
           )}
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex gap-2">
             <Button
               variant="outline"
               onClick={handleViewDetails}
-              className="w-full sm:flex-1 h-10 sm:h-9 text-sm"
+              className="w-full h-10 sm:h-9 text-sm"
             >
               <Eye className="h-4 w-4 mr-2" />
               View Details
             </Button>
+            
             {!isOwnListing ? (
               isAuthenticated ? (
-                <Button
-                  onClick={handleContactConsumer}
-                  disabled={loading}
-                  className="w-full sm:flex-1 bg-purple-600 hover:bg-purple-700 transition-colors h-10 sm:h-9 text-sm"
-                >
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  {loading ? 'Opening Chat...' : 'Contact'}
-                </Button>
+                <div className="w-full flex flex-col sm:flex-row gap-2">
+                  
+                  {listing.whatsapp_number && (
+                    <WhatsAppContact
+                      phoneNumber={listing.whatsapp_number}
+                      listingTitle={listing.title}
+                      listingType="demand"
+                      variant="default"
+                      size="default"
+                      className="w-full sm:flex-1 bg-green-600 hover:bg-green-700 transition-colors h-10 sm:h-9 text-sm"
+                    >
+                      WhatsApp
+                    </WhatsAppContact>
+                  )}
+                </div>
               ) : (
-                <Button
-                  onClick={() => navigate('/login')}
-                  className="w-full sm:flex-1 bg-purple-600 hover:bg-purple-700 transition-colors h-10 sm:h-9 text-sm"
-                >
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  Login to Contact
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <Button
+                    onClick={() => navigate('/login')}
+                    className="w-full sm:flex-1 bg-purple-600 hover:bg-purple-700 transition-colors h-10 sm:h-9 text-sm"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Login to Contact
+                  </Button>
+                  
+                </div>
               )
             ) : (
-              <Button variant="outline" className="w-full sm:flex-1 h-10 sm:h-9 text-sm" disabled>
+              <Button variant="outline" className="w-full h-10 sm:h-9 text-sm" disabled>
                 Your Listing
               </Button>
             )}
