@@ -170,11 +170,11 @@ const UsedAndDeadStockListings: React.FC = () => {
   };
 
   return (
-    <>
-      <Header title="Used Machines & Dead Stock Listings" onBack={() => navigate('/')} logoSrc='cableCartLogo.png' />
+      <>
+        <Header title="Used Machines & Dead Stock Listings" onBack={() => navigate('/')} logoSrc='cableCartLogo.png' />
       <div className="container mx-auto py-4 sm:py-8 px-4 sm:px-6">
         <div className="mb-4 sm:mb-8">
-          {!showForm && (
+            {!showForm && (
             isAuthenticated ? (
               <Button onClick={() => setShowForm(true)}>
                 Add Used Machine or Dead Stock
@@ -187,17 +187,17 @@ const UsedAndDeadStockListings: React.FC = () => {
                 </Button>
               </div>
             )
-          )}
-          {showForm && (
-            <div className="relative border rounded-lg">
-              <Button size="icon" variant="ghost" className="absolute top-2 right-2" onClick={() => setShowForm(false)}>
-                <X className="h-5 w-5" />
-              </Button>
-              <SellUsedOrDeadStock key={formKey} onSuccess={handleFormSuccess} />
-            </div>
-          )}
-        </div>
-        <Tabs value={tab} onValueChange={setTab} className="w-full flex-wrap">
+            )}
+            {showForm && (
+              <div className="relative border rounded-lg">
+                <Button size="icon" variant="ghost" className="absolute top-2 right-2" onClick={() => setShowForm(false)}>
+                  <X className="h-5 w-5" />
+                </Button>
+                <SellUsedOrDeadStock key={formKey} onSuccess={handleFormSuccess} />
+              </div>
+            )}
+          </div>
+          <Tabs value={tab} onValueChange={setTab} className="w-full flex-wrap">
           <TabsList className="grid w-full grid-cols-2 h-auto">
             <TabsTrigger value="used" className="flex items-center gap-2 py-3">
               <span className="text-[12px] sm:text-base">Used Machines</span>
@@ -205,45 +205,45 @@ const UsedAndDeadStockListings: React.FC = () => {
             <TabsTrigger value="dead" className="flex items-center gap-2 py-3">
               <span className="text-[12px] sm:text-base">Dead Stock</span>
             </TabsTrigger>
-          </TabsList>
-          <TabsContent value="used">
-            {loading ? (
-              <div>Loading...</div>
-            ) : used.length === 0 ? (
-              <div className="text-muted-foreground">No used machines listed yet.</div>
-            ) : (
+            </TabsList>
+            <TabsContent value="used">
+              {loading ? (
+                <div>Loading...</div>
+              ) : used.length === 0 ? (
+                <div className="text-muted-foreground">No used machines listed yet.</div>
+              ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {used.map(item => (
-                  <UsedMachineCard key={item.id} item={item} onMediaClick={(url, type) => setMediaDialog({ url, type })} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-          <TabsContent value="dead">
-            {loading ? (
-              <div>Loading...</div>
-            ) : dead.length === 0 ? (
-              <div className="text-muted-foreground">No dead stock listed yet.</div>
-            ) : (
+                  {used.map(item => (
+                    <UsedMachineCard key={item.id} item={item} onMediaClick={(url, type) => setMediaDialog({ url, type })} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+            <TabsContent value="dead">
+              {loading ? (
+                <div>Loading...</div>
+              ) : dead.length === 0 ? (
+                <div className="text-muted-foreground">No dead stock listed yet.</div>
+              ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {dead.map(item => (
-                  <DeadStockCard key={item.id} item={item} onMediaClick={(url, type) => setMediaDialog({ url, type })} />
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-        <Dialog open={!!mediaDialog} onOpenChange={open => !open && setMediaDialog(null)}>
-          <DialogContent className="max-w-2xl">
-            {mediaDialog?.type === 'image' ? (
-              <img src={mediaDialog.url} alt="Preview" className="w-full h-auto max-h-[70vh] object-contain rounded" />
-            ) : mediaDialog?.type === 'video' ? (
-              <video src={mediaDialog.url} controls autoPlay className="w-full h-auto max-h-[70vh] object-contain rounded" />
-            ) : null}
-          </DialogContent>
-        </Dialog>
-      </div>
-    </>
+                  {dead.map(item => (
+                    <DeadStockCard key={item.id} item={item} onMediaClick={(url, type) => setMediaDialog({ url, type })} />
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+          <Dialog open={!!mediaDialog} onOpenChange={open => !open && setMediaDialog(null)}>
+            <DialogContent className="max-w-2xl">
+              {mediaDialog?.type === 'image' ? (
+                <img src={mediaDialog.url} alt="Preview" className="w-full h-auto max-h-[70vh] object-contain rounded" />
+              ) : mediaDialog?.type === 'video' ? (
+                <video src={mediaDialog.url} controls autoPlay className="w-full h-auto max-h-[70vh] object-contain rounded" />
+              ) : null}
+            </DialogContent>
+          </Dialog>
+        </div>
+      </>
   );
 };
 

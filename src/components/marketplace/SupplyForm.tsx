@@ -13,7 +13,6 @@ interface SupplyFormData {
   grade_specification: string;
   available_quantity: string;
   unit: string;
-  price_per_unit: string;
   minimum_order: string;
   location: string;
   delivery_terms: string;
@@ -45,18 +44,17 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     whatsapp_number?: string;
   }>({
     ...{
-      title: '',
-      description: '',
-      category: '',
-      grade_specification: '',
-      available_quantity: '',
-      unit: 'kg',
-      price_per_unit: '',
-      minimum_order: '',
-      location: '',
-      delivery_terms: '',
-      certification: '',
-      is_urgent: false,
+    title: '',
+    description: '',
+    category: '',
+    grade_specification: '',
+    available_quantity: '',
+    unit: 'kg',
+    minimum_order: '',
+    location: '',
+    delivery_terms: '',
+    certification: '',
+    is_urgent: false,
     },
     rm: '',
     type: '',
@@ -172,7 +170,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     e.preventDefault();
     setError('');
     setSuccess('');
-    if (!formData.title || !formData.category || !formData.rm || !formData.available_quantity || !formData.price_per_unit || !formData.minimum_order || !formData.location) {
+    if (!formData.title || !formData.category || !formData.rm || !formData.available_quantity || !formData.minimum_order || !formData.location) {
       setError('Please fill all required fields.');
       return;
     }
@@ -203,7 +201,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
       await onSubmit({ ...formData, image_url: imageUrls, spec_doc_url: specDocUrl });
       setSuccess('Supply listing posted successfully!');
       setFormData({
-        title: '', description: '', category: '', grade_specification: '', available_quantity: '', unit: 'kg', price_per_unit: '', minimum_order: '', location: '', delivery_terms: '', certification: '', is_urgent: false,
+        title: '', description: '', category: '', grade_specification: '', available_quantity: '', unit: 'kg', minimum_order: '', location: '', delivery_terms: '', certification: '', is_urgent: false,
         rm: '',
         type: '',
         whatsapp_number: '',
@@ -328,10 +326,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                   <option value="pieces">pieces</option>
                 </select>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Price per Unit *</label>
-                <Input name="price_per_unit" value={formData.price_per_unit} onChange={handleInput} required type="number" min="0" step="any" />
-              </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Minimum Order *</label>
                 <Input name="minimum_order" value={formData.minimum_order} onChange={handleInput} required type="number" min="0" step="any" />

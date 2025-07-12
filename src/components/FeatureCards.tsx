@@ -10,9 +10,9 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
   const features = [
     {
       icon: Calculator,
-      title: "Smart Calculator",
+      title: "Raw Material Calculator",
       description: "Advanced cost calculations with real-time material pricing",
-      action: "Start Calculating",
+      action: "Start Calculation",
       tab: "calculator",
       gradient: "from-orange-500 to-orange-600",
       bgGradient: "from-orange-50 to-orange-100",
@@ -20,9 +20,9 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
     },
     {
       icon: LucideHeartHandshake,
-      title: "Verified Marketplace",
+      title: "Buy/Sell Raw Materials",
       description: "Connect with trusted suppliers and manufacturers nationwide",
-      action: "Explore Marketplace",
+      action: "Explore Raw Materials",
       tab: "marketplace",
       gradient: "from-green-500 to-green-600",
       bgGradient: "from-green-50 to-green-100",
@@ -40,7 +40,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
     },
     {
       icon: Settings,
-      title: "Machines Marketplace",
+      title: "Buy/Sell Machines",
       description: "Buy and sell industrial machines and equipment",
       action: "Browse Machines",
       tab: "machines",
@@ -50,9 +50,9 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
     },
     {
       icon: TrendingUp,
-      title: "Market Intelligence",
+      title: "Market Pricing",
       description: "Real-time insights and pricing trends for informed decisions",
-      action: "View Insights",
+      action: "View Prices",
       tab: "pricing",
       gradient: "from-blue-500 to-blue-600",
       bgGradient: "from-blue-50 to-blue-100",

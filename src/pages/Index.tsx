@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut, DollarSign, LogIn } from "lucide-react";
+import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut, DollarSign, LogIn, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PricingSlideshow from "@/components/PricingSlideshow";
 import RawMaterialCalculator from "@/components/RawMaterialCalculator";
@@ -49,6 +49,8 @@ const Index = () => {
       navigate("/admin");
     } else if (tabId === "marketplace") {
       navigate("/marketplace");
+    } else if (tabId === "specs") {
+      navigate("/specs-marketplace");
     } else if (tabId === "pricing") {
       navigate("/pricing");
     } else if (tabId === "consulting") {

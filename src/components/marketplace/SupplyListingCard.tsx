@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import type { SupplyListing } from "@/lib/types";
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
+import { WhatsAppContact } from "@/components/ui/whatsapp-contact";
 
 interface MaterialCategory {
   id: string;
@@ -148,13 +149,11 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
           
         </div>
 
-        {/* Price Section */}
+        {/* Quantity Section */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <div>
-            <p className="text-base sm:text-lg md:text-2xl font-bold text-green-600">
-              ₹{listing.price_per_unit.toLocaleString()}
-            </p>
-            <p className="text-xs sm:text-sm text-gray-500">per {listing.unit}</p>
+          <div className="flex flex-col">
+            <p className="text-xs sm:text-sm text-gray-600">Available</p>
+            <p className="text-sm sm:text-base font-semibold">{listing.available_quantity} {listing.unit}</p>
           </div>
           <div className="text-right flex flex-col">
             <p className="text-xs sm:text-sm text-gray-600">Min Order</p>
@@ -164,61 +163,70 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
 
         {/* Stock & Location */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 text-xs sm:text-sm text-gray-600 gap-1 sm:gap-0">
-          <div className="flex items-center gap-1">
-            <Package className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span>{listing.available_quantity} {listing.unit} available</span>
-          </div>
+          
           <div className="flex items-center gap-1">
             <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
             <span className="truncate">{listing.location}</span>
           </div>
-        </div>
-
         {/* Delivery Info */}
         {listing.delivery_terms ? (
-          <div className="mb-3 sm:mb-4 p-2 bg-gray-50 rounded-lg">
+          <div className="p-2 bg-gray-50 rounded-lg">
             <p className="text-xs text-gray-600">
               <strong>Delivery:</strong> {listing.delivery_terms}
             </p>
           </div>
         ):(
-          <div className="mb-3 sm:mb-4 p-2 bg-gray-50 rounded-lg">
+          <div className="p-2 bg-gray-50 rounded-lg">
             <p className="text-xs text-gray-600">
               <strong>Delivery:</strong> {"Not Available"}
             </p>
           </div>
         )}
+        </div>
+
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="w-full flex gap-2">
           <Button
             variant="outline"
             onClick={handleViewDetails}
-            className="w-full sm:flex-1 h-10 sm:h-9 text-sm"
+            className="w-full h-10 sm:h-9 text-sm"
           >
             <Eye className="h-4 w-4 mr-2" />
             View Details
           </Button>
+          
           {!isOwnListing ? (
             isAuthenticated ? (
-              <Button
-                onClick={() => onContactSupplier(listing)}
-                className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
-              >
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Contact
-              </Button>
+              <div className="w-full flex flex-col sm:flex-row gap-2">
+                
+                {listing.whatsapp_number && (
+                  <WhatsAppContact
+                    phoneNumber={listing.whatsapp_number}
+                    listingTitle={listing.title}
+                    listingType="supply"
+                    variant="default"
+                    size="default"
+                    className="w-full sm:flex-1 bg-green-600 hover:bg-green-700 transition-colors h-10 sm:h-9 text-sm"
+                  >
+                    WhatsApp
+                  </WhatsAppContact>
+                )}
+              </div>
             ) : (
-              <Button
-                onClick={() => navigate('/login')}
-                className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
-              >
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Login to Contact
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button
+                  onClick={() => navigate('/login')}
+                  className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Login to Contact
+                </Button>
+                
+              </div>
             )
           ) : (
-            <Button variant="outline" className="w-full sm:flex-1 h-10 sm:h-9 text-sm" disabled>
+            <Button variant="outline" className="w-full h-10 sm:h-9 text-sm" disabled>
               Your Listing
             </Button>
           )}

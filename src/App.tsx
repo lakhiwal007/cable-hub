@@ -25,6 +25,7 @@ import MachinesMarketplace from "./pages/MachinesMarketplace";
 import MachinesListings from "./pages/MachinesListings";
 import Team from "./pages/Team";
 import TeamListings from "./pages/TeamListings";
+import SpecsMarketplace from "./pages/SpecsMarketplace";
 
 const queryClient = new QueryClient();
 
@@ -94,6 +95,7 @@ const App = () => (
           <Route path="/consulting-listings" element={<ConsultingListings />} />
           <Route path="/machines-marketplace" element={<ProtectedRoute><MachinesMarketplace /></ProtectedRoute>} />
           <Route path="/machines-listings" element={<MachinesListings />} />
+          <Route path="/specs-marketplace" element={<SpecsMarketplace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />

@@ -13,8 +13,6 @@ interface DemandFormData {
   specifications: string;
   required_quantity: string;
   unit: string;
-  budget_min: string;
-  budget_max: string;
   location: string;
   delivery_deadline: string;
   additional_requirements: string;
@@ -45,19 +43,17 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     whatsapp_number?: string;
   }>({
     ...{
-      title: '',
-      description: '',
-      category: '',
-      specifications: '',
-      required_quantity: '',
-      unit: 'kg',
-      budget_min: '',
-      budget_max: '',
-      location: '',
-      delivery_deadline: '',
-      additional_requirements: '',
-      is_urgent: false,
-      image_url: '',
+    title: '',
+    description: '',
+    category: '',
+    specifications: '',
+    required_quantity: '',
+    unit: 'kg',
+    location: '',
+    delivery_deadline: '',
+    additional_requirements: '',
+    is_urgent: false,
+    image_url: '',
     },
     rm: '',
     type: '',
@@ -168,7 +164,7 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     setError('');
     setSuccess('');
     
-    if (!formData.title || !formData.category || !formData.rm || !formData.required_quantity || !formData.budget_min || !formData.budget_max || !formData.location) {
+    if (!formData.title || !formData.category || !formData.rm || !formData.required_quantity || !formData.location) {
       setError('Please fill all required fields.');
       return;
     }
@@ -190,7 +186,7 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
       await onSubmit({ ...formData, image_url: imageUrls });
       setSuccess('Demand posted successfully!');
       setFormData({
-        title: '', description: '', category: '', specifications: '', required_quantity: '', unit: 'kg', budget_min: '', budget_max: '', location: '', delivery_deadline: '', additional_requirements: '', is_urgent: false, image_url: '',
+        title: '', description: '', category: '', specifications: '', required_quantity: '', unit: 'kg', location: '', delivery_deadline: '', additional_requirements: '', is_urgent: false, image_url: '',
         rm: '',
         type: '',
         payment_terms: '',
@@ -295,14 +291,7 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                   <option value="pieces">pieces</option>
                 </select>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Budget Min *</label>
-                <Input name="budget_min" value={formData.budget_min} onChange={handleInput} required type="number" min="0" step="any" />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Budget Max *</label>
-                <Input name="budget_max" value={formData.budget_max} onChange={handleInput} required type="number" min="0" step="any" />
-              </div>
+
               <div className="space-y-2">
                 <label className="text-sm font-medium">Location *</label>
                 <Input name="location" value={formData.location} onChange={handleInput} required />

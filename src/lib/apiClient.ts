@@ -64,9 +64,9 @@ class ApiClient {
         email: userData.email,
         password: credentials.password
       });
-      if (error) throw new Error(error.message);
-      if (data.session) await supabase.auth.setSession(data.session);
-      return data;
+    if (error) throw new Error(error.message);
+    if (data.session) await supabase.auth.setSession(data.session);
+    return data;
     } else if (credentials.email) {
       // Standard email login
       const { data, error } = await supabase.auth.signInWithPassword({

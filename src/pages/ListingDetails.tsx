@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel";
 import { apiClient } from '@/lib/apiClient';
+import { WhatsAppContact } from "@/components/ui/whatsapp-contact";
 
 interface SupplyListing {
     id: string;
@@ -261,17 +262,15 @@ ${listing.description}
 
 ${listingType === 'supply' ? `
 Available Quantity: ${(listing as SupplyListing).available_quantity} ${(listing as SupplyListing).unit}
-Price per Unit: ${formatPrice((listing as SupplyListing).price_per_unit)}
 Minimum Order: ${(listing as SupplyListing).minimum_order} ${(listing as SupplyListing).unit}
 ` : `
 Required Quantity: ${(listing as DemandListing).required_quantity} ${(listing as DemandListing).unit}
-Budget Range: ${formatPrice((listing as DemandListing).budget_min)} - ${formatPrice((listing as DemandListing).budget_max)}
 `}
 
 Location: ${listing.location}
 Posted: ${formatDate(listing.created_at)}
 ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
-    `;
+`;
 
         const blob = new Blob([details], { type: 'text/plain' });
         const url = window.URL.createObjectURL(blob);
@@ -336,31 +335,31 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                     </div>
                 }
             />
-            <div className="container mx-auto px-4 py-4 md:py-8">
+        <div className="container mx-auto px-4 py-4 md:py-8">
                 {/* Listing Header */}
-                <div className="mb-4 md:mb-6">
-                    <div className="flex items-start justify-between flex-wrap gap-4">
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 md:gap-3 mb-2 flex-wrap">
-                                <Badge variant={isSupply ? "default" : "secondary"} className="text-xs">
-                                    {isSupply ? 'Supply' : 'Demand'}
+            <div className="mb-4 md:mb-6">
+                <div className="flex items-start justify-between flex-wrap gap-4">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 md:gap-3 mb-2 flex-wrap">
+                            <Badge variant={isSupply ? "default" : "secondary"} className="text-xs">
+                                {isSupply ? 'Supply' : 'Demand'}
+                            </Badge>
+                            {listing.is_urgent && (
+                                <Badge variant="destructive" className="animate-pulse text-xs">
+                                    <AlertCircle className="h-3 w-3 mr-1" />
+                                    Urgent
                                 </Badge>
-                                {listing.is_urgent && (
-                                    <Badge variant="destructive" className="animate-pulse text-xs">
-                                        <AlertCircle className="h-3 w-3 mr-1" />
-                                        Urgent
-                                    </Badge>
-                                )}
-                                {listing.expires_at && getDaysRemaining(listing.expires_at) <= 7 && (
-                                    <Badge variant="outline" className="text-orange-600 border-orange-200 text-xs">
-                                        <Clock className="h-3 w-3 mr-1" />
-                                        Expires Soon
-                                    </Badge>
-                                )}
-                            </div>
-                            <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2 break-words">{listing.title}</h1>
-                            <p className="text-gray-600 text-sm md:text-lg">{listing.description}</p>
+                            )}
+                            {listing.expires_at && getDaysRemaining(listing.expires_at) <= 7 && (
+                                <Badge variant="outline" className="text-orange-600 border-orange-200 text-xs">
+                                    <Clock className="h-3 w-3 mr-1" />
+                                    Expires Soon
+                                </Badge>
+                            )}
                         </div>
+                        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-2 break-words">{listing.title}</h1>
+                        <p className="text-gray-600 text-sm md:text-lg">{listing.description}</p>
+                    </div>
 
                         {/* Mobile action buttons */}
                         <div className="flex gap-1 sm:hidden">
@@ -373,9 +372,9 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                             <Button variant="outline" size="sm" onClick={downloadDetails}>
                                 <Download className="h-4 w-4" />
                             </Button>
-                        </div>
                     </div>
                 </div>
+            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
                 {/* Main Content */}
@@ -421,22 +420,22 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                         );
                                     } else if (materialImage && typeof materialImage === 'string') {
                                         return (
-                                            <img 
-                                                src={materialImage} 
-                                                alt={listing.title}
-                                                className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
-                                                onClick={() => setSelectedImage(materialImage)}
-                                            />
+                                    <img 
+                                        src={materialImage} 
+                                        alt={listing.title}
+                                        className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                                        onClick={() => setSelectedImage(materialImage)}
+                                    />
                                         );
                                     } else {
                                         return (
-                                            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 cursor-pointer hover:scale-105 transition-transform duration-300" onClick={() => setSelectedImage(null)}>
-                                                <ImageIcon className="h-16 w-16 text-gray-400 mb-2" />
-                                                <p className="text-sm text-gray-500 text-center px-4">
-                                                    {listing.category}
-                                                </p>
-                                                <p className="text-xs text-gray-400 mt-1">No image available</p>
-                                            </div>
+                                    <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 cursor-pointer hover:scale-105 transition-transform duration-300" onClick={() => setSelectedImage(null)}>
+                                        <ImageIcon className="h-16 w-16 text-gray-400 mb-2" />
+                                        <p className="text-sm text-gray-500 text-center px-4">
+                                            {listing.category}
+                                        </p>
+                                        <p className="text-xs text-gray-400 mt-1">No image available</p>
+                                    </div>
                                         );
                                     }
                                 })()}
@@ -445,7 +444,7 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                     </Card>
                 </div>
                 <Card className='col-span-2'>
-                    <CardHeader className="p-4">
+                    <CardHeader className="px-4 py-2">
                         <CardTitle>Product Details</CardTitle>
                     </CardHeader>
                     <CardContent className="p-2">
@@ -468,13 +467,6 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                         {isSupply ? (
                                             <>
                                                 <div className="flex items-center gap-2">
-                                                    <DollarSign className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                                                    <span className="font-medium text-sm md:text-base">Price per Unit:</span>
-                                                    <span className="font-bold text-base md:text-lg text-green-600">
-                                                        {formatPrice(supplyListing.price_per_unit)}/{supplyListing.unit}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-2">
                                                     <Package className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                                     <span className="font-medium text-sm md:text-base">Available Quantity:</span>
                                                     <span className="font-semibold text-sm md:text-base">
@@ -482,20 +474,15 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <Truck className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                                                    <Package className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                                     <span className="font-medium text-sm md:text-base">Minimum Order:</span>
-                                                    <span className="text-sm md:text-base">{supplyListing.minimum_order.toLocaleString()} {supplyListing.unit}</span>
+                                                    <span className="font-semibold text-sm md:text-base">
+                                                        {supplyListing.minimum_order.toLocaleString()} {supplyListing.unit}
+                                                    </span>
                                                 </div>
                                             </>
                                         ) : (
                                             <>
-                                                <div className="flex items-center gap-2">
-                                                    <DollarSign className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                                                    <span className="font-medium text-sm md:text-base">Budget Range:</span>
-                                                    <span className="font-bold text-base md:text-lg text-blue-600">
-                                                        {formatPrice(demandListing.budget_min)} - {formatPrice(demandListing.budget_max)}
-                                                    </span>
-                                                </div>
                                                 <div className="flex items-center gap-2">
                                                     <Package className="h-4 w-4 text-gray-500 flex-shrink-0" />
                                                     <span className="font-medium text-sm md:text-base">Required Quantity:</span>
@@ -696,13 +683,22 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                             <Separator />
 
                             {apiClient.isAuthenticated() ? (
-                                <Button
-                                    onClick={() => setContactDialogOpen(true)}
-                                    className="w-full bg-purple-600 hover:bg-purple-700 text-sm md:text-base"
-                                >
-                                    <MessageCircle className="h-4 w-4 mr-2" />
-                                    {isSupply ? 'Contact Supplier' : 'Contact Buyer'}
-                                </Button>
+                                <div className="space-y-3">
+                                    
+                                    
+                                    {(isSupply ? supplyListing.whatsapp_number : demandListing.whatsapp_number) && (
+                                        <WhatsAppContact
+                                            phoneNumber={isSupply ? supplyListing.whatsapp_number! : demandListing.whatsapp_number!}
+                                            listingTitle={listing.title}
+                                            listingType={isSupply ? 'supply' : 'demand'}
+                                            variant="default"
+                                            size="default"
+                                            className="w-full bg-green-600 hover:bg-green-700 transition-colors text-sm md:text-base"
+                                        >
+                                            Contact via WhatsApp
+                                        </WhatsAppContact>
+                                    )}
+                                </div>
                             ) : (
                                 <div className="space-y-3">
                                     <div className="text-center text-sm text-gray-600">
@@ -714,6 +710,7 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                     >
                                         Login to Contact
                                     </Button>
+                                    
                                 </div>
                             )}
                         </CardContent>

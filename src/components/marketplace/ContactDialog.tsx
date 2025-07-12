@@ -44,7 +44,6 @@ const ContactDialog = ({
           <div className="p-4 bg-gray-50 rounded-lg">
             <h4 className="font-semibold">{listing.title}</h4>
             <p className="text-sm text-gray-600">{listing.supplier?.name}</p>
-            <p className="text-sm text-gray-600">₹{listing.price_per_unit}/{listing.unit}</p>
           </div>
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
@@ -87,12 +86,12 @@ const ContactDialog = ({
                 Login to Chat
               </Button>
               <div className="flex gap-2">
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={submitting}>
-                  {submitting ? 'Sending...' : 'Send Message'}
-                </Button>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={submitting}>
+                {submitting ? 'Sending...' : 'Send Message'}
+              </Button>
               </div>
             </div>
           </form>
