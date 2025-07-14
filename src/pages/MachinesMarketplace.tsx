@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -69,6 +69,71 @@ const MachinesMarketplace: React.FC = () => {
     videoFile: null as File | null,
     productionImages: [] as File[],
   });
+
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+  const videoPreviewRef = useRef<HTMLVideoElement>(null);
+  const liveVideoRef = useRef<HTMLVideoElement>(null);
+
+  const openVideoModal = async () => {
+    setShowVideoModal(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      setMediaStream(stream);
+    } catch (err) {
+      toast({ title: 'Error', description: 'Could not access camera.' });
+      setShowVideoModal(false);
+    }
+  };
+  const closeVideoModal = () => {
+    setShowVideoModal(false);
+    setRecording(false);
+    setRecordedChunks([]);
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+      setMediaStream(null);
+    }
+    if (liveVideoRef.current) {
+      liveVideoRef.current.srcObject = null;
+    }
+  };
+  const startRecording = () => {
+    if (!mediaStream) return;
+    const recorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
+    setMediaRecorder(recorder);
+    setRecordedChunks([]);
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) setRecordedChunks((prev) => [...prev, e.data]);
+    };
+    recorder.onstop = () => {
+      setRecording(false);
+    };
+    recorder.start();
+    setRecording(true);
+  };
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+    setRecording(false);
+    if (liveVideoRef.current) {
+      liveVideoRef.current.srcObject = null;
+    }
+  };
+  const useRecordedVideo = () => {
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const file = new File([blob], `recorded-${Date.now()}.webm`, { type: 'video/webm' });
+    setSellForm(prev => ({ ...prev, videoFile: file }));
+    closeVideoModal();
+  };
+  useEffect(() => {
+    if (showVideoModal && liveVideoRef.current && mediaStream) {
+      liveVideoRef.current.srcObject = mediaStream;
+    }
+  }, [showVideoModal, mediaStream, recording]);
 
   useEffect(() => {
     fetchMachineTypes();
@@ -239,16 +304,16 @@ const MachinesMarketplace: React.FC = () => {
   // Filter listings based on search and category
   const filteredSellMachines = sellMachines.filter((machine) => {
     const matchesSearch = machine.machine_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         machine.manufacturing_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         machine.machine_type_id?.toLowerCase().includes(searchTerm.toLowerCase());
+      machine.manufacturing_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      machine.machine_type_id?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === "all" || machine.machine_type_id === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
   const filteredBuyMachines = buyMachines.filter((machine) => {
     const matchesSearch = machine.machine_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         machine.manufacturing_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         machine.machine_type_id?.toLowerCase().includes(searchTerm.toLowerCase());
+      machine.manufacturing_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      machine.machine_type_id?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === "all" || machine.machine_type_id === filterCategory;
     return matchesSearch && matchesCategory;
   });
@@ -395,7 +460,7 @@ const MachinesMarketplace: React.FC = () => {
                                       <Package className="h-16 w-16 text-gray-400" />
                                     </div>
                                   )}
-                                  
+
                                   {/* Badges Overlay */}
                                   <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center justify-between gap-1 sm:gap-2">
                                     {machine.is_urgent && (
@@ -529,7 +594,7 @@ const MachinesMarketplace: React.FC = () => {
                                       <Package className="h-16 w-16 text-gray-400" />
                                     </div>
                                   )}
-                                  
+
                                   {/* Badges Overlay */}
                                   <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center justify-between gap-1 sm:gap-2">
                                     {machine.is_urgent && (
@@ -707,7 +772,7 @@ const MachinesMarketplace: React.FC = () => {
                         />
                       </div>
 
-                      
+
 
                       <div>
                         <label className="block text-sm font-medium mb-2">WhatsApp Number</label>
@@ -721,18 +786,77 @@ const MachinesMarketplace: React.FC = () => {
 
                       <div>
                         <label className="block text-sm font-medium mb-2">Machine Video</label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                          <Video className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                          <input
-                            type="file"
-                            accept="video/*"
-                            onChange={e => handleFileChange('videoFile', e.target.files)}
-                            className="hidden"
-                            id="video-upload"
-                          />
-                          <label htmlFor="video-upload" className="cursor-pointer text-blue-600 hover:text-blue-800">
-                            Upload Video
-                          </label>
+                        <div className="flex flex-col gap-1 items-start">
+                          <div className="flex items-start gap-2">
+                            <input
+                              type="file"
+                              accept="video/*"
+                              style={{ display: 'none' }}
+                              id="video-upload"
+                              onChange={e => handleFileChange('videoFile', e.target.files)}
+                            />
+                            <button
+                              type="button"
+                              className="px-3 py-2 rounded bg-gray-200 text-gray-800 flex items-center gap-1"
+                              onClick={() => document.getElementById('video-upload').click()}
+                            >
+                              <span>Upload Video</span>
+                            </button>
+                            <button type="button" className="px-3 py-2 rounded bg-blue-600 text-white" onClick={openVideoModal}>Record Video</button>
+                            {sellForm.videoFile && (
+                              <>
+                                <span className="text-xs text-gray-600">{sellForm.videoFile.name}</span>
+                                <button
+                                  type="button"
+                                  className="ml-2 text-red-500"
+                                  onClick={() => setSellForm(prev => ({ ...prev, videoFile: null }))}
+                                  title="Remove video"
+                                >
+                                  &#128465;
+                                </button>
+                              </>
+                            )}
+                          </div>
+                          {sellForm.videoFile && (
+                            <video controls className="mb-2 h-32 rounded border object-contain">
+                              <source src={URL.createObjectURL(sellForm.videoFile)} type={sellForm.videoFile.type} />
+                              Your browser does not support the video tag.
+                            </video>
+                          )}
+                          {/* Modal for recording */}
+                          {showVideoModal && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                              <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+                                <button className="absolute top-2 right-2 text-gray-500" onClick={closeVideoModal}>&times;</button>
+                                <h3 className="text-lg font-semibold mb-2">Record Video</h3>
+                                {!recording && recordedChunks.length === 0 && (
+                                  <video ref={liveVideoRef} autoPlay playsInline className="w-full h-48 bg-black rounded mb-2" />
+                                )}
+                                {recording && (
+                                  <video ref={liveVideoRef} autoPlay playsInline className="w-full h-48 bg-black rounded mb-2 border-2 border-red-500" />
+                                )}
+                                {!recording && recordedChunks.length > 0 && (
+                                  <video
+                                    ref={videoPreviewRef}
+                                    controls
+                                    className="w-full h-48 bg-black rounded mb-2"
+                                    src={URL.createObjectURL(new Blob(recordedChunks, { type: 'video/webm' }))}
+                                  />
+                                )}
+                                <div className="flex gap-2 justify-center">
+                                  {!recording && recordedChunks.length === 0 && (
+                                    <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={startRecording}>Start Recording</button>
+                                  )}
+                                  {recording && (
+                                    <button className="px-4 py-2 bg-red-600 text-white rounded" onClick={stopRecording}>Stop Recording</button>
+                                  )}
+                                  {!recording && recordedChunks.length > 0 && (
+                                    <button className="px-4 py-2 bg-green-600 text-white rounded" onClick={useRecordedVideo}>Use This Video</button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
 

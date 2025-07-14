@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut, DollarSign, LogIn, FileText } from "lucide-react";
+import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut, DollarSign, LogIn, FileText, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PricingSlideshow from "@/components/PricingSlideshow";
 import RawMaterialCalculator from "@/components/RawMaterialCalculator";
@@ -38,9 +38,8 @@ const Index = () => {
 
   const navigation = [
     { id: "dashboard", name: "Dashboard", icon: TrendingUp },
-    { id: "calculator", name: "Calculator", icon: Calculator },
-    { id: "marketplace", name: "Marketplace", icon: Users },
-    { id: "pricing", name: "Pricing", icon: DollarSign },
+    { id: "about", name: "About Us", icon: Calculator },
+    
     ...(userType === 'admin' ? [{ id: "admin", name: "Admin Panel", icon: Settings }] : []),
   ];
 
@@ -228,6 +227,17 @@ const Index = () => {
                   </button>
                 );
               })}
+              {user && (
+                <button
+                  onClick={()=>{
+                    navigate('/my-chats');
+                  }}
+                  className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  My Chats
+                </button>
+              ) }
               {/* Login/Logout Button (Desktop) */}
               {user ? (
                 <button
@@ -239,7 +249,10 @@ const Index = () => {
                 </button>
               ) : (
                 <button
-                  onClick={() => navigate('/login')}
+                  onClick={() => {
+                    localStorage.clear();
+                    navigate('/login');
+                  }}
                   className="flex items-center px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-600/25"
                 >
                   <LogIn className="h-4 w-4 mr-2" />

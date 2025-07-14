@@ -538,6 +538,29 @@ class ApiClient {
     return urlData.publicUrl;
   }
 
+  async uploadListingVideo(file: File): Promise<string> {
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.user.id}/${Date.now()}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+      .from('listing-videos')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) throw new Error(error.message);
+
+    const { data: urlData } = supabase.storage
+      .from('listing-videos')
+      .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
+  }
+
   async createSupplyListing(listingData: {
     title: string;
     description: string;
@@ -556,6 +579,7 @@ class ApiClient {
     expires_at?: string;
     spec_doc_url?: string;
     whatsapp_number?: string;
+    video_url?: string;
   }) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Authentication required');
@@ -572,6 +596,7 @@ class ApiClient {
         whatsapp_number: listingData.whatsapp_number,
         spec_doc_url: listingData.spec_doc_url,
         image_url: listingData.image_url,
+        video_url: listingData.video_url ?? null,
       }])
       .select()
       .single();
@@ -724,6 +749,7 @@ class ApiClient {
     spec_doc_url?: string;
     image_url?: string[];
     whatsapp_number?: string;
+    video_url?: string;
   }) {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Authentication required');
@@ -739,6 +765,7 @@ class ApiClient {
         whatsapp_number: listingData.whatsapp_number,
         spec_doc_url: listingData.spec_doc_url,
         image_url: listingData.image_url,
+        video_url: listingData.video_url ?? null,
       }])
       .select()
       .single();
@@ -1535,13 +1562,13 @@ class ApiClient {
   }
 
   async createUsedMachine(data: any) {
-    const { data: result, error } = await supabase.from('used_machines').insert([data]).select().single();
+    const { data: result, error } = await supabase.from('used_machines').insert([{ ...data, video_url: data.video_url ?? null }]).select().single();
     if (error) throw new Error(error.message);
     return result;
   }
 
   async createDeadStock(data: any) {
-    const { data: result, error } = await supabase.from('dead_stock').insert([data]).select().single();
+    const { data: result, error } = await supabase.from('dead_stock').insert([{ ...data, video_url: data.video_url ?? null }]).select().single();
     if (error) throw new Error(error.message);
     return result;
   }
@@ -1617,7 +1644,8 @@ class ApiClient {
   }
 
   async createSellMachine(machineData: any) {
-    const { data, error } = await supabase.from('sell_machines').insert([machineData]).select().single();
+    // Always include video_url, even if null
+    const { data, error } = await supabase.from('sell_machines').insert([{ ...machineData, video_url: machineData.video_url || null }]).select().single();
     if (error) throw new Error(error.message);
     return data;
   }

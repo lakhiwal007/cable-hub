@@ -209,7 +209,6 @@ const Marketplace = () => {
     await apiClient.createSupplyListing({
       ...formData,
       available_quantity: parseFloat(formData.available_quantity),
-      price_per_unit: parseFloat(formData.price_per_unit),
       minimum_order: parseFloat(formData.minimum_order),
       is_urgent: !!formData.is_urgent,
     });
@@ -220,8 +219,6 @@ const Marketplace = () => {
     await apiClient.createDemandListing({
       ...formData,
       required_quantity: parseFloat(formData.required_quantity),
-      budget_min: parseFloat(formData.budget_min),
-      budget_max: parseFloat(formData.budget_max),
       is_urgent: !!formData.is_urgent,
     });
     fetchListings();

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import apiClient from "@/lib/apiClient";
+import { useRef, useEffect } from "react";
 
 interface DemandFormData {
   title: string;
@@ -18,6 +19,7 @@ interface DemandFormData {
   additional_requirements: string;
   is_urgent: boolean;
   image_url?: string | string[];
+  video_url?: string;
 }
 
 interface MaterialCategory {
@@ -68,6 +70,14 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
   const [addCategoryMode, setAddCategoryMode] = useState(false);
   const [newRM, setNewRM] = useState('');
   const [addRMMode, setAddRMMode] = useState(false);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+  const videoPreviewRef = useRef<HTMLVideoElement>(null);
+  const liveVideoRef = useRef<HTMLVideoElement>(null);
 
   // Fallback categories for testing if none are loaded
   const fallbackCategories = [
@@ -104,6 +114,12 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setImageFiles(Array.from(e.target.files));
+    }
+  };
+
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setVideoFile(e.target.files[0]);
     }
   };
 
@@ -159,6 +175,64 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     }
   };
 
+  const openVideoModal = async () => {
+    setShowVideoModal(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      setMediaStream(stream);
+    } catch (err) {
+      setError('Could not access camera.');
+      setShowVideoModal(false);
+    }
+  };
+
+  const closeVideoModal = () => {
+    setShowVideoModal(false);
+    setRecording(false);
+    setRecordedChunks([]);
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+      setMediaStream(null);
+    }
+    // Detach the stream from the video element
+    if (liveVideoRef.current) {
+      liveVideoRef.current.srcObject = null;
+    }
+  };
+
+  const startRecording = () => {
+    if (!mediaStream) return;
+    const recorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
+    setMediaRecorder(recorder);
+    setRecordedChunks([]);
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) setRecordedChunks((prev) => [...prev, e.data]);
+    };
+    recorder.onstop = () => {
+      setRecording(false);
+    };
+    recorder.start();
+    setRecording(true);
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+    setRecording(false);
+    // Detach the stream from the video element
+    if (liveVideoRef.current) {
+      liveVideoRef.current.srcObject = null;
+    }
+  };
+
+  const useRecordedVideo = () => {
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const file = new File([blob], `recorded-${Date.now()}.webm`, { type: 'video/webm' });
+    setVideoFile(file);
+    closeVideoModal();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -183,7 +257,17 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
           return;
         }
       }
-      await onSubmit({ ...formData, image_url: imageUrls });
+      let videoUrl = '';
+      if (videoFile) {
+        try {
+          videoUrl = await apiClient.uploadListingVideo(videoFile);
+        } catch (uploadErr: any) {
+          setError('Failed to upload video: ' + (uploadErr.message || uploadErr));
+          setLoading(false);
+          return;
+        }
+      }
+      await onSubmit({ ...formData, image_url: imageUrls, video_url: videoUrl });
       setSuccess('Demand posted successfully!');
       setFormData({
         title: '', description: '', category: '', specifications: '', required_quantity: '', unit: 'kg', location: '', delivery_deadline: '', additional_requirements: '', is_urgent: false, image_url: '',
@@ -193,12 +277,19 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
         whatsapp_number: '',
       });
       setImageFiles([]);
+      setVideoFile(null);
     } catch (err: any) {
       setError(err.message || 'Failed to post demand listing.');
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (showVideoModal && liveVideoRef.current && mediaStream) {
+      liveVideoRef.current.srcObject = mediaStream;
+    }
+  }, [showVideoModal, mediaStream, recording]);
 
   return (
     <Card>
@@ -318,6 +409,85 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                 {imageFiles.length > 0 && (
                   <div className="text-xs text-gray-500 mt-1">
                     {imageFiles.map((file, idx) => file.name).join(', ')}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Product Video</label>
+                <div className="flex gap-2">
+                  {/* Hidden input for camera capture (fallback) */}
+                  <input
+                    type="file"
+                    accept="video/*"
+                    capture="environment"
+                    style={{ display: 'none' }}
+                    id="video-capture-demand"
+                    onChange={handleVideoChange}
+                  />
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded bg-blue-600 text-white"
+                    onClick={openVideoModal}
+                  >
+                    Record Video
+                  </button>
+                  {/* Hidden input for upload */}
+                  <input
+                    type="file"
+                    accept="video/*"
+                    style={{ display: 'none' }}
+                    id="video-upload-demand"
+                    onChange={handleVideoChange}
+                  />
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded bg-gray-200 text-gray-800"
+                    onClick={() => document.getElementById('video-upload-demand').click()}
+                  >
+                    Upload Video
+                  </button>
+                </div>
+                {videoFile && (
+                  <video controls className="mt-2 h-32 rounded border object-contain">
+                    <source src={URL.createObjectURL(videoFile)} type={videoFile.type} />
+                    Your browser does not support the video tag.
+                  </video>
+                )}
+                {videoFile && (
+                  <div className="text-xs text-gray-500 mt-1">{videoFile.name}</div>
+                )}
+                {/* Video Recorder Modal */}
+                {showVideoModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+                      <button className="absolute top-2 right-2 text-gray-500" onClick={closeVideoModal}>&times;</button>
+                      <h3 className="text-lg font-semibold mb-2">Record Video</h3>
+                      {!recording && recordedChunks.length === 0 && (
+                        <video ref={liveVideoRef} autoPlay playsInline className="w-full h-48 bg-black rounded mb-2" />
+                      )}
+                      {recording && (
+                        <video ref={liveVideoRef} autoPlay playsInline className="w-full h-48 bg-black rounded mb-2 border-2 border-red-500" />
+                      )}
+                      {!recording && recordedChunks.length > 0 && (
+                        <video
+                          ref={videoPreviewRef}
+                          controls
+                          className="w-full h-48 bg-black rounded mb-2"
+                          src={URL.createObjectURL(new Blob(recordedChunks, { type: 'video/webm' }))}
+                        />
+                      )}
+                      <div className="flex gap-2 justify-center">
+                        {!recording && recordedChunks.length === 0 && (
+                          <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={startRecording}>Start Recording</button>
+                        )}
+                        {recording && (
+                          <button className="px-4 py-2 bg-red-600 text-white rounded" onClick={stopRecording}>Stop Recording</button>
+                        )}
+                        {!recording && recordedChunks.length > 0 && (
+                          <button className="px-4 py-2 bg-green-600 text-white rounded" onClick={useRecordedVideo}>Use This Video</button>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

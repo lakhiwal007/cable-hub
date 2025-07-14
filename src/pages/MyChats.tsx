@@ -58,7 +58,7 @@ const MyChats = () => {
 
   return (
     <>
-      <Header title="My Chats" onBack={() => navigate('/marketplace')} logoSrc='cableCartLogo.png' />
+      <Header title="My Chats" onBack={() => navigate(-1)} logoSrc='cableCartLogo.png' />
       <div className="max-w-3xl mx-auto py-8 px-4">
         {loading ? (
           <Loader className="py-12" />
