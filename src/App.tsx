@@ -22,7 +22,6 @@ import PaidExpertConsulting from "./pages/PaidExpertConsulting";
 import ConsultingListings from "./pages/ConsultingListings";
 import MachinesMarketplace from "./pages/MachinesMarketplace";
 import Team from "./pages/Team";
-import TeamListings from "./pages/TeamListings";
 import SpecsMarketplace from "./pages/SpecsMarketplace";
 import Features from "./pages/Features";
 import ScrollToTop from "@/components/ScrollToTop";
@@ -82,7 +81,6 @@ const App = () => (
           } />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/team" element={<Team />} />
-          <Route path="/team-listings" element={<TeamListings />} />
           <Route path="/listing/:listingType/:listingId" element={<ListingDetails />} />
           <Route path="/admin" element={
             <ProtectedRoute adminOnly={true}>
