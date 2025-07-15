@@ -24,6 +24,7 @@ import MachinesMarketplace from "./pages/MachinesMarketplace";
 import Team from "./pages/Team";
 import TeamListings from "./pages/TeamListings";
 import SpecsMarketplace from "./pages/SpecsMarketplace";
+import Features from "./pages/Features";
 
 const queryClient = new QueryClient();
 
@@ -93,6 +94,7 @@ const App = () => (
           <Route path="/machines-marketplace" element={<ProtectedRoute><MachinesMarketplace /></ProtectedRoute>} />
           
           <Route path="/specs-marketplace" element={<SpecsMarketplace />} />
+          <Route path="/features" element={<Features />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />

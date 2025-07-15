@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Calculator, TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut, DollarSign, LogIn, FileText, MessageCircle } from "lucide-react";
+import {  TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut,  LogIn,  MessageCircle, UserCheck, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PricingSlideshow from "@/components/PricingSlideshow";
 import RawMaterialCalculator from "@/components/RawMaterialCalculator";
@@ -38,14 +38,16 @@ const Index = () => {
 
   const navigation = [
     { id: "dashboard", name: "Dashboard", icon: TrendingUp },
-    { id: "about", name: "About Us", icon: Calculator },
-    
+    { id: "about", name: "Our Mentors", icon: UserCheck},
+    { id: "features", name: "Features", icon: Star},
     ...(userType === 'admin' ? [{ id: "admin", name: "Admin Panel", icon: Settings }] : []),
   ];
 
   const handleNavigation = (tabId: string) => {
     if (tabId === "admin") {
       navigate("/admin");
+    } else if (tabId === "features") {
+      navigate("/features");
     } else if (tabId === "marketplace") {
       navigate("/marketplace");
     } else if (tabId === "specs") {

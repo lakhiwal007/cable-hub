@@ -78,6 +78,7 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
   const liveVideoRef = useRef<HTMLVideoElement>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
 
   // Fallback categories for testing if none are loaded
   const fallbackCategories = [
@@ -178,11 +179,43 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
   const openVideoModal = async () => {
     setShowVideoModal(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // Try with preferred facingMode first
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: { ideal: facingMode } } 
+      });
       setMediaStream(stream);
     } catch (err) {
-      setError('Could not access camera.');
-      setShowVideoModal(false);
+      // Fallback to any available camera
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        setMediaStream(stream);
+      } catch (fallbackErr) {
+        setError('Could not access camera. Please check camera permissions.');
+        setShowVideoModal(false);
+      }
+    }
+  };
+
+  const switchCamera = async () => {
+    const newMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(newMode);
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+    }
+    try {
+      // Try with new facingMode
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: { ideal: newMode } } 
+      });
+      setMediaStream(stream);
+    } catch (err) {
+      // Fallback to any available camera
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        setMediaStream(stream);
+      } catch (fallbackErr) {
+        setError('Could not switch camera. Using current camera.');
+      }
     }
   };
 
@@ -462,6 +495,9 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                     <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
                       <button className="absolute top-2 right-2 text-gray-500" onClick={closeVideoModal}>&times;</button>
                       <h3 className="text-lg font-semibold mb-2">Record Video</h3>
+                      <button className="mb-2 px-3 py-1 rounded bg-gray-300 text-gray-800" onClick={switchCamera} type="button">
+                        Switch Camera
+                      </button>
                       {!recording && recordedChunks.length === 0 && (
                         <video ref={liveVideoRef} autoPlay playsInline className="w-full h-48 bg-black rounded mb-2" />
                       )}

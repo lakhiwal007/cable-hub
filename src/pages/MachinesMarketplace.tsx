@@ -77,15 +77,25 @@ const MachinesMarketplace: React.FC = () => {
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const videoPreviewRef = useRef<HTMLVideoElement>(null);
   const liveVideoRef = useRef<HTMLVideoElement>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
 
   const openVideoModal = async () => {
     setShowVideoModal(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // Try with preferred facingMode first
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: { ideal: facingMode } } 
+      });
       setMediaStream(stream);
     } catch (err) {
-      toast({ title: 'Error', description: 'Could not access camera.' });
-      setShowVideoModal(false);
+      // Fallback to any available camera
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        setMediaStream(stream);
+      } catch (fallbackErr) {
+        toast({ title: 'Error', description: 'Could not access camera. Please check camera permissions.' });
+        setShowVideoModal(false);
+      }
     }
   };
   const closeVideoModal = () => {
@@ -337,6 +347,29 @@ const MachinesMarketplace: React.FC = () => {
         setSellForm(prev => ({ ...prev, materialSpecFile: files[0] }));
       } else if (field === 'productionImages') {
         setSellForm(prev => ({ ...prev, productionImages: Array.from(files) }));
+      }
+    }
+  };
+
+  const switchCamera = async () => {
+    const newMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(newMode);
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop());
+    }
+    try {
+      // Try with new facingMode
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: { ideal: newMode } } 
+      });
+      setMediaStream(stream);
+    } catch (err) {
+      // Fallback to any available camera
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        setMediaStream(stream);
+      } catch (fallbackErr) {
+        toast({ title: 'Error', description: 'Could not switch camera. Using current camera.' });
       }
     }
   };
@@ -829,6 +862,9 @@ const MachinesMarketplace: React.FC = () => {
                               <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
                                 <button className="absolute top-2 right-2 text-gray-500" onClick={closeVideoModal}>&times;</button>
                                 <h3 className="text-lg font-semibold mb-2">Record Video</h3>
+                                <button className="mb-2 px-3 py-1 rounded bg-gray-300 text-gray-800" onClick={switchCamera} type="button">
+                                  Switch Camera
+                                </button>
                                 {!recording && recordedChunks.length === 0 && (
                                   <video ref={liveVideoRef} autoPlay playsInline className="w-full h-48 bg-black rounded mb-2" />
                                 )}
