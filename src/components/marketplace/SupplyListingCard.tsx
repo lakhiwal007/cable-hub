@@ -205,11 +205,13 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
                     phoneNumber={listing.whatsapp_number}
                     listingTitle={listing.title}
                     listingType="supply"
+                    listingId={listing.id}
+                    supplierId={listing.supplier_id}
                     variant="default"
                     size="default"
-                    className="w-full sm:flex-1 bg-green-600 hover:bg-green-700 transition-colors h-10 sm:h-9 text-sm"
+                    className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
                   >
-                    WhatsApp
+                    Contact
                   </WhatsAppContact>
                 )}
               </div>

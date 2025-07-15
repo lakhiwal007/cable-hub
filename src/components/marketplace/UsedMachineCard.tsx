@@ -90,11 +90,13 @@ const UsedMachineCard: React.FC<UsedMachineCardProps> = ({ item, onMediaClick })
               phoneNumber={item.whatsapp_number}
               listingTitle={item.machine_name}
               listingType="supply"
+              listingId={item.id}
+              supplierId={item.supplier_id}
               variant="default"
               size="default"
-              className="w-full bg-green-600 hover:bg-green-700 transition-colors h-10 sm:h-9 text-sm"
+              className="w-full bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
             >
-              WhatsApp
+              Contact
             </WhatsAppContact>
           ) : (
             <Button

@@ -103,9 +103,9 @@ function ConsultantCard({ consultant }: { consultant: any }) {
             consultantName={consultant.name}
             variant="default"
             size="default"
-            className="w-full bg-green-600 hover:bg-green-700 h-10 sm:h-9 text-sm"
+            className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-9 text-sm"
           >
-            WhatsApp
+            Contact
           </WhatsAppContact>
         </div>
 
@@ -204,9 +204,9 @@ function ConsultingRequestCard({ request }: { request: any }) {
             consultantName="Requester"
             variant="default"
             size="default"
-            className="w-full bg-green-600 hover:bg-green-700 h-10 sm:h-9 text-sm"
+            className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-9 text-sm"
           >
-            WhatsApp
+            Contact
           </WhatsAppContact>
         </div>
 

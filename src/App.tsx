@@ -25,6 +25,7 @@ import Team from "./pages/Team";
 import TeamListings from "./pages/TeamListings";
 import SpecsMarketplace from "./pages/SpecsMarketplace";
 import Features from "./pages/Features";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <BackButtonHandler />
         <Routes>
           <Route path="/" element={

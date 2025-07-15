@@ -61,7 +61,7 @@ const Index = () => {
     } else if (tabId === "machines") {
       navigate("/machines-marketplace");
     } else if (tabId === "team") {
-      navigate("/team-listings");
+      navigate("/team");
     } else {
       setActiveTab(tabId);
     }

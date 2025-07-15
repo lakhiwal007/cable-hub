@@ -4,15 +4,20 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from './input';
 import { Label } from './label';
 import { Textarea } from './textarea';
-import { MessageCircle, Phone, Loader2 } from 'lucide-react';
+import { MessageCircle, Loader2 } from 'lucide-react';
 import TwilioService from '../../lib/twilio';
 import { useToast } from '../../hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import apiClient from '../../lib/apiClient';
 
-interface WhatsAppContactProps {
+interface ContactDialogProps {
   phoneNumber: string;
   contactName?: string;
   listingTitle?: string;
   listingType?: 'supply' | 'demand';
+  listingId?: string;
+  supplierId?: string;
+  buyerId?: string;
   documentTitle?: string;
   documentType?: 'spec' | 'gtp' | 'format';
   consultantName?: string;
@@ -22,11 +27,14 @@ interface WhatsAppContactProps {
   children?: React.ReactNode;
 }
 
-export const WhatsAppContact: React.FC<WhatsAppContactProps> = ({
+export const WhatsAppContact: React.FC<ContactDialogProps> = ({
   phoneNumber,
   contactName = '',
   listingTitle,
   listingType,
+  listingId,
+  supplierId,
+  buyerId,
   documentTitle,
   documentType,
   consultantName,
@@ -42,97 +50,77 @@ export const WhatsAppContact: React.FC<WhatsAppContactProps> = ({
     message: ''
   });
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleOpenDialog = () => {
-    // Check if Twilio is configured
-    const accountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
-    const authToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
-    const fromNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
-    
-    if (!accountSid || !authToken || !fromNumber) {
-      // Fallback: Open WhatsApp directly
-      const formattedNumber = phoneNumber.replace(/[^\d+]/g, '');
-      const whatsappUrl = `https://wa.me/${formattedNumber}`;
-      window.open(whatsappUrl, '_blank');
-      return;
-    }
-    
-    if (!contactName) {
-      setIsOpen(true);
-    } else {
-      handleSendMessage();
-    }
+    setIsOpen(true);
   };
 
-  const handleSendMessage = async (customMessage?: string) => {
+  const handleSendMessage = async () => {
     setIsLoading(true);
     try {
-      let messageBody = '';
-
-      if (listingTitle && listingType) {
-        messageBody = TwilioService.generateMarketplaceMessage(
-          listingTitle,
-          listingType,
-          formData.name || contactName,
-          '', // No email
-          customMessage || formData.message
-        );
-      } else if (documentTitle && documentType) {
-        messageBody = TwilioService.generateSpecsMessage(
-          documentTitle,
-          documentType,
-          formData.name || contactName,
-          '', // No email
-          customMessage || formData.message
-        );
-      } else if (consultantName) {
-        messageBody = TwilioService.generateConsultingMessage(
-          consultantName,
-          formData.name || contactName,
-          '', // No email
-          customMessage || formData.message
-        );
+      let messageBody = formData.message || '';
+      let chatResult = null;
+      // Send WhatsApp message (Twilio or fallback)
+      const accountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID;
+      const authToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
+      const fromNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
+      if (accountSid && authToken && fromNumber) {
+        await TwilioService.sendWhatsAppMessage({
+          to: phoneNumber,
+          body: messageBody
+        });
       } else {
-        messageBody = `Hi! I'm interested in your services.
-
-My details:
-- Name: ${formData.name || contactName}
-
-${customMessage || formData.message || 'Please provide more information about your services.'}
-
-Best regards,
-${formData.name || contactName}`;
+        // Fallback: Open WhatsApp web with prefilled message
+        const formattedNumber = phoneNumber.replace(/[^ 9+]/g, '');
+        const whatsappUrl = `https://wa.me/${formattedNumber}?text=${encodeURIComponent(messageBody)}`;
+        window.open(whatsappUrl, '_blank');
       }
-
-      await TwilioService.sendWhatsAppMessage({
-        to: phoneNumber,
-        body: messageBody
-      });
-
+      // Create or open chat room
+      if (listingType === 'supply' && listingId && supplierId) {
+        const currentUser = await apiClient.getProfile();
+        chatResult = await apiClient.contactSupplierWithChat({
+          listing_id: listingId,
+          listing_type: 'supply',
+          supplier_id: supplierId,
+          requester_name: currentUser.user_metadata?.name || '',
+          requester_email: currentUser.email || '',
+          requester_phone: '',
+          message: messageBody
+        });
+      } else if (listingType === 'demand' && listingId && buyerId) {
+        const currentUser = await apiClient.getProfile();
+        chatResult = await apiClient.contactConsumerWithChat({
+          listing_id: listingId,
+          listing_type: 'demand',
+          buyer_id: buyerId,
+          supplier_name: currentUser.user_metadata?.name || '',
+          supplier_email: currentUser.email || '',
+          supplier_phone: '',
+          message: messageBody
+        });
+      }
       toast({
-        title: "Message sent!",
-        description: "Your WhatsApp message has been sent successfully.",
+        title: 'Message sent!',
+        description: 'Your message has been sent successfully.',
       });
-
       setIsOpen(false);
       setFormData({ name: contactName, message: '' });
-    } catch (error: any) {
-      console.error('Error sending WhatsApp message:', error);
-      
-      // Check if it's a configuration error
-      if (error.message?.includes('credentials not configured')) {
-        toast({
-          title: "Configuration Required",
-          description: "WhatsApp messaging is not configured. Please contact the administrator.",
-          variant: "destructive",
+      // Always send the message to the chat room, even if it already existed
+      if (chatResult && chatResult.chat_room) {
+        await apiClient.sendMessage({
+          chat_room_id: chatResult.chat_room.id,
+          message_text: messageBody,
+          message_type: 'text',
         });
-      } else {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to send WhatsApp message. Please try again.",
-          variant: "destructive",
-        });
+        navigate(`/chat/${chatResult.chat_room.id}`);
       }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to send message. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -157,15 +145,15 @@ ${formData.name || contactName}`;
         ) : (
           <MessageCircle className="h-4 w-4 mr-2" />
         )}
-        {children || 'Contact via WhatsApp'}
+        {children || 'Contact'}
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Contact via WhatsApp</DialogTitle>
+            <DialogTitle>Contact</DialogTitle>
             <DialogDescription>
-              Send a WhatsApp message to {phoneNumber}
+              Send a message to the contact {phoneNumber}
             </DialogDescription>
           </DialogHeader>
 
@@ -184,13 +172,14 @@ ${formData.name || contactName}`;
             )}
 
             <div>
-              <Label htmlFor="message">Message (Optional)</Label>
+              <Label htmlFor="message">Message</Label>
               <Textarea
                 id="message"
                 value={formData.message}
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                placeholder="Add a custom message..."
+                placeholder="Type your message..."
                 rows={4}
+                required
               />
             </div>
 
@@ -205,8 +194,8 @@ ${formData.name || contactName}`;
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading || (!formData.name && !contactName)}
-                className="flex-1 bg-green-600 hover:bg-green-700"
+                disabled={isLoading || (!formData.name && !contactName) || !formData.message}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
               >
                 {isLoading ? (
                   <>
@@ -215,8 +204,7 @@ ${formData.name || contactName}`;
                   </>
                 ) : (
                   <>
-                    <Phone className="h-4 w-4 mr-2" />
-                    Send WhatsApp
+                    Send
                   </>
                 )}
               </Button>
@@ -226,4 +214,6 @@ ${formData.name || contactName}`;
       </Dialog>
     </>
   );
-}; 
+};
+
+export default WhatsAppContact; 

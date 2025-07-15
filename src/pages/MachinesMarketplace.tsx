@@ -548,11 +548,13 @@ const MachinesMarketplace: React.FC = () => {
                                         phoneNumber={machine.whatsapp_number}
                                         listingTitle={machine.machine_name}
                                         listingType="supply"
+                                        listingId={machine.id}
+                                        supplierId={machine.supplier_id}
                                         variant="default"
                                         size="default"
-                                        className="w-full bg-green-600 hover:bg-green-700 transition-colors h-10 sm:h-9 text-sm"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
                                       >
-                                        WhatsApp
+                                        Contact
                                       </WhatsAppContact>
                                     ) : (
                                       <Button
@@ -682,11 +684,13 @@ const MachinesMarketplace: React.FC = () => {
                                         phoneNumber={machine.whatsapp_number}
                                         listingTitle={machine.machine_name}
                                         listingType="demand"
+                                        listingId={machine.id}
+                                        buyerId={machine.buyer_id}
                                         variant="default"
                                         size="default"
-                                        className="w-full bg-green-600 hover:bg-green-700 transition-colors h-10 sm:h-9 text-sm"
+                                        className="w-full bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
                                       >
-                                        WhatsApp
+                                        Contact
                                       </WhatsAppContact>
                                     ) : (
                                       <Button
