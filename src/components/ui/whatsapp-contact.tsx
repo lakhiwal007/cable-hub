@@ -53,7 +53,7 @@ export const WhatsAppContact: React.FC<ContactDialogProps> = ({
   const navigate = useNavigate();
 
   const handleOpenDialog = () => {
-    setIsOpen(true);
+      setIsOpen(true);
   };
 
   const handleSendMessage = async () => {
@@ -66,10 +66,10 @@ export const WhatsAppContact: React.FC<ContactDialogProps> = ({
       const authToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN;
       const fromNumber = import.meta.env.VITE_TWILIO_WHATSAPP_NUMBER;
       if (accountSid && authToken && fromNumber) {
-        await TwilioService.sendWhatsAppMessage({
-          to: phoneNumber,
-          body: messageBody
-        });
+      await TwilioService.sendWhatsAppMessage({
+        to: phoneNumber,
+        body: messageBody
+      });
       } else {
         // Fallback: Open WhatsApp web with prefilled message
         const formattedNumber = phoneNumber.replace(/[^ 9+]/g, '');
@@ -116,11 +116,11 @@ export const WhatsAppContact: React.FC<ContactDialogProps> = ({
         navigate(`/chat/${chatResult.chat_room.id}`);
       }
     } catch (error: any) {
-      toast({
+        toast({
         title: 'Error',
         description: error.message || 'Failed to send message. Please try again.',
         variant: 'destructive',
-      });
+        });
     } finally {
       setIsLoading(false);
     }
@@ -214,6 +214,6 @@ export const WhatsAppContact: React.FC<ContactDialogProps> = ({
       </Dialog>
     </>
   );
-};
+}; 
 
 export default WhatsAppContact; 

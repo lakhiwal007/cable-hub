@@ -76,55 +76,9 @@ const SpecsMarketplace = () => {
   const fetchDocuments = async () => {
     setLoading(true);
     try {
-      // Mock data - replace with actual API call
-      const mockDocuments: DocumentItem[] = [
-        {
-          id: '1',
-          title: 'Copper Wire Specifications',
-          category: 'spec',
-          description: 'Complete specifications for copper wire manufacturing including dimensions, conductivity, and quality standards.',
-          file_url: '#',
-          file_name: 'copper_wire_specs.pdf',
-          file_size: '2.5 MB',
-          price: 500,
-          uploaded_by: 'TechCorp Industries',
-          uploaded_at: '2024-01-15',
-          downloads: 45,
-          tags: ['copper', 'wire', 'manufacturing'],
-          is_paid: true
-        },
-        {
-          id: '2',
-          title: 'PVC Insulation GTP',
-          category: 'gtp',
-          description: 'Good Technical Practice guidelines for PVC insulation in cable manufacturing.',
-          file_url: '#',
-          file_name: 'pvc_insulation_gtp.pdf',
-          file_size: '1.8 MB',
-          price: 300,
-          uploaded_by: 'CableTech Solutions',
-          uploaded_at: '2024-01-10',
-          downloads: 32,
-          tags: ['pvc', 'insulation', 'cable'],
-          is_paid: true
-        },
-        {
-          id: '3',
-          title: 'Quality Control Format',
-          category: 'format',
-          description: 'Standardized format for quality control documentation in cable manufacturing.',
-          file_url: '#',
-          file_name: 'qc_format.xlsx',
-          file_size: '0.8 MB',
-          price: 200,
-          uploaded_by: 'QualityAssure Ltd',
-          uploaded_at: '2024-01-08',
-          downloads: 28,
-          tags: ['quality', 'control', 'documentation'],
-          is_paid: false
-        }
-      ];
-      setDocuments(mockDocuments);
+      // Fetch real documents from Supabase
+      const docs = await apiClient.getDocuments();
+      setDocuments(docs || []);
     } catch (error) {
       console.error('Failed to fetch documents:', error);
     } finally {
@@ -134,30 +88,50 @@ const SpecsMarketplace = () => {
 
   const fetchUserInfos = async () => {
     try {
-      // Mock data - replace with actual API call
-      const mockUserInfos: UserInfo[] = [
-        {
-          id: '1',
-          name: 'Rajesh Kumar',
-          company: 'MetalCorp Industries',
-          contact: '+91 9205138358',
-          email: 'rajesh@metalcorp.com',
-          type: 'supplier',
-          description: 'Leading supplier of copper and aluminum raw materials for cable manufacturing.',
-          created_at: '2024-01-01'
-        },
-        {
-          id: '2',
-          name: 'Priya Sharma',
-          company: 'CableTech Solutions',
-          contact: '+91 90796 61628',
-          email: 'priya@cabletech.com',
-          type: 'buyer',
-          description: 'Manufacturing company looking for high-quality raw materials and technical specifications.',
-          created_at: '2024-01-05'
+      // Fetch suppliers from supply listings
+      const supplyListings = await apiClient.getSupplyListings();
+      // Fetch buyers from demand listings
+      const demandListings = await apiClient.getDemandListings();
+
+      // Extract unique suppliers
+      const suppliersMap = new Map();
+      (supplyListings || []).forEach((listing: any) => {
+        if (listing.supplier) {
+          suppliersMap.set(listing.supplier.id, {
+            id: listing.supplier.id,
+            name: listing.supplier.name,
+            company: listing.supplier.company_name || '',
+            contact: listing.whatsapp_number || '',
+            email: listing.supplier.email,
+            type: 'supplier',
+            description: listing.supplier.description || '',
+            created_at: listing.supplier.created_at || '',
+          });
         }
-      ];
-      setUserInfos(mockUserInfos);
+      });
+
+      // Extract unique buyers
+      const buyersMap = new Map();
+      (demandListings || []).forEach((listing: any) => {
+        if (listing.buyer) {
+          buyersMap.set(listing.buyer.id, {
+            id: listing.buyer.id,
+            name: listing.buyer.name,
+            company: listing.buyer.company_name || '',
+            contact: listing.whatsapp_number || '',
+            email: listing.buyer.email,
+            type: 'buyer',
+            description: listing.buyer.description || '',
+            created_at: listing.buyer.created_at || '',
+          });
+        }
+      });
+
+      // Combine and set
+      setUserInfos([
+        ...Array.from(suppliersMap.values()),
+        ...Array.from(buyersMap.values()),
+      ]);
     } catch (error) {
       console.error('Failed to fetch user infos:', error);
     }
@@ -180,10 +154,31 @@ const SpecsMarketplace = () => {
 
     try {
       setLoading(true);
-      // Mock upload - replace with actual API call
-      console.log('Uploading document:', uploadForm);
-      
-      // Reset form
+
+      // 1. Upload the file to Supabase Storage
+      const fileUrl = await apiClient.uploadFileToStorage(uploadForm.file, 'documents');
+      const fileSize = `${(uploadForm.file.size / (1024 * 1024)).toFixed(1)} MB`;
+
+      // 2. Prepare tags array
+      const tags = uploadForm.tags
+        ? uploadForm.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean)
+        : [];
+
+      // 3. Call the API to create the document record
+      await apiClient.uploadDocument({
+        title: uploadForm.title,
+        category: uploadForm.category as 'spec' | 'gtp' | 'format',
+        description: uploadForm.description,
+        file_url: fileUrl,
+        file_name: uploadForm.file.name,
+        file_size: fileSize,
+        price: Number(uploadForm.price) || 0,
+        uploaded_by: isAuthenticated ? (await apiClient.getProfile())?.user_metadata?.name || 'Unknown' : 'Unknown',
+        tags,
+        is_paid: Number(uploadForm.price) > 0
+      });
+
+      // Reset form and close dialog
       setUploadForm({
         title: '',
         category: '',
@@ -193,7 +188,7 @@ const SpecsMarketplace = () => {
         file: null
       });
       setUploadDialogOpen(false);
-      
+
       // Refresh documents
       await fetchDocuments();
     } catch (error) {
@@ -204,23 +199,29 @@ const SpecsMarketplace = () => {
     }
   };
 
-  const handleDownload = async (document: DocumentItem) => {
+  const handleDownload = async (doc: DocumentItem) => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
 
-    if (document.is_paid) {
+    if (doc.is_paid) {
       // Handle payment flow
       alert('Payment required for this document. Redirecting to payment...');
       return;
     }
 
-    // Handle free download
     try {
-      // Mock download - replace with actual API call
-      console.log('Downloading document:', document.title);
-      alert('Download started!');
+      // Increment download count in the database
+      await apiClient.incrementDocumentDownload(doc.id);
+      // Trigger file download
+      const link = document.createElement('a');
+      link.href = doc.file_url;
+      link.download = doc.file_name;
+      document.body.appendChild(link);
+      link.target = '_blank';
+      link.click();
+      document.body.removeChild(link);
     } catch (error) {
       console.error('Failed to download document:', error);
       alert('Failed to download document. Please try again.');
@@ -347,12 +348,6 @@ const SpecsMarketplace = () => {
                               {getCategoryIcon(doc.category)}
                               <span className="ml-1 capitalize">{doc.category}</span>
                             </Badge>
-                            {doc.is_paid && (
-                              <Badge className="bg-yellow-100 text-yellow-800 text-xs">
-                                <DollarSign className="h-3 w-3 mr-1" />
-                                Paid
-                              </Badge>
-                            )}
                           </div>
                         </div>
                       </div>
@@ -373,8 +368,8 @@ const SpecsMarketplace = () => {
                           <span>{doc.downloads} downloads</span>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-gray-500 gap-1 sm:gap-0">
-                          <span>Price: {formatPrice(doc.price)}</span>
-                          <span>{new Date(doc.uploaded_at).toLocaleDateString()}</span>
+                          
+                          <span>Uploaded on: {new Date(doc.uploaded_at).toLocaleDateString()}</span>
                         </div>
                       </div>
 
@@ -385,7 +380,7 @@ const SpecsMarketplace = () => {
                           className="flex-1 w-full h-10 sm:h-9 text-xs sm:text-sm"
                         >
                           <Download className="h-4 w-4 mr-2" />
-                          {doc.is_paid ? 'Buy' : 'Download'}
+                          Download
                         </Button>
                       </div>
                     </CardContent>
@@ -489,7 +484,7 @@ const SpecsMarketplace = () => {
                           size="default"
                           className="flex-1 w-full h-10 sm:h-9 text-xs sm:text-sm"
                         >
-                          <Users className="h-4 w-4 mr-2" />
+                          
                           Contact
                         </WhatsAppContact>
                       </div>
@@ -547,19 +542,6 @@ const SpecsMarketplace = () => {
                 onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Describe your document"
                 rows={3}
-                className="w-full"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="price">Price (₹)</Label>
-              <Input
-                id="price"
-                type="number"
-                value={uploadForm.price}
-                onChange={(e) => setUploadForm(prev => ({ ...prev, price: e.target.value }))}
-                placeholder="0 for free, or enter price"
-                min="0"
                 className="w-full"
               />
             </div>

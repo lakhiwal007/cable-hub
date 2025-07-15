@@ -57,6 +57,12 @@ const DeadStockCard: React.FC<DeadStockCardProps> = ({ item, onMediaClick }) => 
         <h2 className="text-sm sm:text-md lg:text-lg font-semibold mb-2 line-clamp-2 group-hover:text-amber-600 transition-colors cursor-pointer" onClick={() => onMediaClick(mainImage, 'image')}>
           {item.stock_name}
         </h2>
+        {/* Budget Range */}
+        {(item.budget_min || item.budget_max) && (
+          <div className="text-base font-bold text-blue-700 mb-1">
+            Budget: ₹{item.budget_min || 0} - ₹{item.budget_max || 0}
+          </div>
+        )}
         {/* Location */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 text-xs sm:text-sm text-gray-600 gap-1 sm:gap-0">
           <div className="flex items-center gap-1">

@@ -1555,9 +1555,9 @@ class ApiClient {
   async uploadFileToStorage(file: File, folder: string): Promise<string> {
     const fileExt = file.name.split('.').pop();
     const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-    const { data, error } = await supabase.storage.from('marketplace-files').upload(fileName, file, { upsert: false });
+    const { data, error } = await supabase.storage.from('marketplace-all').upload(fileName, file, { upsert: false });
     if (error) throw new Error(error.message);
-    const { publicUrl } = supabase.storage.from('marketplace-files').getPublicUrl(fileName).data;
+    const { publicUrl } = supabase.storage.from('marketplace-all').getPublicUrl(fileName).data;
     return publicUrl;
   }
 
@@ -1652,6 +1652,89 @@ class ApiClient {
 
   async createBuyMachine(machineData: any) {
     const { data, error } = await supabase.from('buy_machines').insert([machineData]).select().single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  // === DOCUMENTS (Specs Marketplace) ===
+  async getDocuments() {
+    const { data, error } = await supabase
+      .from('documents')
+      .select('*')
+      .order('uploaded_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async uploadDocument(documentData: {
+    title: string;
+    category: 'spec' | 'gtp' | 'format';
+    description: string;
+    file_url: string;
+    file_name: string;
+    file_size: string;
+    price: number;
+    uploaded_by: string;
+    tags: string[];
+    is_paid: boolean;
+  }) {
+    const { data, error } = await supabase
+      .from('documents')
+      .insert([{ ...documentData, uploaded_at: new Date().toISOString(), downloads: 0 }])
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async incrementDocumentDownload(id: string) {
+    // Increment the downloads count for a document (Supabase JS workaround)
+    // 1. Get current downloads
+    const { data: current, error: getError } = await supabase
+      .from('documents')
+      .select('downloads')
+      .eq('id', id)
+      .single();
+    if (getError) throw new Error(getError.message);
+    const newDownloads = (current?.downloads || 0) + 1;
+    // 2. Update downloads
+    const { data, error } = await supabase
+      .from('documents')
+      .update({ downloads: newDownloads })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  // === TEAM APPLICATIONS ===
+  async getTeamApplications() {
+    const { data, error } = await supabase
+      .from('team_applications')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async submitTeamApplication(application) {
+    const { data, error } = await supabase
+      .from('team_applications')
+      .insert([{ ...application, status: 'pending', created_at: new Date().toISOString() }])
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async updateTeamApplicationStatus(id, status) {
+    const { data, error } = await supabase
+      .from('team_applications')
+      .update({ status })
+      .eq('id', id)
+      .select()
+      .single();
     if (error) throw new Error(error.message);
     return data;
   }

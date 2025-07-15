@@ -314,16 +314,16 @@ const MachinesMarketplace: React.FC = () => {
   // Filter listings based on search and category
   const filteredSellMachines = sellMachines.filter((machine) => {
     const matchesSearch = machine.machine_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      machine.manufacturing_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      machine.machine_type_id?.toLowerCase().includes(searchTerm.toLowerCase());
+                         machine.manufacturing_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         machine.machine_type_id?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === "all" || machine.machine_type_id === filterCategory;
     return matchesSearch && matchesCategory;
   });
 
   const filteredBuyMachines = buyMachines.filter((machine) => {
     const matchesSearch = machine.machine_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      machine.manufacturing_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      machine.machine_type_id?.toLowerCase().includes(searchTerm.toLowerCase());
+                         machine.manufacturing_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         machine.machine_type_id?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === "all" || machine.machine_type_id === filterCategory;
     return matchesSearch && matchesCategory;
   });
@@ -493,7 +493,7 @@ const MachinesMarketplace: React.FC = () => {
                                       <Package className="h-16 w-16 text-gray-400" />
                                     </div>
                                   )}
-
+                                  
                                   {/* Badges Overlay */}
                                   <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center justify-between gap-1 sm:gap-2">
                                     {machine.is_urgent && (
@@ -508,8 +508,8 @@ const MachinesMarketplace: React.FC = () => {
                                   <div className="absolute top-2 sm:top-3 right-2 sm:right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     <Button size="sm" variant="secondary" className="rounded-full shadow-lg h-8 w-8 sm:h-9 sm:w-9">
                                       <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
-                                    </Button>
-                                  </div>
+          </Button>
+        </div>
                                 </div>
 
                                 {/* Product Info Section */}
@@ -629,7 +629,7 @@ const MachinesMarketplace: React.FC = () => {
                                       <Package className="h-16 w-16 text-gray-400" />
                                     </div>
                                   )}
-
+                                  
                                   {/* Badges Overlay */}
                                   <div className="absolute top-2 sm:top-3 left-2 sm:left-3 flex items-center justify-between gap-1 sm:gap-2">
                                     {machine.is_urgent && (
@@ -719,119 +719,119 @@ const MachinesMarketplace: React.FC = () => {
 
               <TabsContent value="sell" className="space-y-4 sm:space-y-6">
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Package className="h-5 w-5 text-green-600" />
-                      Sell Your Machine
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleSellSubmit} className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5 text-green-600" />
+                    Sell Your Machine
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSellSubmit} className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Machine Name</label>
+                      <Input
+                        value={sellForm.machineName}
+                        onChange={e => setSellForm(prev => ({ ...prev, machineName: e.target.value }))}
+                        placeholder="Enter machine name"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Machine Type</label>
+                      <Select value={sellForm.machineTypeId} onValueChange={value => setSellForm(prev => ({ ...prev, machineTypeId: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose machine type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {machineTypes.map(type => (
+                            <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2">Machine Name</label>
+                        <label className="block text-sm font-medium mb-2">Payoff Nos</label>
                         <Input
-                          value={sellForm.machineName}
-                          onChange={e => setSellForm(prev => ({ ...prev, machineName: e.target.value }))}
-                          placeholder="Enter machine name"
-                          required
+                          type="number"
+                          value={sellForm.payoffNos}
+                          onChange={e => setSellForm(prev => ({ ...prev, payoffNos: e.target.value }))}
+                          placeholder="Number of payoffs"
                         />
                       </div>
-
                       <div>
-                        <label className="block text-sm font-medium mb-2">Machine Type</label>
-                        <Select value={sellForm.machineTypeId} onValueChange={value => setSellForm(prev => ({ ...prev, machineTypeId: value }))}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Choose machine type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {machineTypes.map(type => (
-                              <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Payoff Nos</label>
-                          <Input
-                            type="number"
-                            value={sellForm.payoffNos}
-                            onChange={e => setSellForm(prev => ({ ...prev, payoffNos: e.target.value }))}
-                            placeholder="Number of payoffs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Payoff Size</label>
-                          <Input
-                            value={sellForm.payoffSize}
-                            onChange={e => setSellForm(prev => ({ ...prev, payoffSize: e.target.value }))}
-                            placeholder="Size specification"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Main Motor Capacity</label>
-                          <Input
-                            value={sellForm.mainMotorCapacity}
-                            onChange={e => setSellForm(prev => ({ ...prev, mainMotorCapacity: e.target.value }))}
-                            placeholder="HP/KW"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Line Speed (Max Size)</label>
-                          <Input
-                            value={sellForm.lineSpeedMaxSize}
-                            onChange={e => setSellForm(prev => ({ ...prev, lineSpeedMaxSize: e.target.value }))}
-                            placeholder="Meters per minute"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Expected Daily Production</label>
+                        <label className="block text-sm font-medium mb-2">Payoff Size</label>
                         <Input
-                          value={sellForm.expectedDailyProduction}
-                          onChange={e => setSellForm(prev => ({ ...prev, expectedDailyProduction: e.target.value }))}
-                          placeholder="Production capacity"
+                          value={sellForm.payoffSize}
+                          onChange={e => setSellForm(prev => ({ ...prev, payoffSize: e.target.value }))}
+                          placeholder="Size specification"
                         />
                       </div>
+                    </div>
 
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium mb-2">Manufacturing Location</label>
+                        <label className="block text-sm font-medium mb-2">Main Motor Capacity</label>
                         <Input
-                          value={sellForm.manufacturingLocation}
-                          onChange={e => setSellForm(prev => ({ ...prev, manufacturingLocation: e.target.value }))}
-                          placeholder="City, State"
-                          required
+                          value={sellForm.mainMotorCapacity}
+                          onChange={e => setSellForm(prev => ({ ...prev, mainMotorCapacity: e.target.value }))}
+                          placeholder="HP/KW"
                         />
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Line Speed (Max Size)</label>
+                        <Input
+                          value={sellForm.lineSpeedMaxSize}
+                          onChange={e => setSellForm(prev => ({ ...prev, lineSpeedMaxSize: e.target.value }))}
+                          placeholder="Meters per minute"
+                        />
+                      </div>
+                    </div>
 
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Expected Daily Production</label>
+                      <Input
+                        value={sellForm.expectedDailyProduction}
+                        onChange={e => setSellForm(prev => ({ ...prev, expectedDailyProduction: e.target.value }))}
+                        placeholder="Production capacity"
+                      />
+                    </div>
 
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Manufacturing Location</label>
+                      <Input
+                        value={sellForm.manufacturingLocation}
+                        onChange={e => setSellForm(prev => ({ ...prev, manufacturingLocation: e.target.value }))}
+                        placeholder="City, State"
+                        required
+                      />
+                    </div>
+
+                      
 
                       <div>
                         <label className="block text-sm font-medium mb-2">WhatsApp Number</label>
-                        <Input
-                          value={sellForm.whatsappNumber}
-                          onChange={e => setSellForm(prev => ({ ...prev, whatsappNumber: e.target.value }))}
-                          placeholder="+91 98765 43210"
-                          required
-                        />
-                      </div>
+                      <Input
+                        value={sellForm.whatsappNumber}
+                        onChange={e => setSellForm(prev => ({ ...prev, whatsappNumber: e.target.value }))}
+                        placeholder="+91 98765 43210"
+                        required
+                      />
+                    </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Machine Video</label>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Machine Video</label>
                         <div className="flex flex-col gap-1 items-start">
                           <div className="flex items-start gap-2">
-                            <input
-                              type="file"
-                              accept="video/*"
+                        <input
+                          type="file"
+                          accept="video/*"
                               style={{ display: 'none' }}
-                              id="video-upload"
+                          id="video-upload"
                               onChange={e => handleFileChange('videoFile', e.target.files)}
-                            />
+                        />
                             <button
                               type="button"
                               className="px-3 py-2 rounded bg-gray-200 text-gray-800 flex items-center gap-1"
@@ -897,121 +897,121 @@ const MachinesMarketplace: React.FC = () => {
                               </div>
                             </div>
                           )}
-                        </div>
                       </div>
+                    </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Material Specification/Data Sheet</label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                          <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                          <input
-                            type="file"
-                            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                            onChange={e => handleFileChange('materialSpecFile', e.target.files)}
-                            className="hidden"
-                            id="spec-upload"
-                          />
-                          <label htmlFor="spec-upload" className="cursor-pointer text-blue-600 hover:text-blue-800">
-                            Upload File
-                          </label>
-                        </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Material Specification/Data Sheet</label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                          onChange={e => handleFileChange('materialSpecFile', e.target.files)}
+                          className="hidden"
+                          id="spec-upload"
+                        />
+                        <label htmlFor="spec-upload" className="cursor-pointer text-blue-600 hover:text-blue-800">
+                          Upload File
+                        </label>
                       </div>
+                    </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Production Images</label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
-                          <Image className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={e => handleFileChange('productionImages', e.target.files)}
-                            className="hidden"
-                            id="images-upload"
-                          />
-                          <label htmlFor="images-upload" className="cursor-pointer text-blue-600 hover:text-blue-800">
-                            Upload Images
-                          </label>
-                        </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Production Images</label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                        <Image className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={e => handleFileChange('productionImages', e.target.files)}
+                          className="hidden"
+                          id="images-upload"
+                        />
+                        <label htmlFor="images-upload" className="cursor-pointer text-blue-600 hover:text-blue-800">
+                          Upload Images
+                        </label>
                       </div>
+                    </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Preview Images & Video</label>
-                        <div className="w-full">
-                          {sellForm.productionImages.length > 0 || sellForm.videoFile ? (
-                            <Carousel className="w-full h-48 mb-4">
-                              <CarouselContent>
-                                {sellForm.productionImages.map((file, idx) => (
-                                  <CarouselItem key={file?.name + idx} className="flex items-center justify-center w-full h-full">
-                                    <img
-                                      src={file ? URL.createObjectURL(file) : '/placeholder.svg'}
-                                      alt={file?.name || 'Image'}
-                                      className="object-cover w-full h-full max-h-48 rounded"
-                                    />
-                                  </CarouselItem>
-                                ))}
-                                {sellForm.videoFile && (
-                                  <CarouselItem key={sellForm.videoFile.name} className="flex items-center justify-center w-full h-full">
-                                    <video
-                                      src={URL.createObjectURL(sellForm.videoFile)}
-                                      controls
-                                      className="object-cover w-full h-full max-h-48 rounded"
-                                    />
-                                  </CarouselItem>
-                                )}
-                              </CarouselContent>
-                              <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
-                              <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
-                            </Carousel>
-                          ) : (
-                            <img src="/placeholder.svg" alt="Preview" className="object-cover w-full h-48 rounded" />
-                          )}
-                        </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Preview Images & Video</label>
+                      <div className="w-full">
+                        {sellForm.productionImages.length > 0 || sellForm.videoFile ? (
+                          <Carousel className="w-full h-48 mb-4">
+                            <CarouselContent>
+                              {sellForm.productionImages.map((file, idx) => (
+                                <CarouselItem key={file?.name + idx} className="flex items-center justify-center w-full h-full">
+                                  <img
+                                    src={file ? URL.createObjectURL(file) : '/placeholder.svg'}
+                                    alt={file?.name || 'Image'}
+                                    className="object-cover w-full h-full max-h-48 rounded"
+                                  />
+                                </CarouselItem>
+                              ))}
+                              {sellForm.videoFile && (
+                                <CarouselItem key={sellForm.videoFile.name} className="flex items-center justify-center w-full h-full">
+                                  <video
+                                    src={URL.createObjectURL(sellForm.videoFile)}
+                                    controls
+                                    className="object-cover w-full h-full max-h-48 rounded"
+                                  />
+                                </CarouselItem>
+                              )}
+                            </CarouselContent>
+                            <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 z-10" />
+                            <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 z-10" />
+                          </Carousel>
+                        ) : (
+                          <img src="/placeholder.svg" alt="Preview" className="object-cover w-full h-48 rounded" />
+                        )}
                       </div>
+                    </div>
 
-                      <Button type="submit" className="w-full col-span-full" disabled={loading}>
-                        {loading ? 'Submitting...' : 'Submit'}
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                    <Button type="submit" className="w-full col-span-full" disabled={loading}>
+                      {loading ? 'Submitting...' : 'Submit'}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+          </TabsContent>
 
               <TabsContent value="buy" className="space-y-4 sm:space-y-6">
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <DollarSign className="h-5 w-5 text-blue-600" />
-                      Buy Machine Request
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleBuySubmit} className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Machine Name</label>
-                        <Input
-                          value={buyForm.machineName}
-                          onChange={e => setBuyForm(prev => ({ ...prev, machineName: e.target.value }))}
-                          placeholder="Enter machine name"
-                          required
-                        />
-                      </div>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5 text-blue-600" />
+                    Buy Machine Request
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleBuySubmit} className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Machine Name</label>
+                      <Input
+                        value={buyForm.machineName}
+                        onChange={e => setBuyForm(prev => ({ ...prev, machineName: e.target.value }))}
+                        placeholder="Enter machine name"
+                        required
+                      />
+                    </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Machine Type</label>
-                        <Select value={buyForm.machineTypeId} onValueChange={value => setBuyForm(prev => ({ ...prev, machineTypeId: value }))}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Choose machine type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {machineTypes.map(type => (
-                              <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Machine Type</label>
+                      <Select value={buyForm.machineTypeId} onValueChange={value => setBuyForm(prev => ({ ...prev, machineTypeId: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose machine type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {machineTypes.map(type => (
+                            <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                      <div>
+                    <div>
                         <label className="block text-sm font-medium mb-2">Payoff Nos</label>
                         <Input
                           type="number"
@@ -1028,7 +1028,7 @@ const MachinesMarketplace: React.FC = () => {
                           placeholder="Size specification"
                         />
                       </div>
-                      <div>
+                    <div>
                         <label className="block text-sm font-medium mb-2">Main Motor Capacity</label>
                         <Input
                           value={buyForm.mainMotorCapacity}
@@ -1045,53 +1045,53 @@ const MachinesMarketplace: React.FC = () => {
                         />
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Expected Daily Production</label>
-                        <Input
-                          value={buyForm.expectedDailyProduction}
-                          onChange={e => setBuyForm(prev => ({ ...prev, expectedDailyProduction: e.target.value }))}
-                          placeholder="Production capacity"
-                        />
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Expected Daily Production</label>
+                      <Input
+                        value={buyForm.expectedDailyProduction}
+                        onChange={e => setBuyForm(prev => ({ ...prev, expectedDailyProduction: e.target.value }))}
+                        placeholder="Production capacity"
+                      />
+                    </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Manufacturing Location</label>
-                        <Input
-                          value={buyForm.manufacturingLocation}
-                          onChange={e => setBuyForm(prev => ({ ...prev, manufacturingLocation: e.target.value }))}
-                          placeholder="City, State"
-                          required
-                        />
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Manufacturing Location</label>
+                      <Input
+                        value={buyForm.manufacturingLocation}
+                        onChange={e => setBuyForm(prev => ({ ...prev, manufacturingLocation: e.target.value }))}
+                        placeholder="City, State"
+                        required
+                      />
+                    </div>
 
-                      <div>
+                    <div>
                         <label className="block text-sm font-medium mb-2">WhatsApp Number</label>
-                        <Input
-                          value={buyForm.whatsappNumber}
-                          onChange={e => setBuyForm(prev => ({ ...prev, whatsappNumber: e.target.value }))}
-                          placeholder="+91 98765 43210"
-                          required
-                        />
-                      </div>
+                      <Input
+                        value={buyForm.whatsappNumber}
+                        onChange={e => setBuyForm(prev => ({ ...prev, whatsappNumber: e.target.value }))}
+                        placeholder="+91 98765 43210"
+                        required
+                      />
+                    </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Notes</label>
-                        <Textarea
-                          value={buyForm.notes}
-                          onChange={e => setBuyForm(prev => ({ ...prev, notes: e.target.value }))}
-                          placeholder="Additional requirements or specifications"
-                          rows={3}
-                        />
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Notes</label>
+                      <Textarea
+                        value={buyForm.notes}
+                        onChange={e => setBuyForm(prev => ({ ...prev, notes: e.target.value }))}
+                        placeholder="Additional requirements or specifications"
+                        rows={3}
+                      />
+                    </div>
 
-                      <Button type="submit" className="w-full col-span-full" disabled={loading}>
-                        {loading ? 'Submitting...' : 'Submit'}
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                    <Button type="submit" className="w-full col-span-full" disabled={loading}>
+                      {loading ? 'Submitting...' : 'Submit'}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+          </TabsContent>
+        </Tabs>
           )}
         </div>
       </div>

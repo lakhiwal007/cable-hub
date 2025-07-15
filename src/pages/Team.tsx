@@ -26,6 +26,9 @@ import SelfInterviewForm from "@/components/SelfInterviewForm";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 import { useNavigate } from "react-router-dom";
+import apiClient from "@/lib/apiClient";
+import { TeamApplication } from "@/lib/types";
+import { WhatsAppContact } from '@/components/ui/whatsapp-contact';
 
 interface JobApplication {
   id: string;
@@ -80,88 +83,35 @@ const roles = [
 
 const Team = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("apply");
+  const [activeTab, setActiveTab] = useState("listings");
   
   // Applications state
-  const [applications, setApplications] = useState<JobApplication[]>([]);
-  const [filteredApplications, setFilteredApplications] = useState<JobApplication[]>([]);
+  const [applications, setApplications] = useState<TeamApplication[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<TeamApplication[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState<TeamApplication | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
 
   const roleOptions = roles.map(r => r.title);
   const statuses = ['pending', 'reviewed', 'shortlisted', 'rejected', 'hired'];
 
-  // Mock data - replace with actual API call
+  // Fetch real applications from API
   useEffect(() => {
-    const mockApplications: JobApplication[] = [
-      {
-        id: '1',
-        name: 'John Doe',
-        email: 'john.doe@email.com',
-        phone: '+91 98765 43210',
-        role: 'General Manager',
-        location: 'Mumbai, Maharashtra',
-        experience: 12,
-        education: 'MBA, IIM Bangalore, 2010',
-        skills: 'Leadership, Strategic Planning, Team Management, Operations',
-        experience_details: '10+ years in manufacturing industry, led teams of 50+ people',
-        linkedin: 'linkedin.com/in/johndoe',
-        portfolio: 'johndoe.com',
-        cover_letter: 'I am excited to apply for the General Manager position...',
-        salary: '₹15-20 LPA',
-        notice_period: '30 days',
-        references: 'Available on request',
-        resume_url: '/resumes/john-doe.pdf',
-        video_url: '/videos/john-doe.mp4',
-        status: 'shortlisted',
-        created_at: '2024-01-15T10:30:00Z'
-      },
-      {
-        id: '2',
-        name: 'Jane Smith',
-        email: 'jane.smith@email.com',
-        phone: '+91 87654 32109',
-        role: 'Manager',
-        location: 'Delhi, NCR',
-        experience: 8,
-        education: 'B.Tech, Delhi University, 2015',
-        skills: 'Project Management, Team Coordination, Process Improvement',
-        experience_details: '8 years in cable manufacturing, managed multiple projects',
-        cover_letter: 'I have extensive experience in cable manufacturing...',
-        salary: '₹12-15 LPA',
-        notice_period: '15 days',
-        resume_url: '/resumes/jane-smith.pdf',
-        video_url: '/videos/jane-smith.mp4',
-        status: 'reviewed',
-        created_at: '2024-01-14T14:20:00Z'
-      },
-      {
-        id: '3',
-        name: 'Mike Johnson',
-        email: 'mike.johnson@email.com',
-        phone: '+91 76543 21098',
-        role: 'Supervisor',
-        location: 'Chennai, Tamil Nadu',
-        experience: 5,
-        education: 'Diploma in Electrical Engineering, 2018',
-        skills: 'Quality Control, Team Supervision, Technical Skills',
-        experience_details: '5 years supervising production teams',
-        cover_letter: 'I am passionate about quality control and team management...',
-        salary: '₹8-10 LPA',
-        notice_period: '7 days',
-        resume_url: '/resumes/mike-johnson.pdf',
-        video_url: '/videos/mike-johnson.mp4',
-        status: 'pending',
-        created_at: '2024-01-16T09:15:00Z'
-      }
-    ];
-
-    setApplications(mockApplications);
-    setFilteredApplications(mockApplications);
+    setLoading(true);
+    apiClient.getTeamApplications()
+      .then((apps) => {
+        setApplications(apps || []);
+        setFilteredApplications(apps || []);
+      })
+      .catch((err) => {
+        setApplications([]);
+        setFilteredApplications([]);
+        console.error('Failed to fetch team applications:', err);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   // Filter applications
@@ -207,7 +157,7 @@ const Team = () => {
     });
   };
 
-  const handleViewDetails = (application: JobApplication) => {
+  const handleViewDetails = (application: TeamApplication) => {
     setSelectedApplication(application);
     setDetailDialogOpen(true);
   };
@@ -216,7 +166,7 @@ const Team = () => {
     setApplications(prev => 
       prev.map(app => 
         app.id === applicationId 
-          ? { ...app, status: newStatus as JobApplication['status'] }
+          ? { ...app, status: newStatus as TeamApplication['status'] }
           : app
       )
     );
@@ -281,13 +231,13 @@ const Team = () => {
           {/* Tabs Section */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="apply" className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4" />
-                Apply Now
-              </TabsTrigger>
               <TabsTrigger value="listings" className="flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 View Applications
+              </TabsTrigger>
+              <TabsTrigger value="apply" className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4" />
+                Apply Now
               </TabsTrigger>
             </TabsList>
 
@@ -304,7 +254,7 @@ const Team = () => {
               <Card className="mb-6">
                 <CardContent className="p-4 sm:p-6">
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
+                    <div className="md:col-span-2">
                       <label className="block text-sm font-medium mb-2">Search</label>
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -331,7 +281,7 @@ const Team = () => {
                       </select>
                     </div>
                     
-                    <div>
+                    {/* <div>
                       <label className="block text-sm font-medium mb-2">Status</label>
                       <select
                         value={selectedStatus}
@@ -345,7 +295,7 @@ const Team = () => {
                           </option>
                         ))}
                       </select>
-                    </div>
+                    </div> */}
                     
                     <div className="flex items-end">
                       <Button 
@@ -373,9 +323,7 @@ const Team = () => {
                       <div className="flex items-start justify-between">
                         <div>
                           <CardTitle className="text-lg mb-1">{application.name}</CardTitle>
-                          <Badge className={getStatusColor(application.status)}>
-                            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                          </Badge>
+                          
                         </div>
                         <div className="text-right">
                           <p className="text-sm text-gray-500">{formatDate(application.created_at)}</p>
@@ -418,18 +366,16 @@ const Team = () => {
                           <Eye className="h-4 w-4 mr-1" />
                           View Details
                         </Button>
-                        
-                        <select
-                          value={application.status}
-                          onChange={(e) => handleStatusChange(application.id, e.target.value)}
-                          className="text-xs border rounded px-2 py-1"
+                        <WhatsAppContact
+                          phoneNumber={application.phone}
+                          contactName={application.name}
+                          listingTitle={application.role}
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 ml-2"
                         >
-                          {statuses.map(status => (
-                            <option key={status} value={status}>
-                              {status.charAt(0).toUpperCase() + status.slice(1)}
-                            </option>
-                          ))}
-                        </select>
+                          Contact
+                        </WhatsAppContact>
                       </div>
                     </CardContent>
                   </Card>
@@ -544,21 +490,7 @@ const Team = () => {
                           </div>
                         )}
 
-                        {/* Status Update */}
-                        <div>
-                          <h3 className="font-semibold mb-2">Update Status</h3>
-                          <select
-                            value={selectedApplication.status}
-                            onChange={(e) => handleStatusChange(selectedApplication.id, e.target.value)}
-                            className="border rounded px-3 py-2"
-                          >
-                            {statuses.map(status => (
-                              <option key={status} value={status}>
-                                {status.charAt(0).toUpperCase() + status.slice(1)}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                        
                       </div>
                     </>
                   )}

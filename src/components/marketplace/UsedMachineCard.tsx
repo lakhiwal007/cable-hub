@@ -57,6 +57,10 @@ const UsedMachineCard: React.FC<UsedMachineCardProps> = ({ item, onMediaClick })
         <h2 className="text-sm sm:text-md lg:text-lg font-semibold mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors cursor-pointer" onClick={() => onMediaClick(mainImage, 'image')}>
           {item.machine_name}
         </h2>
+        {/* Price */}
+        {item.price && (
+          <div className="text-base lg:text-2xl font-bold text-green-700 mb-1">₹{item.price}</div>
+        )}
         {/* Location & Year */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 text-xs sm:text-sm text-gray-600 gap-1 sm:gap-0">
           <div className="flex items-center gap-1">

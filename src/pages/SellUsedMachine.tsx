@@ -32,7 +32,7 @@ export default function SellUsedMachine({ onSuccess }: Props) {
   const [machine, setMachine] = useState({
     machine_name: '', size: '', year_of_make: '', last_working_year: '',
     electrical_panel_ok: false, main_motor_hp: '', location: '',
-    whatsapp_number: ''
+    whatsapp_number: '', price: ''
   });
   const [machineVideos, setMachineVideos] = useState([null, null, null]);
   const [machineImages, setMachineImages] = useState([null, null, null]);
@@ -159,6 +159,7 @@ export default function SellUsedMachine({ onSuccess }: Props) {
       );
       await apiClient.createUsedMachine({
         ...machine,
+        price: machine.price ? Number(machine.price) : null,
         year_of_make: machine.year_of_make ? Number(machine.year_of_make) : null,
         last_working_year: machine.last_working_year ? Number(machine.last_working_year) : null,
         video_urls: videoUrls,
@@ -166,7 +167,7 @@ export default function SellUsedMachine({ onSuccess }: Props) {
         whatsapp_number: machine.whatsapp_number,
       });
       toast({ title: 'Success', description: 'Used machine listed successfully!' });
-      setMachine({ machine_name: '', size: '', year_of_make: '', last_working_year: '', electrical_panel_ok: false, main_motor_hp: '', location: '', whatsapp_number: '' });
+      setMachine({ machine_name: '', size: '', year_of_make: '', last_working_year: '', electrical_panel_ok: false, main_motor_hp: '', location: '', whatsapp_number: '', price: '' });
       setMachineVideos([null, null, null]);
       setMachineImages([null, null, null]);
       if (onSuccess) onSuccess();
@@ -191,6 +192,7 @@ export default function SellUsedMachine({ onSuccess }: Props) {
         <Input placeholder="Main Motor HP" value={machine.main_motor_hp} onChange={e => setMachine(m => ({ ...m, main_motor_hp: e.target.value }))} />
         <Input placeholder="Location" value={machine.location} onChange={e => setMachine(m => ({ ...m, location: e.target.value }))} />
         <Input placeholder="WhatsApp Number" value={machine.whatsapp_number} onChange={e => setMachine(m => ({ ...m, whatsapp_number: e.target.value }))} />
+        <Input placeholder="Price (₹)" type="number" value={machine.price} onChange={e => setMachine(m => ({ ...m, price: e.target.value }))} />
         <div>
           <label className="block font-medium mb-1">Videos</label>
           {[0,1,2].map(i => (

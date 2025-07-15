@@ -183,3 +183,42 @@ export type PricingData = {
     last_read_at: string;
     is_active: boolean;
   };
+
+  export type DocumentItem = {
+    id: string;
+    title: string;
+    category: 'spec' | 'gtp' | 'format';
+    description: string;
+    file_url: string;
+    file_name: string;
+    file_size: string;
+    price: number;
+    uploaded_by: string;
+    uploaded_at: string;
+    downloads: number;
+    tags: string[];
+    is_paid: boolean;
+  };
+
+  export type TeamApplication = {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    role: string;
+    location: string;
+    experience: number;
+    education: string;
+    skills: string;
+    experience_details: string;
+    linkedin?: string;
+    portfolio?: string;
+    cover_letter: string;
+    salary?: string;
+    notice_period?: string;
+    references?: string;
+    resume_url: string;
+    video_url: string;
+    status: 'pending' | 'reviewed' | 'shortlisted' | 'rejected' | 'hired';
+    created_at: string;
+  };

@@ -30,7 +30,7 @@ interface Props {
 export default function SellDeadStock({ onSuccess }: Props) {
   const [stock, setStock] = useState({
     stock_name: '', cable_name: '', qty: '', size: '', year_of_purchase: '', location: '',
-    whatsapp_number: ''
+    whatsapp_number: '', budget_min: '', budget_max: ''
   });
   const [stockVideos, setStockVideos] = useState([null, null, null]);
   const [stockImages, setStockImages] = useState([null, null, null]);
@@ -157,13 +157,15 @@ export default function SellDeadStock({ onSuccess }: Props) {
       );
       await apiClient.createDeadStock({
         ...stock,
+        budget_min: stock.budget_min ? Number(stock.budget_min) : null,
+        budget_max: stock.budget_max ? Number(stock.budget_max) : null,
         year_of_purchase: stock.year_of_purchase ? Number(stock.year_of_purchase) : null,
         video_urls: videoUrls,
         image_urls: imageUrls,
         whatsapp_number: stock.whatsapp_number,
       });
       toast({ title: 'Success', description: 'Dead stock listed successfully!' });
-      setStock({ stock_name: '', cable_name: '', qty: '', size: '', year_of_purchase: '', location: '', whatsapp_number: '' });
+      setStock({ stock_name: '', cable_name: '', qty: '', size: '', year_of_purchase: '', location: '', whatsapp_number: '', budget_min: '', budget_max: '' });
       setStockVideos([null, null, null]);
       setStockImages([null, null, null]);
       if (onSuccess) onSuccess();
@@ -184,6 +186,8 @@ export default function SellDeadStock({ onSuccess }: Props) {
         <Input placeholder="Year of Purchase" type="number" value={stock.year_of_purchase} onChange={e => setStock(s => ({ ...s, year_of_purchase: e.target.value }))} />
         <Input placeholder="Location" value={stock.location} onChange={e => setStock(s => ({ ...s, location: e.target.value }))} />
         <Input placeholder="WhatsApp Number" value={stock.whatsapp_number} onChange={e => setStock(s => ({ ...s, whatsapp_number: e.target.value }))} />
+        <Input placeholder="Budget Min (₹)" type="number" value={stock.budget_min} onChange={e => setStock(s => ({ ...s, budget_min: e.target.value }))} />
+        <Input placeholder="Budget Max (₹)" type="number" value={stock.budget_max} onChange={e => setStock(s => ({ ...s, budget_max: e.target.value }))} />
         <div>
           <label className="block font-medium mb-1">Videos</label>
           {[0,1,2].map(i => (
