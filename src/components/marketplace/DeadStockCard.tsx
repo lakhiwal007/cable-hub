@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, MapPin } from 'lucide-react';
 import { WhatsAppContact } from '@/components/ui/whatsapp-contact';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DeadStockCardProps {
   item: any;
@@ -10,8 +12,12 @@ interface DeadStockCardProps {
 }
 
 const DeadStockCard: React.FC<DeadStockCardProps> = ({ item, onMediaClick }) => {
+  const { isAuthenticated } = useAuth();
   const mainImage = item.image_urls?.[0] || '/placeholder.svg';
   const thumbnails = item.image_urls?.slice(1, 4) || [];
+  const navigate = useNavigate();
+  // isAuthenticated will be received as a prop
+
   return (
     <div className="group transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-gray-200 h-full bg-white rounded-lg overflow-hidden">
       {/* Product Image Section */}
@@ -87,18 +93,27 @@ const DeadStockCard: React.FC<DeadStockCardProps> = ({ item, onMediaClick }) => 
             View Details
           </Button>
           {item.whatsapp_number ? (
-            <WhatsAppContact
-              phoneNumber={item.whatsapp_number}
-              listingTitle={item.stock_name}
-              listingType="supply"
-              listingId={item.id}
-              supplierId={item.supplier_id}
-              variant="default"
-              size="default"
-              className="w-full bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
-            >
-              Contact
-            </WhatsAppContact>
+            isAuthenticated ? (
+              <WhatsAppContact
+                phoneNumber={item.whatsapp_number}
+                listingTitle={item.stock_name}
+                listingType="supply"
+                listingId={item.id}
+                supplierId={item.supplier_id}
+                variant="default"
+                size="default"
+                className="w-full bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
+              >
+                Contact
+              </WhatsAppContact>
+            ) : (
+              <Button
+                onClick={() => navigate('/login')}
+                className="w-full h-10 sm:h-9 text-sm bg-blue-600 hover:bg-blue-700"
+              >
+                Login to Contact
+              </Button>
+            )
           ) : (
             <Button
               className="w-full h-10 sm:h-9 text-sm bg-gray-400 cursor-not-allowed"

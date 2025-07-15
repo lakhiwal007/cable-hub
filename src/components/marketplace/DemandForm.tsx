@@ -356,7 +356,7 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                 />
                 {addRMMode && (
                   <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                    <Input value={newRM} onChange={e => setNewRM(e.target.value)} placeholder="New RM name" className="flex-1" />
+                    <Input value={newRM} onChange={e => setNewRM(e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250))} placeholder="New RM name" className="flex-1" maxLength={250} />
                     <div className="flex gap-2">
                       <Button type="button" onClick={handleAddRM} disabled={loading} className="flex-1 sm:flex-none">Add</Button>
                       <Button type="button" variant="outline" onClick={() => setAddRMMode(false)} className="flex-1 sm:flex-none">Cancel</Button>
@@ -366,7 +366,7 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Title *</label>
-                <Input name="title" value={formData.title} onChange={handleInput} required />
+                <Input name="title" value={formData.title} onChange={e => setFormData(prev => ({ ...prev, title: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} required maxLength={250} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Category *</label>
@@ -387,7 +387,7 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                 )}
                 {addCategoryMode && (
                   <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                    <Input value={newCategory} onChange={e => setNewCategory(e.target.value)} placeholder="New category name" className="flex-1" />
+                    <Input value={newCategory} onChange={e => setNewCategory(e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250))} placeholder="New category name" className="flex-1" maxLength={250} />
                     <div className="flex gap-2">
                       <Button type="button" onClick={handleAddCategory} disabled={loading} className="flex-1 sm:flex-none">Add</Button>
                       <Button type="button" variant="outline" onClick={() => setAddCategoryMode(false)} className="flex-1 sm:flex-none">Cancel</Button>
@@ -397,11 +397,11 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Type</label>
-                <Input name="type" value={formData.type} onChange={handleInput} />
+                <Input name="type" value={formData.type} onChange={e => setFormData(prev => ({ ...prev, type: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Specifications</label>
-                <Input name="specifications" value={formData.specifications} onChange={handleInput} />
+                <Input name="specifications" value={formData.specifications} onChange={e => setFormData(prev => ({ ...prev, specifications: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Required Quantity *</label>
@@ -418,16 +418,16 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Location *</label>
-                <Input name="location" value={formData.location} onChange={handleInput} required />
+                <Input name="location" value={formData.location} onChange={e => setFormData(prev => ({ ...prev, location: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} required maxLength={250} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Delivery Deadline</label>
-                <Input name="delivery_deadline" value={formData.delivery_deadline} onChange={handleInput} />
+                <Input name="delivery_deadline" value={formData.delivery_deadline} onChange={e => setFormData(prev => ({ ...prev, delivery_deadline: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
               </div>
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Payment Terms</label>
-                <Input name="payment_terms" value={formData.payment_terms} onChange={handleInput} />
+                <Input name="payment_terms" value={formData.payment_terms} onChange={e => setFormData(prev => ({ ...prev, payment_terms: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Reference Image(s)</label>
@@ -533,12 +533,22 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
               </div>
               <div className="col-span-1 sm:col-span-2 lg:col-span-3">
                 <label className="block text-sm font-medium mb-1">Enter your WhatsApp no</label>
-                <Input name="whatsapp_number" value={formData.whatsapp_number} onChange={handleInput} required type="tel" pattern="[0-9]{10,15}" />
+                <Input
+                  name="whatsapp_number"
+                  value={formData.whatsapp_number}
+                  onChange={e => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setFormData(prev => ({ ...prev, whatsapp_number: value }));
+                  }}
+                  required
+                  type="tel"
+                  maxLength={10}
+                />
               </div>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Additional Requirements</label>
-              <textarea name="additional_requirements" value={formData.additional_requirements} onChange={handleInput} rows={3} className="w-full border rounded p-2" />
+              <textarea name="additional_requirements" value={formData.additional_requirements} onChange={e => setFormData(prev => ({ ...prev, additional_requirements: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '') }))} rows={3} className="w-full border rounded p-2" />
             </div>
             {error && <div className="text-red-500 text-sm">{error}</div>}
             {success && <div className="text-green-600 text-sm">{success}</div>}

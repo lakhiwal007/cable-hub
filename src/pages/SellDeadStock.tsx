@@ -179,13 +179,18 @@ export default function SellDeadStock({ onSuccess }: Props) {
   return (
     <div className="container mx-auto py-2">
       <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" onSubmit={handleDeadStockSubmit}>
-        <Input placeholder="Stock Name" value={stock.stock_name} onChange={e => setStock(s => ({ ...s, stock_name: e.target.value }))} />
-        <Input placeholder="Cable/Wire/Raw Material Name" value={stock.cable_name} onChange={e => setStock(s => ({ ...s, cable_name: e.target.value }))} />
+        <Input placeholder="Stock Name" value={stock.stock_name} onChange={e => setStock(s => ({ ...s, stock_name: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
+        <Input placeholder="Cable/Wire/Raw Material Name" value={stock.cable_name} onChange={e => setStock(s => ({ ...s, cable_name: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
         <Input placeholder="Qty" value={stock.qty} onChange={e => setStock(s => ({ ...s, qty: e.target.value }))} />
-        <Input placeholder="Size" value={stock.size} onChange={e => setStock(s => ({ ...s, size: e.target.value }))} />
+        <Input placeholder="Size" value={stock.size} onChange={e => setStock(s => ({ ...s, size: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
         <Input placeholder="Year of Purchase" type="number" value={stock.year_of_purchase} onChange={e => setStock(s => ({ ...s, year_of_purchase: e.target.value }))} />
-        <Input placeholder="Location" value={stock.location} onChange={e => setStock(s => ({ ...s, location: e.target.value }))} />
-        <Input placeholder="WhatsApp Number" value={stock.whatsapp_number} onChange={e => setStock(s => ({ ...s, whatsapp_number: e.target.value }))} />
+        <Input placeholder="Location" value={stock.location} onChange={e => setStock(s => ({ ...s, location: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
+        <Input
+          placeholder="WhatsApp Number"
+          value={stock.whatsapp_number}
+          onChange={e => setStock(s => ({ ...s, whatsapp_number: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+          maxLength={10}
+        />
         <Input placeholder="Budget Min (₹)" type="number" value={stock.budget_min} onChange={e => setStock(s => ({ ...s, budget_min: e.target.value }))} />
         <Input placeholder="Budget Max (₹)" type="number" value={stock.budget_max} onChange={e => setStock(s => ({ ...s, budget_max: e.target.value }))} />
         <div>

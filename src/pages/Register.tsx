@@ -247,11 +247,12 @@ const Register = () => {
                     type="text"
                     placeholder="Enter your full name"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={e => setName(e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250))}
                     className="pl-10 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     required
                     autoComplete="name"
                     autoFocus
+                    maxLength={250}
                   />
                 </div>
               </div>
@@ -271,6 +272,7 @@ const Register = () => {
                     className="pl-10 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     required
                     autoComplete="email"
+                    maxLength={250}
                   />
                 </div>
               </div>
@@ -286,10 +288,11 @@ const Register = () => {
                     type="tel"
                     placeholder="Enter your mobile number"
                     value={mobile}
-                    onChange={(e) => setMobile(e.target.value)}
+                    onChange={e => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     className="pl-10 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     required
                     autoComplete="tel"
+                    maxLength={10}
                   />
                 </div>
               </div>
@@ -309,6 +312,7 @@ const Register = () => {
                     className="pl-10 pr-10 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     required
                     autoComplete="new-password"
+                    maxLength={250}
                   />
                   <button
                     type="button"
@@ -383,6 +387,7 @@ const Register = () => {
                     className="pl-10 pr-10 h-11 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
                     required
                     autoComplete="new-password"
+                    maxLength={250}
                   />
                   <button
                     type="button"

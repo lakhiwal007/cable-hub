@@ -176,7 +176,7 @@ export const WhatsAppContact: React.FC<ContactDialogProps> = ({
               <Textarea
                 id="message"
                 value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                onChange={e => setFormData({ ...formData, message: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '') })}
                 placeholder="Type your message..."
                 rows={4}
                 required

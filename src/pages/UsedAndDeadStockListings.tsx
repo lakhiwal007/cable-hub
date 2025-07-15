@@ -13,6 +13,7 @@ import Header from '@/components/Header';
 import Loader from '@/components/ui/loader';
 import UsedMachineCard from '@/components/marketplace/UsedMachineCard';
 import DeadStockCard from '@/components/marketplace/DeadStockCard';
+import { Button } from '@/components/ui/button';
 
 function MediaGallery({ images = [], videos = [], onMediaClick }: { images?: string[]; videos?: string[]; onMediaClick?: (url: string, type: 'image' | 'video') => void }) {
   if (!images?.length && !videos?.length) {
@@ -217,31 +218,45 @@ const UsedAndDeadStockListings: React.FC = () => {
               </TabsContent>
 
               <TabsContent value="post-used" className="space-y-4 sm:space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Settings className="h-5 w-5 text-blue-600" />
-                      Sell Used Machine
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <SellUsedMachine key={formKey} onSuccess={handleFormSuccess} />
-                  </CardContent>
-                </Card>
+                {isAuthenticated ? (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="h-5 w-5 text-blue-600" />
+                        Sell Used Machine
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <SellUsedMachine key={formKey} onSuccess={handleFormSuccess} />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="p-6 text-center text-gray-500">
+                    Please log in to post a used machine.<br />
+                    <Button className="mt-4" onClick={() => navigate('/login')}>Login</Button>
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="post-dead" className="space-y-4 sm:space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Zap className="h-5 w-5 text-amber-600" />
-                      Sell Dead Stock
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <SellDeadStock key={formKey} onSuccess={handleFormSuccess} />
-                  </CardContent>
-                </Card>
+                {isAuthenticated ? (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Zap className="h-5 w-5 text-amber-600" />
+                        Sell Dead Stock
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <SellDeadStock key={formKey} onSuccess={handleFormSuccess} />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="p-6 text-center text-gray-500">
+                    Please log in to post dead stock.<br />
+                    <Button className="mt-4" onClick={() => navigate('/login')}>Login</Button>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           )}

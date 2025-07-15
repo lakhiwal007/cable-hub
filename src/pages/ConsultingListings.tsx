@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { apiClient } from '@/lib/apiClient';
+import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MessageCircle, User, DollarSign, Clock, MapPin, Phone, Search, Filter, Eye, UserPlus } from 'lucide-react';
 import { WhatsAppContact } from '@/components/ui/whatsapp-contact';
@@ -17,6 +18,9 @@ import Loader from '@/components/ui/loader';
 import { useToast } from '@/hooks/use-toast';
 
 function ConsultantCard({ consultant }: { consultant: any }) {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <div className="group transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-gray-200 h-full bg-white rounded-lg overflow-hidden">
       {/* Header Section */}
@@ -98,15 +102,24 @@ function ConsultantCard({ consultant }: { consultant: any }) {
             <Eye className="h-4 w-4 mr-2" />
             View Details
           </Button>
-          <WhatsAppContact
-            phoneNumber={consultant.whatsapp_number}
-            consultantName={consultant.name}
-            variant="default"
-            size="default"
-            className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-9 text-sm"
-          >
-            Contact
-          </WhatsAppContact>
+          {isAuthenticated ? (
+            <WhatsAppContact
+              phoneNumber={consultant.whatsapp_number}
+              consultantName={consultant.name}
+              variant="default"
+              size="default"
+              className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-9 text-sm"
+            >
+              Contact
+            </WhatsAppContact>
+          ) : (
+            <Button
+              onClick={() => navigate('/login')}
+              className="w-full h-10 sm:h-9 text-sm bg-blue-600 hover:bg-blue-700"
+            >
+              Login to Contact
+            </Button>
+          )}
         </div>
 
         {/* Posted Date */}
@@ -119,6 +132,9 @@ function ConsultantCard({ consultant }: { consultant: any }) {
 }
 
 function ConsultingRequestCard({ request }: { request: any }) {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
       case 'high': return 'bg-red-600 text-white';
@@ -199,15 +215,24 @@ function ConsultingRequestCard({ request }: { request: any }) {
             <Eye className="h-4 w-4 mr-2" />
             View Details
           </Button>
-          <WhatsAppContact
-            phoneNumber={request.whatsappNumber}
-            consultantName="Requester"
-            variant="default"
-            size="default"
-            className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-9 text-sm"
-          >
-            Contact
-          </WhatsAppContact>
+          {isAuthenticated ? (
+            <WhatsAppContact
+              phoneNumber={request.whatsappNumber}
+              consultantName="Requester"
+              variant="default"
+              size="default"
+              className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-9 text-sm"
+            >
+              Contact
+            </WhatsAppContact>
+          ) : (
+            <Button
+              onClick={() => navigate('/login')}
+              className="w-full h-10 sm:h-9 text-sm bg-blue-600 hover:bg-blue-700"
+            >
+              Login to Contact
+            </Button>
+          )}
         </div>
 
         {/* Posted Date */}
@@ -243,6 +268,7 @@ const ConsultingListings: React.FC = () => {
   const [formLoading, setFormLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
 
   // Seeking consulting state
   const [seekingConsulting, setSeekingConsulting] = useState({
@@ -512,172 +538,188 @@ const ConsultingListings: React.FC = () => {
               </TabsContent>
 
               <TabsContent value="post-request" className="space-y-4 sm:space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageCircle className="h-5 w-5 text-green-600" />
-                      Post Consulting Request
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleSeekingSubmit} className="space-y-6">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">My WhatsApp No.</label>
-                        <Input
-                          type="tel"
-                          placeholder="+1234567890"
-                          value={seekingConsulting.whatsappNumber}
-                          onChange={e => setSeekingConsulting(prev => ({ ...prev, whatsappNumber: e.target.value }))}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-3">I need consulting for:</label>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {expertiseAreas.map(area => (
-                            <div key={area} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`seeking-${area}`}
-                                checked={seekingConsulting.expertiseNeeded.includes(area)}
-                                onCheckedChange={() => toggleExpertiseArea(area, 'seeking')}
-                              />
-                              <label htmlFor={`seeking-${area}`} className="text-sm">{area}</label>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Project Description</label>
-                        <Textarea
-                          placeholder="Describe your project and what kind of consulting you need..."
-                          value={seekingConsulting.description}
-                          onChange={e => setSeekingConsulting(prev => ({ ...prev, description: e.target.value }))}
-                          rows={4}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Urgency</label>
-                        <Select value={seekingConsulting.urgency} onValueChange={(value: 'low' | 'medium' | 'high') => setSeekingConsulting(prev => ({ ...prev, urgency: value }))}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="low">Low</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="high">High</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      <Button type="submit" disabled={formLoading} className="w-full">
-                        {formLoading ? 'Submitting...' : 'Submit Consulting Request'}
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="register" className="space-y-4 sm:space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <User className="h-5 w-5 text-blue-600" />
-                      Register as Consultant
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleConsultantSubmit} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Name</label>
-                          <Input
-                            placeholder="Your Name"
-                            value={consultantRegistration.name}
-                            onChange={e => setConsultantRegistration(prev => ({ ...prev, name: e.target.value }))}
-                            required
-                          />
-                        </div>
+                {isAuthenticated ? (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MessageCircle className="h-5 w-5 text-green-600" />
+                        Post Consulting Request
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleSeekingSubmit} className="space-y-6">
                         <div>
                           <label className="block text-sm font-medium mb-2">My WhatsApp No.</label>
                           <Input
                             type="tel"
                             placeholder="+1234567890"
-                            value={consultantRegistration.whatsappNumber}
-                            onChange={e => setConsultantRegistration(prev => ({ ...prev, whatsappNumber: e.target.value }))}
+                            value={seekingConsulting.whatsappNumber}
+                            onChange={e => setSeekingConsulting(prev => ({ ...prev, whatsappNumber: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                            required
+                            maxLength={10}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-3">I need consulting for:</label>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {expertiseAreas.map(area => (
+                              <div key={area} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`seeking-${area}`}
+                                  checked={seekingConsulting.expertiseNeeded.includes(area)}
+                                  onCheckedChange={() => toggleExpertiseArea(area, 'seeking')}
+                                />
+                                <label htmlFor={`seeking-${area}`} className="text-sm">{area}</label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Project Description</label>
+                          <Textarea
+                            placeholder="Describe your project and what kind of consulting you need..."
+                            value={seekingConsulting.description}
+                            onChange={e => setSeekingConsulting(prev => ({ ...prev, description: e.target.value }))}
+                            rows={4}
                             required
                           />
                         </div>
-                      </div>
 
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="incognito"
-                          checked={consultantRegistration.isIncognito}
-                          onCheckedChange={checked => setConsultantRegistration(prev => ({ ...prev, isIncognito: checked }))}
-                        />
-                        <label htmlFor="incognito" className="text-sm">I wish to remain incognito / hidden</label>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-3">Areas of Expertise:</label>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {expertiseAreas.map(area => (
-                            <div key={area} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`consultant-${area}`}
-                                checked={consultantRegistration.expertiseAreas.includes(area)}
-                                onCheckedChange={() => toggleExpertiseArea(area, 'consultant')}
-                              />
-                              <label htmlFor={`consultant-${area}`} className="text-sm">{area}</label>
-                            </div>
-                          ))}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Urgency</label>
+                          <Select value={seekingConsulting.urgency} onValueChange={(value: 'low' | 'medium' | 'high') => setSeekingConsulting(prev => ({ ...prev, urgency: value }))}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
-                      </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Cable Product Types (mention product names)</label>
-                        <Textarea
-                          placeholder="e.g., Power cables, Control cables, Instrumentation cables, etc."
-                          value={consultantRegistration.cableProductTypes.join(', ')}
-                          onChange={e => setConsultantRegistration(prev => ({ 
-                            ...prev, 
-                            cableProductTypes: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
-                          }))}
-                          rows={2}
-                        />
-                      </div>
+                        <Button type="submit" disabled={formLoading} className="w-full">
+                          {formLoading ? 'Submitting...' : 'Submit Consulting Request'}
+                        </Button>
+                      </form>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="p-6 text-center text-gray-500">
+                    Please log in to post a consulting request.<br />
+                    <Button className="mt-4" onClick={() => navigate('/login')}>Login</Button>
+                  </div>
+                )}
+              </TabsContent>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Years of Experience</label>
-                        <Input
-                          type="number"
-                          placeholder="5"
-                          value={consultantRegistration.experienceYears}
-                          onChange={e => setConsultantRegistration(prev => ({ ...prev, experienceYears: e.target.value }))}
-                        />
-                      </div>
+              <TabsContent value="register" className="space-y-4 sm:space-y-6">
+                {isAuthenticated ? (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <User className="h-5 w-5 text-blue-600" />
+                        Register as Consultant
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <form onSubmit={handleConsultantSubmit} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Name</label>
+                            <Input
+                              placeholder="Your Name"
+                              value={consultantRegistration.name}
+                              onChange={e => setConsultantRegistration(prev => ({ ...prev, name: e.target.value }))}
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">My WhatsApp No.</label>
+                            <Input
+                              type="tel"
+                              placeholder="+1234567890"
+                              value={consultantRegistration.whatsappNumber}
+                              onChange={e => setConsultantRegistration(prev => ({ ...prev, whatsappNumber: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                              required
+                              maxLength={10}
+                            />
+                          </div>
+                        </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Professional Description</label>
-                        <Textarea
-                          placeholder="Describe your experience, qualifications, and what makes you a good consultant..."
-                          value={consultantRegistration.description}
-                          onChange={e => setConsultantRegistration(prev => ({ ...prev, description: e.target.value }))}
-                          rows={4}
-                          required
-                        />
-                      </div>
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id="incognito"
+                            checked={consultantRegistration.isIncognito}
+                            onCheckedChange={checked => setConsultantRegistration(prev => ({ ...prev, isIncognito: checked }))}
+                          />
+                          <label htmlFor="incognito" className="text-sm">I wish to remain incognito / hidden</label>
+                        </div>
 
-                      <Button type="submit" disabled={formLoading} className="w-full">
-                        {formLoading ? 'Submitting...' : 'Register as Consultant'}
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
+                        <div>
+                          <label className="block text-sm font-medium mb-3">Areas of Expertise:</label>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            {expertiseAreas.map(area => (
+                              <div key={area} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`consultant-${area}`}
+                                  checked={consultantRegistration.expertiseAreas.includes(area)}
+                                  onCheckedChange={() => toggleExpertiseArea(area, 'consultant')}
+                                />
+                                <label htmlFor={`consultant-${area}`} className="text-sm">{area}</label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Cable Product Types (mention product names)</label>
+                          <Textarea
+                            placeholder="e.g., Power cables, Control cables, Instrumentation cables, etc."
+                            value={consultantRegistration.cableProductTypes.join(', ')}
+                            onChange={e => setConsultantRegistration(prev => ({ 
+                              ...prev, 
+                              cableProductTypes: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                            }))}
+                            rows={2}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Years of Experience</label>
+                          <Input
+                            type="number"
+                            placeholder="5"
+                            value={consultantRegistration.experienceYears}
+                            onChange={e => setConsultantRegistration(prev => ({ ...prev, experienceYears: e.target.value }))}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium mb-2">Professional Description</label>
+                          <Textarea
+                            placeholder="Describe your experience, qualifications, and what makes you a good consultant..."
+                            value={consultantRegistration.description}
+                            onChange={e => setConsultantRegistration(prev => ({ ...prev, description: e.target.value }))}
+                            rows={4}
+                            required
+                          />
+                        </div>
+
+                        <Button type="submit" disabled={formLoading} className="w-full">
+                          {formLoading ? 'Submitting...' : 'Register as Consultant'}
+                        </Button>
+                      </form>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="p-6 text-center text-gray-500">
+                    Please log in to register as a consultant.<br />
+                    <Button className="mt-4" onClick={() => navigate('/login')}>Login</Button>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           )}

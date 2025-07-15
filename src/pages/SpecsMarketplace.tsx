@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import Header from '@/components/Header';
 import apiClient from "@/lib/apiClient";
+import { useAuth } from '@/hooks/useAuth';
 import { WhatsAppContact } from "@/components/ui/whatsapp-contact";
 
 interface DocumentItem {
@@ -49,7 +50,7 @@ const SpecsMarketplace = () => {
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [userInfos, setUserInfos] = useState<UserInfo[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { isAuthenticated } = useAuth();
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [uploadForm, setUploadForm] = useState({
     title: '',
@@ -68,7 +69,6 @@ const SpecsMarketplace = () => {
   ];
 
   useEffect(() => {
-    setIsAuthenticated(apiClient.isAuthenticated());
     fetchDocuments();
     fetchUserInfos();
   }, []);
@@ -265,13 +265,19 @@ const SpecsMarketplace = () => {
         onBack={() => navigate('/')} 
         logoSrc='cableCartLogo.png'
         rightContent={
-          <Button
-            onClick={() => setUploadDialogOpen(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Upload className="h-4 w-4 mr-2" />
-            Upload
-          </Button>
+          isAuthenticated ? (
+            <Button
+              onClick={() => setUploadDialogOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              Upload
+            </Button>
+          ) : (
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => navigate('/login')}>
+              Login to Upload
+            </Button>
+          )
         }
       />
 
@@ -477,16 +483,24 @@ const SpecsMarketplace = () => {
                       </div>
 
                       <div className="flex flex-col sm:flex-row gap-2">
-                        <WhatsAppContact
-                          phoneNumber={user.contact}
-                          consultantName={user.name}
-                          variant="outline"
-                          size="default"
-                          className="flex-1 w-full h-10 sm:h-9 text-xs sm:text-sm"
-                        >
-                          
-                          Contact
-                        </WhatsAppContact>
+                        {isAuthenticated ? (
+                          <WhatsAppContact
+                            phoneNumber={user.contact}
+                            consultantName={user.name}
+                            variant="outline"
+                            size="default"
+                            className="flex-1 w-full h-10 sm:h-9 text-xs sm:text-sm"
+                          >
+                            Contact
+                          </WhatsAppContact>
+                        ) : (
+                          <Button
+                            onClick={() => navigate('/login')}
+                            className="flex-1 w-full h-10 sm:h-9 text-xs sm:text-sm bg-blue-600 hover:bg-blue-700"
+                          >
+                            Login to Contact
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -498,97 +512,100 @@ const SpecsMarketplace = () => {
       </main>
 
       {/* Upload Dialog */}
-      <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
-        <DialogContent className="w-full max-h-[90vh] overflow-y-scroll border-none outline-none p-3 sm:p-6">
-          <DialogHeader>
-            <DialogTitle>Upload Document</DialogTitle>
-            <DialogDescription>
-              Share your technical documents and earn money. Choose your category and set a price.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={handleUpload} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="title">Document Title *</Label>
-              <Input
-                id="title"
-                value={uploadForm.title}
-                onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Enter document title"
-                required
-                className="w-full"
-              />
-            </div>
+      {isAuthenticated && (
+        <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+          <DialogContent className="w-full max-h-[90vh] overflow-y-scroll border-none outline-none p-3 sm:p-6">
+            <DialogHeader>
+              <DialogTitle>Upload Document</DialogTitle>
+              <DialogDescription>
+                Share your technical documents and earn money. Choose your category and set a price.
+              </DialogDescription>
+            </DialogHeader>
             
-            <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <Select value={uploadForm.category} onValueChange={(value) => setUploadForm(prev => ({ ...prev, category: value }))}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="spec">Specifications</SelectItem>
-                  <SelectItem value="gtp">GTP</SelectItem>
-                  <SelectItem value="format">Formats</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={uploadForm.description}
-                onChange={(e) => setUploadForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Describe your document"
-                rows={3}
-                className="w-full"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="tags">Tags (comma separated)</Label>
-              <Input
-                id="tags"
-                value={uploadForm.tags}
-                onChange={(e) => setUploadForm(prev => ({ ...prev, tags: e.target.value }))}
-                placeholder="copper, wire, manufacturing"
-                className="w-full"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="file">Document File *</Label>
-              <Input
-                id="file"
-                type="file"
-                accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
-                onChange={(e) => setUploadForm(prev => ({ ...prev, file: e.target.files?.[0] || null }))}
-                required
-                className="w-full"
-              />
-            </div>
-            
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setUploadDialogOpen(false)}
-                className="flex-1 w-full"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="flex-1 w-full bg-blue-600 hover:bg-blue-700"
-              >
-                {loading ? 'Uploading...' : 'Upload Document'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+            <form onSubmit={handleUpload} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Document Title *</Label>
+                <Input
+                  id="title"
+                  value={uploadForm.title}
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Enter document title"
+                  required
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="category">Category *</Label>
+                <Select value={uploadForm.category} onValueChange={(value) => setUploadForm(prev => ({ ...prev, category: value }))}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="spec">Specifications</SelectItem>
+                    <SelectItem value="gtp">GTP</SelectItem>
+                    <SelectItem value="format">Formats</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={uploadForm.description}
+                  onChange={e => setUploadForm(prev => ({ ...prev, description: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '') }))}
+                  placeholder="Describe your document"
+                  rows={3}
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="tags">Tags (comma separated)</Label>
+                <Input
+                  id="tags"
+                  value={uploadForm.tags}
+                  onChange={e => setUploadForm(prev => ({ ...prev, tags: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))}
+                  placeholder="copper, wire, manufacturing"
+                  className="w-full"
+                  maxLength={250}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="file">Document File *</Label>
+                <Input
+                  id="file"
+                  type="file"
+                  accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+                  onChange={(e) => setUploadForm(prev => ({ ...prev, file: e.target.files?.[0] || null }))}
+                  required
+                  className="w-full"
+                />
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setUploadDialogOpen(false)}
+                  className="flex-1 w-full"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  {loading ? 'Uploading...' : 'Upload Document'}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

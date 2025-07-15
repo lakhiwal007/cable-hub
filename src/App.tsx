@@ -89,9 +89,9 @@ const App = () => (
           } />
           <Route path="/chat/:roomId" element={<ChatRoomWrapper />} />
           <Route path="/used-dead-stock-listings" element={<UsedAndDeadStockListings />} />
-          <Route path="/paid-expert-consulting" element={<ProtectedRoute><PaidExpertConsulting /></ProtectedRoute>} />
+          <Route path="/paid-expert-consulting" element={<PaidExpertConsulting />} />
           <Route path="/consulting-listings" element={<ConsultingListings />} />
-          <Route path="/machines-marketplace" element={<ProtectedRoute><MachinesMarketplace /></ProtectedRoute>} />
+          <Route path="/machines-marketplace" element={<MachinesMarketplace />} />
           
           <Route path="/specs-marketplace" element={<SpecsMarketplace />} />
           <Route path="/features" element={<Features />} />

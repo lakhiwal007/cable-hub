@@ -26,6 +26,7 @@ import SelfInterviewForm from "@/components/SelfInterviewForm";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from '@/hooks/useAuth';
 import apiClient from "@/lib/apiClient";
 import { TeamApplication } from "@/lib/types";
 import { WhatsAppContact } from '@/components/ui/whatsapp-contact';
@@ -94,6 +95,7 @@ const Team = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedApplication, setSelectedApplication] = useState<TeamApplication | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   const roleOptions = roles.map(r => r.title);
   const statuses = ['pending', 'reviewed', 'shortlisted', 'rejected', 'hired'];
@@ -173,56 +175,55 @@ const Team = () => {
   };
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-white">
-        <Header 
-          title="Team Application" 
-          onBack={() => navigate("/")}
-          logoSrc='/cableCartLogo.png'
-        />
+    <div className="min-h-screen bg-white">
+      <Header 
+        title="Team Application" 
+        onBack={() => navigate("/")}
+        logoSrc='/cableCartLogo.png'
+      />
         
         {/* Main Content */}
         <main className="max-w-7xl mx-auto py-4 sm:py-8 px-1 sm:px-4 lg:px-8">
-          {/* Header Section */}
-          <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Job Application</h1>
-            <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6 px-2">
-              Submit your application to join our team
-            </p>
-          </div>
+        {/* Header Section */}
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">Job Application</h1>
+          <p className="text-base sm:text-lg text-gray-600 mb-4 sm:mb-6 px-2">
+            Submit your application to join our team
+          </p>
+        </div>
 
-          {/* Hiring Announcement */}
+        {/* Hiring Announcement */}
           {/* <Card className="mb-6 sm:mb-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
-            <CardContent className="p-4 sm:p-6">
-              <div className="text-center">
-                <div className="flex justify-center mb-3 sm:mb-4">
-                  <Badge className="bg-green-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-lg">
-                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
-                    We Are Hiring!
-                  </Badge>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
-                  Join Our Growing Team
-                </h2>
-                <p className="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6 max-w-2xl mx-auto px-2">
-                  We're looking for talented individuals to join our dynamic team. 
-                  Submit your application with a self-interview video to stand out!
-                </p>
+          <CardContent className="p-4 sm:p-6">
+            <div className="text-center">
+              <div className="flex justify-center mb-3 sm:mb-4">
+                <Badge className="bg-green-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-lg">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                  We Are Hiring!
+                </Badge>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
+                Join Our Growing Team
+              </h2>
+              <p className="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6 max-w-2xl mx-auto px-2">
+                We're looking for talented individuals to join our dynamic team. 
+                Submit your application with a self-interview video to stand out!
+              </p>
+              
                 
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                  {roles.map((role, index) => (
-                    <div key={role.title} className="bg-white p-3 sm:p-4 rounded-lg border shadow-sm">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Briefcase className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                        <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{role.title}</h3>
-                      </div>
-                      <p className="text-xs sm:text-sm text-gray-600 mb-2 leading-relaxed">{role.description}</p>
-                      <Badge variant="outline" className="text-xs leading-tight">
-                        {role.requirements}
-                      </Badge>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+                {roles.map((role, index) => (
+                  <div key={role.title} className="bg-white p-3 sm:p-4 rounded-lg border shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Briefcase className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{role.title}</h3>
                     </div>
-                  ))}
+                    <p className="text-xs sm:text-sm text-gray-600 mb-2 leading-relaxed">{role.description}</p>
+                    <Badge variant="outline" className="text-xs leading-tight">
+                      {role.requirements}
+                    </Badge>
+                  </div>
+                ))}
                 </div>
               </div>
             </CardContent>
@@ -242,9 +243,14 @@ const Team = () => {
             </TabsList>
 
             <TabsContent value="apply" className="space-y-6">
-              
-              
-              <SelfInterviewForm roles={roles.map(r => r.title)} />
+              {isAuthenticated ? (
+                <SelfInterviewForm roles={roles.map(r => r.title)} />
+              ) : (
+                <div className="p-6 text-center text-gray-500">
+                  Please log in to apply for a job.<br />
+                  <Button className="mt-4" onClick={() => navigate('/login')}>Login</Button>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="listings" className="space-y-6">
@@ -310,10 +316,10 @@ const Team = () => {
                         <Filter className="h-4 w-4 mr-2" />
                         Clear Filters
                       </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
               {/* Applications Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -366,16 +372,25 @@ const Team = () => {
                           <Eye className="h-4 w-4 mr-1" />
                           View Details
                         </Button>
-                        <WhatsAppContact
-                          phoneNumber={application.phone}
-                          contactName={application.name}
-                          listingTitle={application.role}
-                          variant="outline"
-                          size="sm"
-                          className="flex-1 ml-2"
-                        >
-                          Contact
-                        </WhatsAppContact>
+                        {isAuthenticated ? (
+                          <WhatsAppContact
+                            phoneNumber={application.phone}
+                            contactName={application.name}
+                            listingTitle={application.role}
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 ml-2"
+                          >
+                            Contact
+                          </WhatsAppContact>
+                        ) : (
+                          <Button
+                            onClick={() => navigate('/login')}
+                            className="flex-1 ml-2 bg-blue-600 hover:bg-blue-700"
+                          >
+                            Login to Contact
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -491,7 +506,7 @@ const Team = () => {
                         )}
 
                         
-                      </div>
+        </div>
                     </>
                   )}
                 </DialogContent>
@@ -500,7 +515,6 @@ const Team = () => {
           </Tabs>
         </main>
       </div>
-    </ProtectedRoute>
   );
 };
 

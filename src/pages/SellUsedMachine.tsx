@@ -181,8 +181,8 @@ export default function SellUsedMachine({ onSuccess }: Props) {
   return (
     <div className="container mx-auto py-2">
       <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" onSubmit={handleUsedMachineSubmit}>
-        <Input placeholder="Machine Name" value={machine.machine_name} onChange={e => setMachine(m => ({ ...m, machine_name: e.target.value }))} />
-        <Input placeholder="Size" value={machine.size} onChange={e => setMachine(m => ({ ...m, size: e.target.value }))} />
+        <Input placeholder="Machine Name" value={machine.machine_name} onChange={e => setMachine(m => ({ ...m, machine_name: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
+        <Input placeholder="Size" value={machine.size} onChange={e => setMachine(m => ({ ...m, size: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
         <Input placeholder="Year of Make" type="number" value={machine.year_of_make} onChange={e => setMachine(m => ({ ...m, year_of_make: e.target.value }))} />
         <Input placeholder="Last Working Year" type="number" value={machine.last_working_year} onChange={e => setMachine(m => ({ ...m, last_working_year: e.target.value }))} />
         <div className="flex items-center gap-2">
@@ -190,8 +190,13 @@ export default function SellUsedMachine({ onSuccess }: Props) {
           <Switch checked={machine.electrical_panel_ok} onCheckedChange={v => setMachine(m => ({ ...m, electrical_panel_ok: v }))} />
         </div>
         <Input placeholder="Main Motor HP" value={machine.main_motor_hp} onChange={e => setMachine(m => ({ ...m, main_motor_hp: e.target.value }))} />
-        <Input placeholder="Location" value={machine.location} onChange={e => setMachine(m => ({ ...m, location: e.target.value }))} />
-        <Input placeholder="WhatsApp Number" value={machine.whatsapp_number} onChange={e => setMachine(m => ({ ...m, whatsapp_number: e.target.value }))} />
+        <Input placeholder="Location" value={machine.location} onChange={e => setMachine(m => ({ ...m, location: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
+        <Input
+          placeholder="WhatsApp Number"
+          value={machine.whatsapp_number}
+          onChange={e => setMachine(m => ({ ...m, whatsapp_number: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+          maxLength={10}
+        />
         <Input placeholder="Price (₹)" type="number" value={machine.price} onChange={e => setMachine(m => ({ ...m, price: e.target.value }))} />
         <div>
           <label className="block font-medium mb-1">Videos</label>

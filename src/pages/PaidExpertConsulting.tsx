@@ -173,8 +173,9 @@ const PaidExpertConsulting: React.FC = () => {
                       type="tel"
                       placeholder="+1234567890"
                       value={seekingConsulting.whatsappNumber}
-                      onChange={e => setSeekingConsulting(prev => ({ ...prev, whatsappNumber: e.target.value }))}
+                      onChange={e => setSeekingConsulting(prev => ({ ...prev, whatsappNumber: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
                       required
+                      maxLength={10}
                     />
                   </div>
 
@@ -272,8 +273,9 @@ const PaidExpertConsulting: React.FC = () => {
                         type="tel"
                         placeholder="+1234567890"
                         value={consultantRegistration.whatsappNumber}
-                        onChange={e => setConsultantRegistration(prev => ({ ...prev, whatsappNumber: e.target.value }))}
+                        onChange={e => setConsultantRegistration(prev => ({ ...prev, whatsappNumber: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
                         required
+                        maxLength={10}
                       />
                     </div>
                   </div>
