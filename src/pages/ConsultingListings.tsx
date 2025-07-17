@@ -109,6 +109,7 @@ function ConsultantCard({ consultant }: { consultant: any }) {
               variant="default"
               size="default"
               className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-9 text-sm"
+              defaultMessage={`Hi, I would like to connect regarding your consulting expertise.`}
             >
               Contact
             </WhatsAppContact>
@@ -222,6 +223,7 @@ function ConsultingRequestCard({ request }: { request: any }) {
               variant="default"
               size="default"
               className="w-full bg-blue-600 hover:bg-blue-700 h-10 sm:h-9 text-sm"
+              defaultMessage={`Hi, I am interested in your consulting request. Please share more info.`}
             >
               Contact
             </WhatsAppContact>

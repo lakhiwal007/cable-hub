@@ -25,6 +25,10 @@ import Team from "./pages/Team";
 import SpecsMarketplace from "./pages/SpecsMarketplace";
 import Features from "./pages/Features";
 import ScrollToTop from "@/components/ScrollToTop";
+import Mentor from "./pages/Mentor";
+import apiClient from "@/lib/apiClient";
+import SessionTimeoutHandler from "@/components/SessionTimeoutHandler";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -65,12 +69,9 @@ const App = () => (
       <BrowserRouter>
         <ScrollToTop />
         <BackButtonHandler />
+        <SessionTimeoutHandler />
         <Routes>
-          <Route path="/" element={
-            
-              <Index />
-            
-          } />
+          <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/marketplace" element={<MarketplacePage />} />
@@ -95,6 +96,8 @@ const App = () => (
           
           <Route path="/specs-marketplace" element={<SpecsMarketplace />} />
           <Route path="/features" element={<Features />} />
+          <Route path="/mentor" element={<Mentor />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />

@@ -242,6 +242,7 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
                       variant="default"
                       size="default"
                       className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
+                      defaultMessage={`Hello, I saw your demand listing: ${listing.title}. Let's discuss further.`}
                     >
                       Contact
                     </WhatsAppContact>

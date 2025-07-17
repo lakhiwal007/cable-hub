@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import {  TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut,  LogIn,  MessageCircle, UserCheck, Star } from "lucide-react";
+import {  TrendingUp, Users, Menu, X, Zap, Shield, Globe, Settings, LogOut,  LogIn,  MessageCircle, UserCheck, Star, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import PricingSlideshow from "@/components/PricingSlideshow";
 import RawMaterialCalculator from "@/components/RawMaterialCalculator";
@@ -38,8 +38,8 @@ const Index = () => {
 
   const navigation = [
     { id: "dashboard", name: "Dashboard", icon: TrendingUp },
-    { id: "about", name: "Our Mentors", icon: UserCheck},
-    { id: "features", name: "Features", icon: Star},
+    { id: "mentor", name: "Mentors", icon: UserCheck },
+    { id: "features", name: "Features", icon: Star },
     ...(userType === 'admin' ? [{ id: "admin", name: "Admin Panel", icon: Settings }] : []),
   ];
 
@@ -48,6 +48,8 @@ const Index = () => {
       navigate("/admin");
     } else if (tabId === "features") {
       navigate("/features");
+    } else if (tabId === "mentor") {
+      navigate("/mentor");
     } else if (tabId === "marketplace") {
       navigate("/marketplace");
     } else if (tabId === "specs") {
@@ -230,36 +232,22 @@ const Index = () => {
                 );
               })}
               {user && (
-                <button
-                  onClick={()=>{
-                    navigate('/my-chats');
-                  }}
-                  className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
-                >
-                  <MessageCircle className="h-4 w-4 mr-2" />
-                  My Chats
-                </button>
-              ) }
-              {/* Login/Logout Button (Desktop) */}
-              {user ? (
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    localStorage.clear();
-                    navigate('/login');
-                  }}
-                  className="flex items-center px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-all duration-200 shadow-lg shadow-blue-600/25"
-                >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Login
-                </button>
+                <>
+                  <button
+                    onClick={() => navigate('/my-chats')}
+                    className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    My Chats
+                  </button>
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="flex items-center px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200"
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </button>
+                </>
               )}
             </nav>
 
@@ -300,29 +288,29 @@ const Index = () => {
                   </button>
                 );
               })}
-              {/* Mobile Login/Logout Button */}
-              {user ? (
-                <button
-                  onClick={() => {
-                    handleLogout();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex items-center w-full px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-                >
-                  <LogOut className="h-5 w-5 mr-3" />
-                  Logout
-                </button>
-              ) : (
-                <button
-                  onClick={() => {
-                    navigate('/login');
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex items-center w-full px-3 py-2 rounded-lg text-base font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-                >
-                  <LogIn className="h-5 w-5 mr-3" />
-                  Login
-                </button>
+              {user && (
+                <>
+                  <button
+                    onClick={() => {
+                      navigate('/my-chats');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex items-center w-full px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                  >
+                    <MessageCircle className="h-5 w-5 mr-3" />
+                    My Chats
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/profile');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex items-center w-full px-3 py-2 rounded-lg text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                  >
+                    <User className="h-5 w-5 mr-3" />
+                    Profile
+                  </button>
+                </>
               )}
             </div>
           </div>

@@ -103,6 +103,7 @@ const DeadStockCard: React.FC<DeadStockCardProps> = ({ item, onMediaClick }) => 
                 variant="default"
                 size="default"
                 className="w-full bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
+                defaultMessage={`Hello, I'm interested in your dead stock listing: ${item.stock_name}. Please provide more details.`}
               >
                 Contact
               </WhatsAppContact>

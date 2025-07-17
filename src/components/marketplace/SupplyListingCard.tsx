@@ -210,6 +210,7 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
                     variant="default"
                     size="default"
                     className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
+                    defaultMessage={`Hello, I'm interested in your supply listing: ${listing.title}. Please provide more details.`}
                   >
                     Contact
                   </WhatsAppContact>

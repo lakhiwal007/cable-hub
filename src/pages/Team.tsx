@@ -375,11 +375,11 @@ const Team = () => {
                         {isAuthenticated ? (
                           <WhatsAppContact
                             phoneNumber={application.phone}
-                            contactName={application.name}
                             listingTitle={application.role}
                             variant="outline"
                             size="sm"
                             className="flex-1 ml-2"
+                            defaultMessage={`Hello, I am reaching out regarding your application for ${application.role}.`}
                           >
                             Contact
                           </WhatsAppContact>

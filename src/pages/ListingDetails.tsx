@@ -694,6 +694,7 @@ ${listing.expires_at ? `Expires: ${formatDate(listing.expires_at)}` : ''}
                                             variant="default"
                                             size="default"
                                             className="w-full bg-green-600 hover:bg-green-700 transition-colors text-sm md:text-base"
+                                            defaultMessage={`Hello, I'm interested in your ${isSupply ? 'supply' : 'demand'} listing: ${listing.title}. Please provide more details.`}
                                         >
                                             Contact via WhatsApp
                                         </WhatsAppContact>

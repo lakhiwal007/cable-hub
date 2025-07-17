@@ -1738,6 +1738,19 @@ class ApiClient {
     if (error) throw new Error(error.message);
     return data;
   }
+
+  // Call this after successful login
+  setLoginTimestamp() {
+    localStorage.setItem('loginTimestamp', Date.now().toString());
+  }
+
+  // Returns true if 30 minutes have passed since login
+  isSessionExpired() {
+    const ts = localStorage.getItem('loginTimestamp');
+    if (!ts) return false;
+    const now = Date.now();
+    return now - parseInt(ts, 10) > 30 * 60 * 1000;
+  }
 }
 
 export const apiClient = new ApiClient();

@@ -555,6 +555,7 @@ const MachinesMarketplace: React.FC = () => {
                                         variant="default"
                                         size="default"
                                         className="w-full bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
+                                        defaultMessage={`Hello, I'm interested in your used machine: ${machine.machine_name}. Please provide more details.`}
                                       >
                                         Contact
                                       </WhatsAppContact>
@@ -691,6 +692,7 @@ const MachinesMarketplace: React.FC = () => {
                                         variant="default"
                                         size="default"
                                         className="w-full bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"
+                                        defaultMessage={`Hello, I saw your demand for a used machine: ${machine.machine_name}. Let's discuss further.`}
                                       >
                                         Contact
                                       </WhatsAppContact>

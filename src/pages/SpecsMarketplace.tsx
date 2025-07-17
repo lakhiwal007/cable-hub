@@ -490,6 +490,7 @@ const SpecsMarketplace = () => {
                             variant="outline"
                             size="default"
                             className="flex-1 w-full h-10 sm:h-9 text-xs sm:text-sm"
+                            defaultMessage={`Hi, I am interested in your document. Please share more info.`}
                           >
                             Contact
                           </WhatsAppContact>

@@ -12,7 +12,6 @@ import apiClient from '../../lib/apiClient';
 
 interface ContactDialogProps {
   phoneNumber: string;
-  contactName?: string;
   listingTitle?: string;
   listingType?: 'supply' | 'demand';
   listingId?: string;
@@ -25,11 +24,11 @@ interface ContactDialogProps {
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
   children?: React.ReactNode;
+  defaultMessage?: string; // Add a prop for default message
 }
 
 export const WhatsAppContact: React.FC<ContactDialogProps> = ({
   phoneNumber,
-  contactName = '',
   listingTitle,
   listingType,
   listingId,
@@ -41,19 +40,20 @@ export const WhatsAppContact: React.FC<ContactDialogProps> = ({
   variant = 'default',
   size = 'default',
   className = '',
-  children
+  children,
+  defaultMessage = '', // Use the new prop
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: contactName,
-    message: ''
+    message: defaultMessage
   });
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleOpenDialog = () => {
       setIsOpen(true);
+      setFormData({ message: defaultMessage }); // Reset message to default when opening
   };
 
   const handleSendMessage = async () => {
@@ -105,7 +105,7 @@ export const WhatsAppContact: React.FC<ContactDialogProps> = ({
         description: 'Your message has been sent successfully.',
       });
       setIsOpen(false);
-      setFormData({ name: contactName, message: '' });
+      setFormData({ message: defaultMessage }); // Reset message to default on close
       // Always send the message to the chat room, even if it already existed
       if (chatResult && chatResult.chat_room) {
         await apiClient.sendMessage({
@@ -153,30 +153,17 @@ export const WhatsAppContact: React.FC<ContactDialogProps> = ({
           <DialogHeader>
             <DialogTitle>Contact</DialogTitle>
             <DialogDescription>
-              Send a message to the contact {phoneNumber}
+              Send a message
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {!contactName && (
-              <div>
-                <Label htmlFor="name">Your Name *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  placeholder="Enter your name"
-                />
-              </div>
-            )}
-
             <div>
               <Label htmlFor="message">Message</Label>
               <Textarea
                 id="message"
                 value={formData.message}
-                onChange={e => setFormData({ ...formData, message: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '') })}
+                onChange={e => setFormData({ ...formData, message: e.target.value })}
                 placeholder="Type your message..."
                 rows={4}
                 required
@@ -194,7 +181,7 @@ export const WhatsAppContact: React.FC<ContactDialogProps> = ({
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading || (!formData.name && !contactName) || !formData.message}
+                disabled={isLoading || !formData.message}
                 className="flex-1 bg-blue-600 hover:bg-blue-700"
               >
                 {isLoading ? (

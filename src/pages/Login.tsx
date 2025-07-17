@@ -95,6 +95,7 @@ const Login = () => {
         localStorage.setItem('authToken', response.session.access_token);
         // Update apiClient internal token
         apiClient.setToken(response.session.access_token);
+        apiClient.setLoginTimestamp();
       }
       // Fetch the latest user profile from Supabase
       const user = await apiClient.getProfile();
