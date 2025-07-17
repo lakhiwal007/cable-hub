@@ -59,19 +59,7 @@ const Login = () => {
     return true;
   };
 
-  // Quick login handlers
-  const handleQuickUserLogin = () => {
-    setIdentifier("nojic853@exitbit.com");
-    setPassword("Admin@123");
-    setError("");
-  };
-
-  const handleQuickAdminLogin = () => {
-    setIdentifier("nojic85339@exitbit.com");
-    setPassword("Admin@123");
-    setError("");
-  };
-
+ 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
