@@ -1753,5 +1753,24 @@ class ApiClient {
   }
 }
 
+// === RAW MATERIALS ===
+export async function getRawMaterials() {
+  const { data, error } = await supabase
+    .from('raw_materials')
+    .select('*')
+    .order('label', { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
+export async function addRawMaterial({ value, label }: { value: string, label: string }) {
+  const { data, error } = await supabase
+    .from('raw_materials')
+    .insert([{ value, label }])
+    .single();
+  if (error) throw error;
+  return data;
+}
+
 export const apiClient = new ApiClient();
 export default apiClient; 

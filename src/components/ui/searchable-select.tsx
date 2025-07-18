@@ -48,8 +48,14 @@ export function SearchableSelect({
   className,
 }: SearchableSelectProps) {
   const [open, setOpen] = React.useState(false)
+  const [searchValue, setSearchValue] = React.useState("")
 
-  const selectedOption = options.find(option => option.value === value)
+  const filteredOptions = options.filter((option) =>
+    option.label.toLowerCase().includes(searchValue.toLowerCase())
+  )
+
+  const selectedLabel =
+    options.find((o) => o.value === value)?.label ?? placeholder
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -58,65 +64,64 @@ export function SearchableSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn(
-            "w-full justify-between",
-            !value && "text-muted-foreground",
-            className
-          )}
+          className={cn("w-full justify-between", className)}
           disabled={disabled}
         >
-          {selectedOption ? selectedOption.label : placeholder}
+          {selectedLabel}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
-          <div className="max-h-60 flex flex-col">
-            <CommandList className="flex-1 overflow-auto">
-              <CommandEmpty>{emptyText}</CommandEmpty>
-              <CommandGroup>
-                {options.map((option) => (
+          <CommandInput
+            placeholder={searchPlaceholder}
+            value={searchValue}
+            onValueChange={(value) => setSearchValue(value)}
+          />
+          <CommandList>
+            <CommandEmpty>{emptyText}</CommandEmpty>
+            {filteredOptions.length > 0 && (
+              <CommandGroup className="max-h-[200px] overflow-y-auto pb-10">
+                {filteredOptions.map((option) => (
                   <CommandItem
                     key={option.value}
-                    value={option.value}
-                    onSelect={(currentValue) => {
-                      onValueChange(currentValue)
+                    onSelect={() => {
+                      onValueChange(option.value)
                       setOpen(false)
+                      setSearchValue("")
                     }}
                   >
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        value === option.value ? "opacity-100" : "opacity-0"
+                        option.value === value ? "opacity-100" : "opacity-0"
                       )}
                     />
                     {option.label}
                   </CommandItem>
                 ))}
               </CommandGroup>
-            </CommandList>
+            )}
+
             {showAddNew && (
-              <>
-                <CommandSeparator />
-                <div className="p-1">
+              <div className="fixed bottom-0 left-0 right-0 bg-white rounded-b-md">
+                <CommandSeparator className="mx-1" />
+                <CommandGroup>
                   <CommandItem
-                    value="__add_new__"
                     onSelect={() => {
                       onAddNew?.()
                       setOpen(false)
                     }}
-                    className="cursor-pointer"
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Add new category
                   </CommandItem>
-                </div>
-              </>
+                </CommandGroup>
+              </div>
             )}
-          </div>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
   )
-} 
+}

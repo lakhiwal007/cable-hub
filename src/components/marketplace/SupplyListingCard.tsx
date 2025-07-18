@@ -53,7 +53,7 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
                           <img 
                             src={imageUrl} 
                             alt={`${listing.title} - Image ${index + 1}`}
-                            className="w-full h-full aspect-square group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+                            className="w-full h-full aspect-video group-hover:scale-105 transition-transform duration-300 cursor-pointer"
                             onClick={handleViewDetails}
                           />
                         </CarouselItem>
@@ -162,7 +162,7 @@ const SupplyListingCard = ({ listing, onContactSupplier, currentUserId, material
         </div>
 
         {/* Stock & Location */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 text-xs sm:text-sm text-gray-600 gap-1 sm:gap-0">
+        <div className="flex flex-row items-center justify-between mb-2 text-xs sm:text-sm text-gray-600 gap-1 sm:gap-0">
           
           <div className="flex items-center gap-1">
             <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />

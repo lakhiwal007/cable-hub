@@ -94,7 +94,7 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
                           <img 
                             src={imageUrl} 
                             alt={`${listing.title} - Image ${index + 1}`}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+                            className="w-full h-full aspect-video group-hover:scale-105 transition-transform duration-300 cursor-pointer"
                             onClick={handleViewDetails}
                           />
                         </CarouselItem>
@@ -195,7 +195,7 @@ const DemandListingCard = ({ listing, materialCategories = [], currentUserId, is
           </div>
 
           {/* Location & Deadline */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 text-xs sm:text-sm text-gray-600 gap-1 sm:gap-0">
+          <div className="flex flex-row sm:items-center justify-between mb-4 text-xs sm:text-sm text-gray-600 gap-1 sm:gap-0">
             <div className="flex items-center gap-1">
               <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="truncate">{listing.location}</span>

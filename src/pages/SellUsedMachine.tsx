@@ -4,23 +4,26 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { apiClient } from '@/lib/apiClient';
 import { useToast } from '@/hooks/use-toast';
+import CaptureOrUploadImage from "@/components/CaptureOrUploadImage";
+import CaptureOrUploadVideo from "@/components/CaptureOrUploadVideo";
+import { X } from 'lucide-react';
 
 const VideoImageInputs = ({ label, files, setFiles, max = 3, accept }: any) => (
   <div>
     <label className="block font-medium mb-1">{label}</label>
-    {[...Array(max)].map((_, i) => (
-      <Input
-        key={i}
-        type="file"
-        accept={accept}
-        onChange={e => {
-          const newFiles = [...files];
-          newFiles[i] = e.target.files?.[0] || null;
-          setFiles(newFiles);
-        }}
-        className="mb-2"
-      />
-    ))}
+    <CaptureOrUploadImage
+      label={label}
+      multiple={max > 1}
+      onImageSelect={file => setFiles((prev: any[]) => {
+        const newFiles = [...prev];
+        // Find first empty slot
+        const idx = newFiles.findIndex(f => !f);
+        if (idx !== -1) newFiles[idx] = file;
+        else newFiles.push(file);
+        return newFiles.slice(0, max);
+      })}
+      accept={accept}
+    />
   </div>
 );
 
@@ -34,116 +37,12 @@ export default function SellUsedMachine({ onSuccess }: Props) {
     electrical_panel_ok: false, main_motor_hp: '', location: '',
     whatsapp_number: '', price: ''
   });
-  const [machineVideos, setMachineVideos] = useState([null, null, null]);
+  // For multiple videos
+  const [machineVideos, setMachineVideos] = useState<File[]>([]);
   const [machineImages, setMachineImages] = useState([null, null, null]);
 
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-
-  const [showVideoModalIndex, setShowVideoModalIndex] = useState<number|null>(null);
-  const [recording, setRecording] = useState(false);
-  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
-  const videoPreviewRef = useRef<HTMLVideoElement>(null);
-  const liveVideoRef = useRef<HTMLVideoElement>(null);
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
-
-  const openVideoModal = async (index: number) => {
-    setShowVideoModalIndex(index);
-    try {
-      // Try with preferred facingMode first
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: { ideal: facingMode } } 
-      });
-      setMediaStream(stream);
-    } catch (err) {
-      // Fallback to any available camera
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setMediaStream(stream);
-      } catch (fallbackErr) {
-        alert('Could not access camera. Please check camera permissions.');
-        setShowVideoModalIndex(null);
-      }
-    }
-  };
-
-  const closeVideoModal = () => {
-    setShowVideoModalIndex(null);
-    setRecording(false);
-    setRecordedChunks([]);
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
-      setMediaStream(null);
-    }
-    if (liveVideoRef.current) {
-      liveVideoRef.current.srcObject = null;
-    }
-  };
-
-  const startRecording = () => {
-    if (!mediaStream) return;
-    const recorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
-    setMediaRecorder(recorder);
-    setRecordedChunks([]);
-    recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) setRecordedChunks((prev) => [...prev, e.data]);
-    };
-    recorder.onstop = () => {
-      setRecording(false);
-    };
-    recorder.start();
-    setRecording(true);
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop();
-    }
-    setRecording(false);
-    if (liveVideoRef.current) {
-      liveVideoRef.current.srcObject = null;
-    }
-  };
-
-  const switchCamera = async () => {
-    const newMode = facingMode === 'user' ? 'environment' : 'user';
-    setFacingMode(newMode);
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
-    }
-    try {
-      // Try with new facingMode
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: { ideal: newMode } } 
-      });
-      setMediaStream(stream);
-    } catch (err) {
-      // Fallback to any available camera
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setMediaStream(stream);
-      } catch (fallbackErr) {
-        alert('Could not switch camera. Using current camera.');
-      }
-    }
-  };
-
-  const useRecordedVideo = () => {
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-    const file = new File([blob], `recorded-${Date.now()}.webm`, { type: 'video/webm' });
-    const newFiles = [...machineVideos];
-    if (showVideoModalIndex !== null) newFiles[showVideoModalIndex] = file;
-    setMachineVideos(newFiles);
-    closeVideoModal();
-  };
-
-  useEffect(() => {
-    if (showVideoModalIndex !== null && liveVideoRef.current && mediaStream) {
-      liveVideoRef.current.srcObject = mediaStream;
-    }
-  }, [showVideoModalIndex, mediaStream, recording]);
 
   async function handleUsedMachineSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -151,7 +50,7 @@ export default function SellUsedMachine({ onSuccess }: Props) {
     try {
       // Upload videos
       const videoUrls = await Promise.all(
-        machineVideos.filter(Boolean).map((file: File) => apiClient.uploadFileToStorage(file, 'used-machines/videos'))
+        machineVideos.map((file: File) => apiClient.uploadFileToStorage(file, 'used-machines/videos'))
       );
       // Upload images
       const imageUrls = await Promise.all(
@@ -168,7 +67,7 @@ export default function SellUsedMachine({ onSuccess }: Props) {
       });
       toast({ title: 'Success', description: 'Used machine listed successfully!' });
       setMachine({ machine_name: '', size: '', year_of_make: '', last_working_year: '', electrical_panel_ok: false, main_motor_hp: '', location: '', whatsapp_number: '', price: '' });
-      setMachineVideos([null, null, null]);
+      setMachineVideos([]);
       setMachineImages([null, null, null]);
       if (onSuccess) onSuccess();
     } catch (err: any) {
@@ -198,95 +97,54 @@ export default function SellUsedMachine({ onSuccess }: Props) {
           maxLength={10}
         />
         <Input placeholder="Price (₹)" type="number" value={machine.price} onChange={e => setMachine(m => ({ ...m, price: e.target.value }))} />
-        <div>
-          <label className="block font-medium mb-1">Videos</label>
-          {[0,1,2].map(i => (
-            <div key={i} className="flex flex-col gap-1 mb-2">
-              <div className="flex items-center gap-2">
-                <input
-                  type="file"
-                  accept="video/*"
-                  style={{ display: 'none' }}
-                  id={`video-upload-${i}`}
-                  onChange={e => {
-                    const newFiles = [...machineVideos];
-                    newFiles[i] = e.target.files?.[0] || null;
-                    setMachineVideos(newFiles);
-                  }}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Product Videos (optional, you can add multiple)
+          </label>
+          <CaptureOrUploadVideo
+            onVideoSelect={(file) => {
+              if (file) setMachineVideos((prev) => [...prev, file]);
+            }}
+          />
+          {machineVideos.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-4">
+              {machineVideos.map((video, idx) => (
+                <div key={idx} className="relative flex flex-col items-center">
+                  <video src={URL.createObjectURL(video)} controls className="h-24 rounded border object-contain" />
+                  <button
+                    type="button"
+                    className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-opacity-100 z-10"
+                    onClick={() => setMachineVideos((prev) => prev.filter((_, i) => i !== idx))}
+                    aria-label="Remove video"
+                  >
+                    <X className="h-4 w-4 text-gray-700" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        {machineImages.length > 0 && (
+          <div className="flex gap-2 flex-wrap mt-2">
+            {machineImages.map((file, idx) => file && (
+              <div key={idx} className="relative">
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={`Preview ${idx + 1}`}
+                  className="h-24 rounded border object-contain"
                 />
                 <button
                   type="button"
-                  className="px-3 py-2 rounded bg-gray-200 text-gray-800 flex items-center gap-1"
-                  onClick={() => document.getElementById(`video-upload-${i}`).click()}
+                  className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-opacity-100 z-10"
+                  onClick={() => setMachineImages(prev => prev.map((f, i) => i === idx ? null : f))}
+                  aria-label="Remove image"
                 >
-                  <span>Upload Video</span>
+                  <X className="h-4 w-4 text-gray-700" />
                 </button>
-                <button type="button" className="px-3 py-2 rounded bg-blue-600 text-white" onClick={() => openVideoModal(i)}>Record Video</button>
-                {machineVideos[i] && (
-                  <>
-                    <span className="text-xs text-gray-600">{machineVideos[i].name}</span>
-                    <button
-                      type="button"
-                      className="ml-2 text-red-500"
-                      onClick={() => {
-                        const newFiles = [...machineVideos];
-                        newFiles[i] = null;
-                        setMachineVideos(newFiles);
-                      }}
-                      title="Remove video"
-                    >
-                      &#128465;
-                    </button>
-                  </>
-                )}
               </div>
-              {machineVideos[i] && (
-                <video controls className="mb-2 h-32 rounded border object-contain">
-                  <source src={URL.createObjectURL(machineVideos[i])} type={machineVideos[i].type} />
-                  Your browser does not support the video tag.
-                </video>
-              )}
-              {/* Modal for recording */}
-              {showVideoModalIndex === i && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-                  <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-                    <button className="absolute top-2 right-2 text-gray-500" onClick={closeVideoModal}>&times;</button>
-                    <h3 className="text-lg font-semibold mb-2">Record Video</h3>
-                    <button className="mb-2 px-3 py-1 rounded bg-gray-300 text-gray-800" onClick={switchCamera} type="button">
-                      Switch Camera
-                    </button>
-                    {!recording && recordedChunks.length === 0 && (
-                      <video ref={liveVideoRef} autoPlay playsInline className="w-full h-48 bg-black rounded mb-2" />
-                    )}
-                    {recording && (
-                      <video ref={liveVideoRef} autoPlay playsInline className="w-full h-48 bg-black rounded mb-2 border-2 border-red-500" />
-                    )}
-                    {!recording && recordedChunks.length > 0 && (
-                      <video
-                        ref={videoPreviewRef}
-                        controls
-                        className="w-full h-48 bg-black rounded mb-2"
-                        src={URL.createObjectURL(new Blob(recordedChunks, { type: 'video/webm' }))}
-                      />
-                    )}
-                    <div className="flex gap-2 justify-center">
-                      {!recording && recordedChunks.length === 0 && (
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={startRecording}>Start Recording</button>
-                      )}
-                      {recording && (
-                        <button className="px-4 py-2 bg-red-600 text-white rounded" onClick={stopRecording}>Stop Recording</button>
-                      )}
-                      {!recording && recordedChunks.length > 0 && (
-                        <button className="px-4 py-2 bg-green-600 text-white rounded" onClick={useRecordedVideo}>Use This Video</button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <VideoImageInputs label="Images" files={machineImages} setFiles={setMachineImages} accept="image/*" />
+            ))}
+          </div>
+        )}
         <Button className='col-span-full' type="submit" disabled={loading}>{loading ? 'Submitting...' : 'Submit Used Machine'}</Button>
       </form>
     </div>

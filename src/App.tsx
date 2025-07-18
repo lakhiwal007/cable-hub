@@ -29,6 +29,7 @@ import Mentor from "./pages/Mentor";
 import apiClient from "@/lib/apiClient";
 import SessionTimeoutHandler from "@/components/SessionTimeoutHandler";
 import Profile from "./pages/Profile";
+import CalculatorPage from "./pages/CalculatorPage";
 
 const queryClient = new QueryClient();
 
@@ -80,24 +81,26 @@ const App = () => (
               <MyChats />
             </ProtectedRoute>
           } />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/listing/:listingType/:listingId" element={<ListingDetails />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/calculator" element={<CalculatorPage />} />
           <Route path="/admin" element={
             <ProtectedRoute adminOnly={true}>
               <AdminPanel />
             </ProtectedRoute>
           } />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/mentor" element={<Mentor />} />
           <Route path="/chat/:roomId" element={<ChatRoomWrapper />} />
+          <Route path="/listing/:listingType/:listingId" element={<ListingDetails />} />
+
+          {/* <Route path="/team" element={<Team />} />
           <Route path="/used-dead-stock-listings" element={<UsedAndDeadStockListings />} />
           <Route path="/paid-expert-consulting" element={<PaidExpertConsulting />} />
           <Route path="/consulting-listings" element={<ConsultingListings />} />
           <Route path="/machines-marketplace" element={<MachinesMarketplace />} />
-          
-          <Route path="/specs-marketplace" element={<SpecsMarketplace />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/mentor" element={<Mentor />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/specs-marketplace" element={<SpecsMarketplace />} /> */}
+
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />

@@ -12,20 +12,24 @@ const Features = () => {
       navigate("/admin");
     } else if (tabId === "marketplace") {
       navigate("/marketplace");
-    } else if (tabId === "specs") {
-      navigate("/specs-marketplace");
-    } else if (tabId === "pricing") {
+    } 
+    else if (tabId === "pricing") {
       navigate("/pricing");
-    } else if (tabId === "consulting") {
-      navigate("/consulting-listings");
-    } else if (tabId === "used-dead-stock") {
-      navigate("/used-dead-stock-listings");
-    } else if (tabId === "machines") {
-      navigate("/machines-marketplace");
-    } else if (tabId === "team") {
-      navigate("/team");
-    } else if (tabId === "calculator") {
-      navigate("/");
+    } 
+    // else if (tabId === "specs") {
+    //   navigate("/specs-marketplace");
+    // }
+    // else if (tabId === "consulting") {
+    //   navigate("/consulting-listings");
+    // } else if (tabId === "used-dead-stock") {
+    //   navigate("/used-dead-stock-listings");
+    // } else if (tabId === "machines") {
+    //   navigate("/machines-marketplace");
+    // } else if (tabId === "team") {
+    //   navigate("/team");
+    // } 
+    else if (tabId === "calculator") {
+      navigate("/calculator");
     } else {
       // Handle other navigation
       console.log("Navigate to:", tabId);

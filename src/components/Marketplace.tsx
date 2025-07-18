@@ -248,10 +248,10 @@ const Marketplace = () => {
       ) : (
         
         <UITabs value={activeTab} onValueChange={setActiveTab}>
-          <UITabsList className="grid w-full grid-cols-3 gap-1 sm:gap-2">
+          <UITabsList className="grid w-full grid-cols-3 gap-1 sm:gap-2 content-center h-12 sm:h-auto">
             <UITabsTrigger value="browse" className="text-xs sm:text-sm">Browse</UITabsTrigger>
-            <UITabsTrigger value="post-supply" className="text-xs sm:text-sm">Sell Raw Materials</UITabsTrigger>
-            <UITabsTrigger value="post-demand" className="text-xs sm:text-sm">Buy Raw Materials</UITabsTrigger>
+            <UITabsTrigger value="post-supply" className="text-xs sm:text-sm text-balance">Sell Raw Materials</UITabsTrigger>
+            <UITabsTrigger value="post-demand" className="text-xs sm:text-sm text-balance">Buy Raw Materials</UITabsTrigger>
           </UITabsList>
 
           <UITabsContent value="browse" className="space-y-4 sm:space-y-6">

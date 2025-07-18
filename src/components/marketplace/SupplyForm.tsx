@@ -1,11 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SearchableSelect } from "@/components/ui/searchable-select";
-import apiClient from "@/lib/apiClient";
+import { getRawMaterials, addRawMaterial } from '@/lib/apiClient';
+import apiClient from '@/lib/apiClient';
 import { useNavigate } from "react-router-dom";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
+import CaptureOrUploadImage from "@/components/CaptureOrUploadImage";
+import { X } from "lucide-react";
+import CaptureOrUploadVideo from "@/components/CaptureOrUploadVideo";
+import { sanitizeTextInput, sanitizeTextInputWithHyphens } from '@/lib/utils';
 
 interface SupplyFormData {
   title: string;
@@ -46,17 +51,17 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     whatsapp_number?: string;
   }>({
     ...{
-    title: '',
-    description: '',
-    category: '',
-    grade_specification: '',
-    available_quantity: '',
-    unit: 'kg',
-    minimum_order: '',
-    location: '',
-    delivery_terms: '',
-    certification: '',
-    is_urgent: false,
+      title: '',
+      description: '',
+      category: '',
+      grade_specification: '',
+      available_quantity: '',
+      unit: 'kg',
+      minimum_order: '',
+      location: '',
+      delivery_terms: '',
+      certification: '',
+      is_urgent: false,
     },
     rm: '',
     type: '',
@@ -72,14 +77,6 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
   const [addRMMode, setAddRMMode] = useState(false);
   const [specFile, setSpecFile] = useState<File | null>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [showVideoModal, setShowVideoModal] = useState(false);
-  const [recording, setRecording] = useState(false);
-  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
-  const videoPreviewRef = useRef<HTMLVideoElement>(null);
-  const liveVideoRef = useRef<HTMLVideoElement>(null);
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
 
   // Fallback categories for testing if none are loaded
   const fallbackCategories = [
@@ -90,19 +87,29 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     { value: "Rubber Insulation", label: "Rubber Insulation" },
   ];
 
-  const categoriesToUse = categories.length > 0 ? categories : fallbackCategories;
-
-  // RM options with fallback
-  const rmOptions = [
-    { value: "Cu", label: "Copper (Cu)" },
-    { value: "Al", label: "Aluminum (Al)" },
+  const fallbackRMs = [
+    { value: "Copper", label: "Copper" },
+    { value: "Aluminium", label: "Aluminium" },
     { value: "PVC", label: "PVC" },
     { value: "XLPE", label: "XLPE" },
-    { value: "Rubber", label: "Rubber" },
-    { value: "Steel", label: "Steel" },
-    { value: "Brass", label: "Brass" },
-    { value: "Fiber", label: "Fiber" },
   ];
+
+  
+
+  const [rmOptions, setRmOptions] = useState<{ value: string, label: string }[]>([]);
+  const [categoriesToUse, setCategoriesToUse] = useState<{ value: string, label: string }[]>([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const rms = await getRawMaterials();
+        setRmOptions(rms.map((rm: any) => ({ value: rm.value, label: rm.label })));
+        setCategoriesToUse(categories.length > 0 ? categories : fallbackCategories);
+      } catch (err) {
+        // fallback or error handling
+        setRmOptions(fallbackRMs);
+      }
+    })();
+  }, []);
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -113,11 +120,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setImageFiles(Array.from(e.target.files));
-    }
-  };
+
 
   const handleSpecFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -125,18 +128,16 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     }
   };
 
-  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setVideoFile(e.target.files[0]);
-    }
-  };
+
 
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return;
     try {
       setLoading(true);
-      const cat = await apiClient.addMaterialCategory({ name: newCategory });
-      setFormData((prev) => ({ ...prev, category: cat.name }));
+      // TODO: Implement addMaterialCategory via API if needed
+      const newCategoryObj = await apiClient.addMaterialCategory({ name: newCategory });
+      setCategoriesToUse((prev) => [...prev, { value: newCategory, label: newCategory }]);
+      setFormData((prev) => ({ ...prev, category: newCategory }));
       setAddCategoryMode(false);
       setNewCategory('');
       onCategoryAdded?.();
@@ -162,7 +163,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
       setAddRMMode(true);
       setFormData((prev) => ({ ...prev, rm: "" }));
     } else {
-      setFormData((prev) => ({ ...prev, rm: value }));
+      setFormData((prev) => ({ ...prev, rm: String(value) }));
       setAddRMMode(false);
     }
   };
@@ -171,8 +172,9 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
     if (!newRM.trim()) return;
     try {
       setLoading(true);
-      // Add the new RM to the options
-      rmOptions.push({ value: newRM, label: newRM });
+      const newRMObj = await addRawMaterial({ value: newRM, label: newRM });
+
+      setRmOptions((prev) => [...prev, { value: newRM, label: newRM }]);
       setFormData((prev) => ({ ...prev, rm: newRM }));
       setAddRMMode(false);
       setNewRM('');
@@ -245,102 +247,6 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
 
   const navigate = useNavigate();
 
-  const openVideoModal = async () => {
-    setShowVideoModal(true);
-    try {
-      // Try with preferred facingMode first
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: { ideal: facingMode } } 
-      });
-      setMediaStream(stream);
-    } catch (err) {
-      // Fallback to any available camera
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setMediaStream(stream);
-      } catch (fallbackErr) {
-        setError('Could not access camera. Please check camera permissions.');
-        setShowVideoModal(false);
-      }
-    }
-  };
-
-  const switchCamera = async () => {
-    const newMode = facingMode === 'user' ? 'environment' : 'user';
-    setFacingMode(newMode);
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
-    }
-    try {
-      // Try with new facingMode
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: { ideal: newMode } } 
-      });
-      setMediaStream(stream);
-    } catch (err) {
-      // Fallback to any available camera
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        setMediaStream(stream);
-      } catch (fallbackErr) {
-        setError('Could not switch camera. Using current camera.');
-      }
-    }
-  };
-
-  const closeVideoModal = () => {
-    setShowVideoModal(false);
-    setRecording(false);
-    setRecordedChunks([]);
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
-      setMediaStream(null);
-    }
-    // Detach the stream from the video element
-    if (liveVideoRef.current) {
-      liveVideoRef.current.srcObject = null;
-    }
-  };
-
-  const startRecording = () => {
-    if (!mediaStream) return;
-    const recorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
-    setMediaRecorder(recorder);
-    setRecordedChunks([]);
-    recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) setRecordedChunks((prev) => [...prev, e.data]);
-    };
-    recorder.onstop = () => {
-      setRecording(false);
-    };
-    recorder.start();
-    setRecording(true);
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop();
-    }
-    setRecording(false);
-    // Detach the stream from the video element
-    if (liveVideoRef.current) {
-      liveVideoRef.current.srcObject = null;
-    }
-  };
-
-  const useRecordedVideo = () => {
-    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-    const file = new File([blob], `recorded-${Date.now()}.webm`, { type: 'video/webm' });
-    setVideoFile(file);
-    closeVideoModal();
-  };
-
-  useEffect(() => {
-    if (showVideoModal && liveVideoRef.current && mediaStream) {
-      liveVideoRef.current.srcObject = mediaStream;
-    }
-  }, [showVideoModal, mediaStream, recording]);
-
   return (
     <Card>
       <CardHeader className="pb-4">
@@ -362,20 +268,25 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Choose RM *</label>
-                <SearchableSelect
-                  options={rmOptions}
-                  value={formData.rm}
-                  onValueChange={handleRMChange}
-                  placeholder="Select RM"
-                  searchPlaceholder="Search RM..."
-                  emptyText="No RM found."
-                  showAddNew={true}
-                  onAddNew={() => setAddRMMode(true)}
-                  disabled={loading}
-                />
+                {rmOptions.length > 0 ? (
+                  <SearchableSelect
+                    key={"rmoptions"}
+                    options={rmOptions}
+                    value={formData.rm}
+                    onValueChange={handleRMChange}
+                    placeholder="Select RM"
+                    searchPlaceholder="Search RM..."
+                    emptyText="No RM found."
+                    showAddNew={true}
+                    onAddNew={() => setAddRMMode(true)}
+                    disabled={loading}
+                  />
+                ) : (
+                  <div className="text-sm text-gray-500">Loading RMs...</div>
+                )}
                 {addRMMode && (
                   <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                    <Input value={newRM} onChange={e => setNewRM(e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250))} placeholder="New RM name" className="flex-1" maxLength={250} />
+                    <Input value={newRM} onChange={e => setNewRM(sanitizeTextInput(e.target.value))} placeholder="New RM name" className="flex-1" maxLength={250} />
                     <div className="flex gap-2">
                       <Button type="button" onClick={handleAddRM} disabled={loading} className="flex-1 sm:flex-none">Add</Button>
                       <Button type="button" variant="outline" onClick={() => setAddRMMode(false)} className="flex-1 sm:flex-none">Cancel</Button>
@@ -385,7 +296,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Title *</label>
-                <Input name="title" value={formData.title} onChange={e => setFormData(prev => ({ ...prev, title: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} required maxLength={250} />
+                <Input name="title" value={formData.title} onChange={e => setFormData(prev => ({ ...prev, title: sanitizeTextInput(e.target.value) }))} required maxLength={250} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Category *</label>
@@ -393,6 +304,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                   <div className="text-sm text-gray-500">Loading categories...</div>
                 ) : (
                   <SearchableSelect
+                    key={"categories"}
                     options={categoriesToUse.filter(c => c.value !== 'all')}
                     value={formData.category}
                     onValueChange={handleCategoryChange}
@@ -406,7 +318,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                 )}
                 {addCategoryMode && (
                   <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                    <Input value={newCategory} onChange={e => setNewCategory(e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250))} placeholder="New category name" className="flex-1" maxLength={250} />
+                    <Input value={newCategory} onChange={e => setNewCategory(sanitizeTextInput(e.target.value))} placeholder="New category name" className="flex-1" maxLength={250} />
                     <div className="flex gap-2">
                       <Button type="button" onClick={handleAddCategory} disabled={loading} className="flex-1 sm:flex-none">Add</Button>
                       <Button type="button" variant="outline" onClick={() => setAddCategoryMode(false)} className="flex-1 sm:flex-none">Cancel</Button>
@@ -416,7 +328,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Type</label>
-                <Input name="type" value={formData.type} onChange={e => setFormData(prev => ({ ...prev, type: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
+                <Input name="type" value={formData.type} onChange={e => setFormData(prev => ({ ...prev, type: sanitizeTextInput(e.target.value) }))} maxLength={250} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Available Daily Production *</label>
@@ -424,7 +336,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Manufacturing Location *</label>
-                <Input name="location" value={formData.location} onChange={e => setFormData(prev => ({ ...prev, location: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} required maxLength={250} />
+                <Input name="location" value={formData.location} onChange={e => setFormData(prev => ({ ...prev, location: sanitizeTextInput(e.target.value) }))} required maxLength={250} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Material Specification / Data Picture / Data Sheet</label>
@@ -440,7 +352,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Grade/Specification</label>
-                <Input name="grade_specification" value={formData.grade_specification} onChange={e => setFormData(prev => ({ ...prev, grade_specification: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
+                <Input name="grade_specification" value={formData.grade_specification} onChange={e => setFormData(prev => ({ ...prev, grade_specification: sanitizeTextInput(e.target.value) }))} maxLength={250} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Unit</label>
@@ -457,19 +369,37 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Delivery Terms</label>
-                <Input name="delivery_terms" value={formData.delivery_terms} onChange={e => setFormData(prev => ({ ...prev, delivery_terms: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
+                <Input name="delivery_terms" value={formData.delivery_terms} onChange={e => setFormData(prev => ({ ...prev, delivery_terms: sanitizeTextInputWithHyphens(e.target.value) }))} maxLength={250} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Certification</label>
-                <Input name="certification" value={formData.certification} onChange={e => setFormData(prev => ({ ...prev, certification: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '').slice(0, 250) }))} maxLength={250} />
+                <Input name="certification" value={formData.certification} onChange={e => setFormData(prev => ({ ...prev, certification: sanitizeTextInput(e.target.value) }))} maxLength={250} />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Product Image(s)</label>
-                <Input type="file" accept="image/*" onChange={handleImageChange} multiple />
+                <CaptureOrUploadImage
+                  label="Product Image(s)"
+                  multiple
+                  onImageSelect={file => setImageFiles(prev => [...prev, file])}
+                />
                 {imageFiles.length > 0 && (
                   <div className="flex gap-2 flex-wrap mt-2">
                     {imageFiles.map((file, idx) => (
-                      <img key={idx} src={URL.createObjectURL(file)} alt={`Preview ${idx + 1}`} className="h-24 rounded border object-contain" />
+                      <div key={idx} className="relative">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Preview ${idx + 1}`}
+                          className="h-24 rounded border object-contain"
+                        />
+                        <button
+                          type="button"
+                          className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-opacity-100 z-10"
+                          onClick={() => setImageFiles(prev => prev.filter((_, i) => i !== idx))}
+                          aria-label="Remove image"
+                        >
+                          <X className="h-4 w-4 text-gray-700" />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -481,83 +411,22 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Product Video</label>
-                <div className="flex gap-2">
-                  {/* Hidden input for camera capture (fallback) */}
-                  <input
-                    type="file"
-                    accept="video/*"
-                    capture="environment"
-                    style={{ display: 'none' }}
-                    id="video-capture-supply"
-                    onChange={handleVideoChange}
-                  />
-                  <button
-                    type="button"
-                    className="px-4 py-2 rounded bg-blue-600 text-white"
-                    onClick={openVideoModal}
-                  >
-                    Record Video
-                  </button>
-                  {/* Hidden input for upload */}
-                  <input
-                    type="file"
-                    accept="video/*"
-                    style={{ display: 'none' }}
-                    id="video-upload-supply"
-                    onChange={handleVideoChange}
-                  />
-                  <button
-                    type="button"
-                    className="px-4 py-2 rounded bg-gray-200 text-gray-800"
-                    onClick={() => document.getElementById('video-upload-supply').click()}
-                  >
-                    Upload Video
-                  </button>
-                </div>
+                <CaptureOrUploadVideo
+                  label="Product Video"
+                  onVideoSelect={file => setVideoFile(file)}
+                />
                 {videoFile && (
-                  <video controls className="mt-2 h-32 rounded border object-contain">
-                    <source src={URL.createObjectURL(videoFile)} type={videoFile.type} />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
-                {videoFile && (
-                  <div className="text-xs text-gray-500 mt-1">{videoFile.name}</div>
-                )}
-                {/* Video Recorder Modal */}
-                {showVideoModal && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-                    <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
-                      <button className="absolute top-2 right-2 text-gray-500" onClick={closeVideoModal}>&times;</button>
-                      <h3 className="text-lg font-semibold mb-2">Record Video</h3>
-                      <button className="mb-2 px-3 py-1 rounded bg-gray-300 text-gray-800" onClick={switchCamera} type="button">
-                        Switch Camera
-                      </button>
-                      {!recording && recordedChunks.length === 0 && (
-                        <video ref={liveVideoRef} autoPlay playsInline className="w-full h-48 bg-black rounded mb-2" />
-                      )}
-                      {recording && (
-                        <video ref={liveVideoRef} autoPlay playsInline className="w-full h-48 bg-black rounded mb-2 border-2 border-red-500" />
-                      )}
-                      {!recording && recordedChunks.length > 0 && (
-                        <video
-                          ref={videoPreviewRef}
-                          controls
-                          className="w-full h-48 bg-black rounded mb-2"
-                          src={URL.createObjectURL(new Blob(recordedChunks, { type: 'video/webm' }))}
-                        />
-                      )}
-                      <div className="flex gap-2 justify-center">
-                        {!recording && recordedChunks.length === 0 && (
-                          <button className="px-4 py-2 bg-blue-600 text-white rounded" onClick={startRecording}>Start Recording</button>
-                        )}
-                        {recording && (
-                          <button className="px-4 py-2 bg-red-600 text-white rounded" onClick={stopRecording}>Stop Recording</button>
-                        )}
-                        {!recording && recordedChunks.length > 0 && (
-                          <button className="px-4 py-2 bg-green-600 text-white rounded" onClick={useRecordedVideo}>Use This Video</button>
-                        )}
-                      </div>
-                    </div>
+                  <div className="mt-2 relative w-fit">
+                    <span className="text-xs text-gray-500">{videoFile.name}</span>
+                    <video src={URL.createObjectURL(videoFile)} controls className="mt-2 h-24 rounded border object-contain" />
+                    <button
+                      type="button"
+                      className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-opacity-100 z-10"
+                      onClick={() => setVideoFile(null)}
+                      aria-label="Remove video"
+                    >
+                      <X className="h-4 w-4 text-gray-700" />
+                    </button>
                   </div>
                 )}
               </div>
@@ -582,7 +451,7 @@ const SupplyForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Description</label>
-              <textarea name="description" value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: e.target.value.replace(/[^a-zA-Z0-9,. ]/g, '') }))} rows={3} className="w-full border rounded p-2" />
+              <textarea name="description" value={formData.description} onChange={e => setFormData(prev => ({ ...prev, description: sanitizeTextInput(e.target.value) }))} rows={3} className="w-full border rounded p-2" />
             </div>
             {error && <div className="text-red-500 text-sm">{error}</div>}
             {success && <div className="text-green-600 text-sm">{success}</div>}
