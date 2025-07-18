@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Upload, X, RefreshCw } from "lucide-react";
 
@@ -15,7 +15,7 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
   label = "Video",
   accept = "video/*",
   className = "",
-  maxDuration = 30
+  maxDuration = 60,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showCamera, setShowCamera] = useState(false);
@@ -32,7 +32,13 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      onVideoSelect(e.target.files[0]);
+      const file = e.target.files[0];
+      onVideoSelect(file);
+
+      // Optional: preview fallback video
+      const url = URL.createObjectURL(file);
+      setVideoUrl(url);
+      setShowCamera(true);
     }
   };
 
@@ -43,15 +49,28 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
     setShowCamera(true);
     setRecordedChunks([]);
     setTimer(0);
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError("Camera access is not supported on this browser.");
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: useMode }, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: useMode } }
+      });
       setMediaStream(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
+      
+    } catch (err: any) {
+      console.error("Camera access error:", err);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        setMediaStream(stream);
+        
+      } catch (fallbackErr: any) {
+        alert('Could not access camera. Please check camera permissions.');
+        
       }
-    } catch (err) {
-      setError("Could not access camera. Please allow camera access or try a different device.");
+      setError("Could not access camera. Please allow camera access or use a different device.");
     }
   };
 
@@ -59,28 +78,23 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
     const newMode = facingMode === 'user' ? 'environment' : 'user';
     setFacingMode(newMode);
     if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
+      mediaStream.getTracks().forEach((track) => track.stop());
     }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: { ideal: newMode } }, audio: true 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: newMode } }
       });
       setMediaStream(stream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
+      
     } catch (err) {
-      // Fallback to any available camera
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        setMediaStream(stream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          videoRef.current.play();
-        }
+        const fallback = await navigator.mediaDevices.getUserMedia({
+          video: true
+        });
+        setMediaStream(fallback);
+       
       } catch (fallbackErr) {
-        setError('Could not switch camera. Using current camera.');
+        setError("Could not switch camera. Using current camera.");
       }
     }
   };
@@ -92,7 +106,7 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
     setRecording(false);
     setTimer(0);
     if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
+      mediaStream.getTracks().forEach((track) => track.stop());
       setMediaStream(null);
     }
     if (timerRef.current) {
@@ -106,17 +120,28 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
     setRecordedChunks([]);
     setRecording(true);
     setTimer(0);
-    const recorder = new MediaRecorder(mediaStream, { mimeType: 'video/mp4' });
+
+    const mp4Supported = MediaRecorder.isTypeSupported("video/mp4");
+    console.log("mp4Supported", mp4Supported);
+    const mimeType = mp4Supported ? "video/mp4" : "video/webm";
+    let localChunks: Blob[] = [];
+
+    const recorder = new MediaRecorder(mediaStream, { mimeType });
     setMediaRecorder(recorder);
+
     recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) setRecordedChunks((prev) => [...prev, e.data]);
+      if (e.data.size > 0) localChunks.push(e.data);
     };
     recorder.onstop = () => {
-      const blob = new Blob(recordedChunks, { type: 'video/mp4' });
+      setRecording(false);
+      setTimer(0);
+      setRecordedChunks(localChunks); // Save for later use
+      const blob = new Blob(localChunks, { type: mimeType });
       const url = URL.createObjectURL(blob);
-      setVideoUrl(url);
+      setVideoUrl(url); // This will show the preview in the modal
     };
     recorder.start();
+
     timerRef.current = setInterval(() => {
       setTimer((prev) => {
         if (prev + 1 >= maxDuration) {
@@ -129,7 +154,7 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
   };
 
   const stopRecording = () => {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
       mediaRecorder.stop();
     }
     setRecording(false);
@@ -148,16 +173,26 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
   };
 
   const handleConfirm = () => {
-    if (recordedChunks.length === 0) return;
-    const blob = new Blob(recordedChunks, { type: 'video/mp4' });
-    const file = new File([blob], `${Date.now()}.mp4`, { type: 'video/mp4' });
-    onVideoSelect(file);
+    if (recordedChunks.length === 0 && !videoUrl) return;
+
+    if (recordedChunks.length > 0) {
+      const blob = new Blob(recordedChunks, { type: "video/mp4" });
+      const file = new File([blob], `${Date.now()}.mp4`, { type: "video/mp4" });
+      onVideoSelect(file);
+    }
+
     closeCamera();
   };
 
+
+  useEffect(() => {
+    if (showCamera && videoRef.current && mediaStream) {
+      videoRef.current.srcObject = mediaStream;
+    }
+  }, [showCamera, mediaStream, recording]);
+
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      
       <div className="flex gap-2">
         <Button
           type="button"
@@ -173,18 +208,20 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
           onClick={() => fileInputRef.current?.click()}
           className="flex items-center gap-2"
         >
-          <Upload className="h-4 w-4" /> Choose File
+          <Upload className="h-4 w-4" /> Upload video
         </Button>
       </div>
-      {/* Hidden file input for upload */}
+
+      {/* Hidden file input with mobile capture support */}
       <input
         ref={fileInputRef}
         type="file"
-        accept={accept}
+        accept="video/*"
+        capture={facingMode} // Helps open camera on mobile
         style={{ display: "none" }}
         onChange={handleFileChange}
       />
-      {/* Camera Modal */}
+
       {showCamera && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
           <div className="bg-white rounded-lg shadow-lg p-4 max-w-sm w-full relative flex flex-col items-center">
@@ -192,7 +229,7 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
               <button
                 type="button"
                 className="bg-black/40 rounded-full p-1 shadow hover:bg-black/60 z-10"
-                onClick={() => switchCamera()}
+                onClick={switchCamera}
                 aria-label="Switch camera"
               >
                 <RefreshCw className="h-6 w-6 text-white" />
@@ -200,7 +237,7 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
               <button
                 type="button"
                 className="bg-black/40 backdrop-blur-sm rounded-full p-1 shadow hover:bg-black/60 z-10"
-                onClick={(e)=>{
+                onClick={(e) => {
                   e.preventDefault();
                   closeCamera();
                 }}
@@ -212,32 +249,58 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
             <div className="w-full flex flex-col items-center">
               {!videoUrl ? (
                 <>
-                  <video ref={videoRef} className="w-full rounded mb-2 bg-black" autoPlay playsInline muted />
+                  <video
+                    ref={videoRef}
+                    className="w-full rounded mb-2 bg-black"
+                    autoPlay
+                    playsInline
+                    muted
+                  />
                   <div className="flex gap-2 w-full mt-2">
                     {!recording ? (
-                      <Button type="button" onClick={startRecording} className="flex-1 flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+                      <Button
+                        type="button"
+                        onClick={startRecording}
+                        className="flex-1 flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                      >
                         <Camera className="h-4 w-4" /> Start Recording
                       </Button>
                     ) : (
-                      <Button type="button" onClick={stopRecording} className="flex-1 flex items-center gap-2 bg-red-600 hover:bg-red-700">
+                      <Button
+                        type="button"
+                        onClick={stopRecording}
+                        className="flex-1 flex items-center gap-2 bg-red-600 hover:bg-red-700"
+                      >
                         <Camera className="h-4 w-4" /> Stop
                       </Button>
                     )}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">{recording ? `Recording... ${timer}s` : `Max duration: ${maxDuration}s`}</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {recording
+                      ? `Recording... ${timer}s`
+                      : `Max duration: ${maxDuration}s`}
+                  </div>
                   {error && <div className="text-red-500 text-sm mt-2">{error}</div>}
                 </>
               ) : (
                 <>
                   <div className="relative w-full mb-2">
                     <video src={videoUrl} controls className="w-full rounded" />
-                    
                   </div>
                   <div className="flex gap-2 w-full">
-                    <Button type="button" onClick={handleRetake} variant="outline" className="flex-1 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      onClick={handleRetake}
+                      variant="outline"
+                      className="flex-1 flex items-center gap-2"
+                    >
                       <RefreshCw className="h-4 w-4" /> Retake
                     </Button>
-                    <Button type="button" onClick={handleConfirm} className="flex-1 flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+                    <Button
+                      type="button"
+                      onClick={handleConfirm}
+                      className="flex-1 flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                    >
                       <Camera className="h-4 w-4" /> Use Video
                     </Button>
                   </div>
@@ -251,4 +314,4 @@ const CaptureOrUploadVideo: React.FC<CaptureOrUploadVideoProps> = ({
   );
 };
 
-export default CaptureOrUploadVideo; 
+export default CaptureOrUploadVideo;

@@ -373,8 +373,8 @@ const DemandForm = ({ onSubmit, categories, materialCategories, isAuthenticated,
                 />
                 {videoFile && (
                   <div className="mt-2 relative w-fit">
-                    <span className="text-xs text-gray-500">{videoFile.name}</span>
                     <video src={URL.createObjectURL(videoFile)} controls className="mt-2 h-24 rounded border object-contain" />
+                    <span className="text-xs text-gray-500">{videoFile.name}</span>
                     <button
                       type="button"
                       className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 shadow hover:bg-opacity-100 z-10"
