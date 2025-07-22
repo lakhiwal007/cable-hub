@@ -146,7 +146,7 @@ const formatXAxis = (tick: string) => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white sticky top-0 z-50 shadow-lg">
+    <div className="bg-gradient-to-r from-blue-600/90 via-blue-700/90 to-blue-800/90 text-white sticky top-0 z-50 shadow-lg backdrop-blur-md">
       <div className="w-full">
         <div className="flex items-center justify-between flex-wrap">
           

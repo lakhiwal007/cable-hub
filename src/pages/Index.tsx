@@ -8,6 +8,7 @@ import HeroSection from "@/components/HeroSection";
 import FeatureCards from "@/components/FeatureCards";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import apiClient from "@/lib/apiClient";
+import Loader from "@/components/ui/loader";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -17,6 +18,12 @@ const Index = () => {
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
 
+  const [pricing, setPricing] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const [recentListings, setRecentListings] = useState<any[]>([]);
+  const [loadingListings, setLoadingListings] = useState(true);
+
   useEffect(() => {
     const storedUserType = localStorage.getItem('userType');
     if (storedUserType) {
@@ -25,6 +32,25 @@ const Index = () => {
     }
     // Check for logged-in user
     apiClient.getProfile().then(setUser).catch(() => setUser(null));
+  }, []);
+
+  useEffect(() => {
+    apiClient.getPricingData()
+      .then(data => setPricing(data || []))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    Promise.all([
+      apiClient.getSupplyListings({}),
+      apiClient.getDemandListings({})
+    ]).then(([supply, demand]) => {
+      const supplyWithType = (supply || []).map(item => ({ ...item, type: "supply" }));
+      const demandWithType = (demand || []).map(item => ({ ...item, type: "demand" }));
+      const combined = [...supplyWithType, ...demandWithType]
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      setRecentListings(combined.slice(0, 3));
+    }).finally(() => setLoadingListings(false));
   }, []);
 
   const fetchUserProfile = async () => {
@@ -89,7 +115,7 @@ const Index = () => {
             <HeroSection onGetStarted={() => navigate("/marketplace")} />
             
             {/* Market Intelligence Section */}
-            <section className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-3xl p-8 md:p-12">
+            <section className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-3xl p-4 md:p-12">
               <div className="text-center mb-10">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                   Real-Time Market Intelligence
@@ -102,33 +128,37 @@ const Index = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <Card className="border-0 shadow-lg bg-white/70 backdrop-blur-sm">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-gray-900">
+                    <CardTitle className="flex items-center gap-2 text-gray-900 text-balance text-lg md:text-2xl">
                       <TrendingUp className="h-5 w-5 text-blue-600" />
                       Live Price Tracking
                     </CardTitle>
                     <CardDescription>Real-time commodity prices updated every minute</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {[
-                      { material: "Copper Wire 99.9%", price: "₹485/kg", change: "+2.3%", positive: true },
-                      { material: "Aluminum Rods", price: "₹162/kg", change: "-1.2%", positive: false },
-                      { material: "PVC Granules", price: "₹89/kg", change: "+0.8%", positive: true },
-                      { material: "XLPE Granules", price: "₹145/kg", change: "+3.2%", positive: true },
-                    ].map((item, index) => (
-                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-                        <div>
-                          <p className="font-medium text-gray-900">{item.material}</p>
-                          <p className="text-xl font-bold text-gray-900">{item.price}</p>
-                        </div>
-                        <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                          item.positive 
-                            ? 'bg-green-100 text-green-700' 
-                            : 'bg-red-100 text-red-700'
-                        }`}>
-                          {item.change}
-                        </span>
-                      </div>
-                    ))}
+                    {loading ? (
+                      <Loader className="py-8" />
+                    ) : pricing.length === 0 ? (
+                      <div>No pricing data available.</div>
+                    ) : (
+                      [...pricing]
+                        .sort(() => 0.5 - Math.random())
+                        .slice(0, 4)
+                        .map((item, index) => (
+                          <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
+                            <div>
+                              <p className="font-medium text-gray-900">{item.material}</p>
+                              <p className="text-xl font-bold text-gray-900">{item.price}</p>
+                            </div>
+                            <span className={`px-3 py-1 text-sm font-medium rounded-full ${
+                              parseFloat(item.change) >= 0
+                                ? 'bg-green-300/70 text-green-700'
+                                : 'bg-red-300/70 text-red-700'
+                            }`}>
+                              {item.change}
+                            </span>
+                          </div>
+                        ))
+                    )}
                   </CardContent>
                 </Card>
 
@@ -141,28 +171,32 @@ const Index = () => {
                     <CardDescription>Latest supplier postings and requirements</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {[
-                      { type: "Supply", material: "Copper Wire 99.9%", quantity: "500kg", supplier: "MetalCorp Ltd" },
-                      { type: "Demand", material: "PVC Granules", quantity: "2 Tons", manufacturer: "CableTech Industries" },
-                      { type: "Supply", material: "Aluminum Rods", quantity: "1 Ton", supplier: "Prime Metals" },
-                    ].map((item, index) => (
-                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              item.type === 'Supply' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-                            }`}>
-                              {item.type}
-                            </span>
+                    {loadingListings ? (
+                      <Loader className="py-8" />
+                    ) : recentListings.length === 0 ? (
+                      <div>No recent listings available.</div>
+                    ) : (
+                      recentListings.map((item, idx) => (
+                        <div key={idx} className="flex flex-col md:flex-row justify-between items-start md:items-center p-3 bg-gray-50 rounded-xl">
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              
+                              {item.title || "Untitled"}
+                            </p>
+                            <p className="text-sm text-gray-600">{item.location || "No location"}</p>
+                            {item.type==="supply" ? <p className="text-lg text-gray-400">{item.available_quantity}{" "}{item.unit}</p> : <p className="text-lg text-gray-400">{item.required_quantity}{" "}{item.unit}</p>}
+                            
                           </div>
-                          <p className="font-medium text-gray-900">{item.material}</p>
-                          <p className="text-sm text-gray-600">{item.quantity}</p>
+                          <span className={`mt-2 md:mt-0 px-3 py-1 text-sm font-medium rounded-full ${
+                            item.type === "supply"
+                              ? "bg-green-300/70 text-green-700"
+                              : "bg-blue-300/70 text-blue-700"
+                          }`}>
+                            {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                          </span>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-gray-900">{item.supplier || item.manufacturer}</p>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </CardContent>
                 </Card>
 
