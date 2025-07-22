@@ -16,7 +16,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       tab: "calculator",
       gradient: "from-orange-500 to-orange-600",
       bgGradient: "from-orange-50 to-orange-100",
-      borderColor: "border-orange-200",
+      borderColor: "ring-orange-200",
     },
     {
       icon: LucideHeartHandshake,
@@ -26,7 +26,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       tab: "marketplace",
       gradient: "from-green-500 to-green-600",
       bgGradient: "from-green-50 to-green-100",
-      borderColor: "border-green-200",
+      borderColor: "ring-green-200",
     },
     {
       icon: TrendingUp,
@@ -36,7 +36,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       tab: "pricing",
       gradient: "from-blue-500 to-blue-600",
       bgGradient: "from-blue-50 to-blue-100",
-      borderColor: "border-blue-200",
+      borderColor: "ring-blue-200",
     },
     
     {
@@ -47,7 +47,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       tab: "machines",
       gradient: "from-indigo-500 to-purple-600",
       bgGradient: "from-indigo-50 to-purple-100",
-      borderColor: "border-indigo-200",
+      borderColor: "ring-indigo-200",
     },
     {
       icon: PackageSearch,
@@ -57,7 +57,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       tab: "used-dead-stock",
       gradient: "from-amber-400 to-yellow-500",
       bgGradient: "from-yellow-50 to-yellow-100",
-      borderColor: "border-yellow-200",
+      borderColor: "ring-yellow-200",
     },
     
     {
@@ -68,7 +68,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       tab: "consulting",
       gradient: "from-purple-500 to-purple-600",
       bgGradient: "from-purple-50 to-purple-100",
-      borderColor: "border-purple-200",
+      borderColor: "ring-purple-200",
     },
     {
       icon: Users2,
@@ -78,7 +78,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       tab: "team",
       gradient: "from-cyan-500 to-cyan-600",
       bgGradient: "from-blue-50 to-blue-100",
-      borderColor: "border-cyan-200",
+      borderColor: "ring-cyan-200",
     },
     {
       icon: CpuIcon,
@@ -88,7 +88,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
       tab: "specs",
       gradient: "from-rose-500 to-rose-600",
       bgGradient: "from-rose-50 to-rose-100",
-      borderColor: "border-rose-200",
+      borderColor: "ring-rose-200",
     },
   ];
 
@@ -127,7 +127,7 @@ const FeatureCards = ({ onNavigate }: FeatureCardsProps) => {
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
-              <Card key={index} className={`group hover:shadow-2xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br ${feature.bgGradient} ${feature.borderColor} hover:scale-105`}>
+              <Card key={index} className={`group hover:shadow-2xl transition-all duration-300 border-0 shadow-lg bg-gradient-to-br ${feature.bgGradient} ${feature.borderColor} hover:ring-2 hover:scale-105`}>
                 <CardHeader className="text-center pb-4">
                   <div className={`w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center shadow-lg`}>
                     <Icon className="h-8 w-8 text-white" />

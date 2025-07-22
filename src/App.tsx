@@ -30,6 +30,12 @@ import apiClient from "@/lib/apiClient";
 import SessionTimeoutHandler from "@/components/SessionTimeoutHandler";
 import Profile from "./pages/Profile";
 import CalculatorPage from "./pages/CalculatorPage";
+import ForgotPassword from "./pages/ForgotPassword";
+import LoginOtp from "./pages/LoginOtp";
+import { StatusBar, Style } from '@capacitor/status-bar';
+
+StatusBar.setOverlaysWebView({ overlay: true });
+StatusBar.setStyle({ style: Style.Light });
 
 const queryClient = new QueryClient();
 
@@ -75,6 +81,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/login-otp" element={<LoginOtp />} />
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/my-chats" element={
             <ProtectedRoute>

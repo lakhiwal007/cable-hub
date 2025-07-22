@@ -164,14 +164,14 @@ const formatXAxis = (tick: string) => {
                   priceData.map((item, index) => (
                     <div 
                       key={`${copyIndex}-${index}`} 
-                      className="flex items-center p-4 cursor-pointer hover:bg-white/10 rounded-lg transition-colors" 
+                      className="flex items-center px-4 py-1 cursor-pointer hover:bg-white/10 rounded-lg transition-colors" 
                       onClick={() => handleMaterialClick(item)}
                     >
                     <div className="text-center">
-                      <p className="font-semibold text-sm mb-1">{item.material}</p>
-                      <div className="flex items-center space-x-3">
-                        <span className="text-lg font-bold">{item.price}</span>
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      <p className="font-semibold text-xs">{item.material}</p>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs font-bold">{item.price}</span>
+                        <span className={`text-xs px-2 rounded-full font-medium ${
                           item.trend === 'up' 
                             ? 'bg-green-500/20 text-green-200 border border-green-400/30' 
                             : 'bg-red-500/20 text-red-200 border border-red-400/30'

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, LogIn } from "lucide-react";
 import apiClient from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
@@ -15,23 +15,9 @@ const Login = () => {
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
+  
 
-  // Get the page user was trying to access before being redirected to login
-  const from = location.state?.from?.pathname || "/";
-
-  // Check if user is already logged in
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    const userType = localStorage.getItem('userType');
-    if (apiClient.isAuthenticated() && token) {
-      if (userType === 'admin') {
-        navigate("/admin", { replace: true });
-      } else {
-        navigate(from, { replace: true });
-      }
-    }
-  }, [navigate, from]);
+  
 
   const validateForm = () => {
     if (!identifier) {
@@ -111,7 +97,7 @@ const Login = () => {
         navigate("/admin", { replace: true });
       } else {
         console.log('Redirecting to home page');
-        navigate(from, { replace: true });
+        navigate("/", { replace: true });
       }
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials and try again.");
@@ -228,6 +214,15 @@ const Login = () => {
                 )}
               </Button>
             </form>
+
+            {/* <Button
+              variant="outline"
+              className="w-full mt-2"
+              type="button"
+              onClick={() => navigate("/login-otp")}
+            >
+              Login via OTP
+            </Button> */}
 
             <div className="text-center">
               <p className="text-sm text-gray-600">

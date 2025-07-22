@@ -144,31 +144,7 @@ const RawMaterialCalculator = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="insulationThickness">Insulation Thickness (mm)</Label>
-              <Input
-                id="insulationThickness"
-                type="number"
-                step="0.1"
-                placeholder="e.g., 1.5"
-                name="insulationThickness"
-                value={form.insulationThickness}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="sheathThickness">Sheath Thickness (mm)</Label>
-              <Input
-                id="sheathThickness"
-                type="number"
-                step="0.1"
-                placeholder="e.g., 1.5"
-                name="sheathThickness"
-                value={form.sheathThickness}
-                onChange={handleChange}
-              />
-            </div>
+            
 
             <div className="flex gap-2">
               <div className="flex-1">

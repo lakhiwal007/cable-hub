@@ -10,6 +10,7 @@ const API_BASE_URL = `${supabaseUrl}/functions/v1/cable-hub-admin`;
 class ApiClient {
   private baseURL: string;
   private token: string | null = null;
+  supabase = supabase;
 
   constructor(baseURL: string = API_BASE_URL) {
     this.baseURL = baseURL;
@@ -96,7 +97,13 @@ class ApiClient {
   async getProfile() {
     const { data, error } = await supabase.auth.getUser();
     if (error) throw new Error(error.message);
-    return data.user;
+    const user = data.user;
+    if (user) {
+      const { data: userData, error: userError } = await supabase.from('users').select('*').eq('id', user.id).single();
+      if (userError) throw new Error(userError.message);
+      return { ...user, ...userData };
+    }
+    return null;
   }
 
   async getPricingData() {
@@ -1750,6 +1757,72 @@ class ApiClient {
     if (!ts) return false;
     const now = Date.now();
     return now - parseInt(ts, 10) > 30 * 60 * 1000;
+  }
+
+  
+
+  async sendOtpForPasswordReset(mobile: string) {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${supabaseAnonKey}`,
+    };
+    const session = await supabase.auth.getSession();
+    if (session.data.session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.data.session.access_token}`;
+    }
+    const response = await fetch(this.baseURL, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ action: "auth/send-otp-reset", data: { mobile } })
+    });
+    if (!response.ok) throw new Error((await response.json()).error || "Failed to send OTP");
+    return response.json();
+  }
+
+  async verifyOtpForPasswordReset(mobile: string, otp: string) {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${supabaseAnonKey}`,
+    };
+    const session = await supabase.auth.getSession();
+    if (session.data.session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.data.session.access_token}`;
+    }
+    const response = await fetch(this.baseURL, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ action: "auth/verify-otp-reset", data: { mobile, otp } })
+    });
+    if (!response.ok) throw new Error((await response.json()).error || "Invalid OTP");
+    return response.json();
+  }
+
+  async resetPasswordWithOtp(mobile: string, otp: string, newPassword: string) {
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${supabaseAnonKey}`,
+    };
+    const session = await supabase.auth.getSession();
+    if (session.data.session?.access_token) {
+      headers['Authorization'] = `Bearer ${session.data.session.access_token}`;
+    }
+    const response = await fetch(this.baseURL, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ action: "auth/reset-password-with-otp", data: { mobile, otp, newPassword } })
+    });
+    if (!response.ok) throw new Error((await response.json()).error || "Failed to reset password");
+    return response.json();
+  }
+
+  async getUserByMobile(mobile: string) {
+    const { data, error } = await this.supabase
+      .from("users")
+      .select("*")
+      .eq("phone", mobile)
+      .single();
+    if (error || !data) throw new Error("User not found");
+    return data;
   }
 }
 
