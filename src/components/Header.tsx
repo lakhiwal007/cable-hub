@@ -12,8 +12,13 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ title, onBack, showBack = true, logoSrc = '/logo.svg', rightContent }) => {
   const navigate = useNavigate();
+  // Always apply safe area padding using the plugin's CSS variable
+  const safeAreaStyle = { paddingTop: 'var(--safe-area-inset-top, 20px)' };
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-40 w-full">
+    <header
+      className="bg-white/95 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-40 w-full"
+      style={safeAreaStyle}
+    >
       <div className="mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-14 sm:h-16 gap-2 sm:gap-4 justify-between">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           {showBack && (

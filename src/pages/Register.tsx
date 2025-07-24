@@ -27,13 +27,6 @@ const Register = () => {
   });
   const navigate = useNavigate();
 
-  // Check if user is already logged in
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token && apiClient.isAuthenticated()) {
-      navigate("/");
-    }
-  }, [navigate]);
 
   // Password validation
   useEffect(() => {

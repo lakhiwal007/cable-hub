@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.example.app',
-  appName: 'Cable Hub Connect',
+  appName: 'Cable Junction',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
@@ -10,7 +10,12 @@ const config: CapacitorConfig = {
   plugins: {
     App: {
       launchAutoHide: true
-    }
+    },
+    StatusBar: {
+      overlaysWebView: false,
+      style: "DARK",
+      backgroundColor: "#000000",
+    },
   }
 };
 

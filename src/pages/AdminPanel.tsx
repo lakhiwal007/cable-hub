@@ -412,10 +412,7 @@ const AdminPanel = () => {
             <CalculationConstantsManager />
           </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings">
-            {/* Settings content */}
-          </TabsContent>
+         
         </Tabs>
       </div>
     </div>

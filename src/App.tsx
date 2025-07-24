@@ -26,16 +26,18 @@ import SpecsMarketplace from "./pages/SpecsMarketplace";
 import Features from "./pages/Features";
 import ScrollToTop from "@/components/ScrollToTop";
 import Mentor from "./pages/Mentor";
-import apiClient from "@/lib/apiClient";
 import SessionTimeoutHandler from "@/components/SessionTimeoutHandler";
 import Profile from "./pages/Profile";
 import CalculatorPage from "./pages/CalculatorPage";
 import ForgotPassword from "./pages/ForgotPassword";
 import LoginOtp from "./pages/LoginOtp";
 import { StatusBar, Style } from '@capacitor/status-bar';
+import useSafeAreaCssVars from './hooks/useSafeAreaCssVars';
 
-StatusBar.setOverlaysWebView({ overlay: true });
-StatusBar.setStyle({ style: Style.Light });
+
+StatusBar.setOverlaysWebView({ overlay: false });
+StatusBar.setStyle({ style: Style.Dark });
+StatusBar.hide()
 
 const queryClient = new QueryClient();
 
@@ -68,53 +70,56 @@ function ChatRoomWrapper() {
   return <ChatRoom roomId={roomId} onBack={() => navigate(-1)} />;
 }
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <ScrollToTop />
-        <BackButtonHandler />
-        <SessionTimeoutHandler />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/login-otp" element={<LoginOtp />} />
-          <Route path="/marketplace" element={<MarketplacePage />} />
-          <Route path="/my-chats" element={
-            <ProtectedRoute>
-              <MyChats />
-            </ProtectedRoute>
-          } />
-          <Route path="/features" element={<Features />} />
-          <Route path="/calculator" element={<CalculatorPage />} />
-          <Route path="/admin" element={
-            <ProtectedRoute adminOnly={true}>
-              <AdminPanel />
-            </ProtectedRoute>
-          } />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/mentor" element={<Mentor />} />
-          <Route path="/chat/:roomId" element={<ChatRoomWrapper />} />
-          <Route path="/listing/:listingType/:listingId" element={<ListingDetails />} />
+const App = () => {
+  useSafeAreaCssVars();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <ScrollToTop />
+          <BackButtonHandler />
+          <SessionTimeoutHandler />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/login-otp" element={<LoginOtp />} />
+            <Route path="/marketplace" element={<MarketplacePage />} />
+            <Route path="/my-chats" element={
+              <ProtectedRoute>
+                <MyChats />
+              </ProtectedRoute>
+            } />
+            <Route path="/features" element={<Features />} />
+            <Route path="/calculator" element={<CalculatorPage />} />
+            <Route path="/admin" element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminPanel />
+              </ProtectedRoute>
+            } />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/mentor" element={<Mentor />} />
+            <Route path="/chat/:roomId" element={<ChatRoomWrapper />} />
+            <Route path="/listing/:listingType/:listingId" element={<ListingDetails />} />
 
-          {/* <Route path="/team" element={<Team />} />
-          <Route path="/used-dead-stock-listings" element={<UsedAndDeadStockListings />} />
-          <Route path="/paid-expert-consulting" element={<PaidExpertConsulting />} />
-          <Route path="/consulting-listings" element={<ConsultingListings />} />
-          <Route path="/machines-marketplace" element={<MachinesMarketplace />} />
-          <Route path="/specs-marketplace" element={<SpecsMarketplace />} /> */}
+            {/* <Route path="/team" element={<Team />} />
+            <Route path="/used-dead-stock-listings" element={<UsedAndDeadStockListings />} />
+            <Route path="/paid-expert-consulting" element={<PaidExpertConsulting />} />
+            <Route path="/consulting-listings" element={<ConsultingListings />} />
+            <Route path="/machines-marketplace" element={<MachinesMarketplace />} />
+            <Route path="/specs-marketplace" element={<SpecsMarketplace />} /> */}
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Footer />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Footer />
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

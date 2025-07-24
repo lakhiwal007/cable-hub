@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Calculator, Download, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,10 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import apiClient from "@/lib/apiClient";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { sanitizeTextInput } from "@/lib/utils";
+import * as XLSX from "xlsx";
 
 const RawMaterialCalculator = () => {
   const [form, setForm] = useState({
-    cableType: "",
     length: 100,
     conductorSize: 10,
     insulationThickness: 1.5,
@@ -25,7 +27,7 @@ const RawMaterialCalculator = () => {
   const [calculationSettings, setCalculationSettings] = useState<any>({
     materialDensities: {
       copper: 8.96,
-      aluminum: 2.70,
+      aluminium: 2.70,
       pvc: 1.40,
       xlpe: 0.92,
       rubber: 1.50
@@ -43,7 +45,34 @@ const RawMaterialCalculator = () => {
       lengthSafetyFactor: 1.02
     }
   });
-  const [showSettings, setShowSettings] = useState(false);
+
+  console.log(form);
+  
+  const [rawMaterials, setRawMaterials] = useState<{ value: string; label: string }[]>([]);
+  const [materialsLoading, setMaterialsLoading] = useState(true);
+  const [materialsError, setMaterialsError] = useState("");
+
+  useEffect(() => {
+    setMaterialsLoading(true);
+    apiClient.getCalculationConstants("default_prices")
+      .then((data) => {
+        // data is an array of constants with name, value, etc.
+        const options = (data || []).map((item: any) => ({ value: item.name, label: item.name }));
+        setRawMaterials(options);
+        setMaterialsError("");
+        // If current selected material is not in the list, default to first
+        if (options.length > 0 && !options.some((m: any) => m.value === form.conductorMaterial)) {
+          setForm((prev) => ({ ...prev, conductorMaterial: options[0].value }));
+        }
+        if (options.length > 0 && !options.some((m: any) => m.value === form.insulationMaterial)) {
+          setForm((prev) => ({ ...prev, insulationMaterial: options[0].value }));
+        }
+      })
+      .catch((err) => {
+        setMaterialsError("Failed to load materials");
+      })
+      .finally(() => setMaterialsLoading(false));
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -56,14 +85,17 @@ const RawMaterialCalculator = () => {
     setResult(null);
     try {
       // Convert numeric fields
-      const payload = {
+      const payload: any = {
         ...form,
+        conductorMaterial: form.conductorMaterial.toLowerCase(),
         length: Number(form.length),
         conductorSize: Number(form.conductorSize),
         insulationThickness: Number(form.insulationThickness),
         sheathThickness: Number(form.sheathThickness),
-        calculationSettings: calculationSettings // Include settings in the payload
+        calculationSettings: calculationSettings
       };
+      // Remove cableType if present
+      delete payload.cableType;
       const res = await apiClient.calculateRawMaterial(payload);
       setResult(res);
     } catch (err: any) {
@@ -73,17 +105,23 @@ const RawMaterialCalculator = () => {
     }
   };
 
-  const cableTypes = [
-    { value: "power", label: "Power Cable" },
-    { value: "control", label: "Control Cable" },
-    { value: "instrumentation", label: "Instrumentation Cable" },
-    { value: "coaxial", label: "Coaxial Cable" },
-    { value: "fiber", label: "Fiber Optic Cable" }
-  ];
 
-  const coreSizes = [
-    "1.5", "2.5", "4", "6", "10", "16", "25", "35", "50", "70", "95", "120", "150", "185", "240", "300"
-  ];
+
+  const handleExportXLSX = () => {
+    if (!result) return;
+    // Prepare data for export
+    const data = [
+      ["Section", "Key", "Value"],
+      ...Object.entries(result.weights || {}).map(([k, v]) => ["Weights", k, v]),
+      ...Object.entries(result.costs || {}).map(([k, v]) => ["Costs", k, v]),
+      ...Object.entries(result.materials || {}).map(([k, v]) => ["Materials", k, v]),
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Calculation");
+    XLSX.writeFile(wb, "cable_calculation.xlsx");
+  };
+
 
   return (
     <div className="space-y-8">
@@ -103,21 +141,47 @@ const RawMaterialCalculator = () => {
             <CardDescription>Enter your cable requirements to calculate raw materials</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="cableType">Cable Type *</Label>
-              <Select onValueChange={(value) => handleChange({ target: { name: "cableType", value } } as any)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select cable type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cableTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex gap-2 items-start">
+              <div className="flex-1">
+                <Label htmlFor="conductorMaterial">Conductor Material</Label>
+                {materialsLoading ? (
+                  <div className="mt-1 p-2 w-full border rounded text-gray-400">Loading...</div>
+                ) : materialsError ? (
+                  <div className="mt-1 p-2 w-full border rounded text-red-500">{materialsError}</div>
+                ) : (
+                  <SearchableSelect
+                    key={"categories"}
+                    options={rawMaterials}
+                    value={form.conductorMaterial}
+                    onValueChange={value => setForm(prev => ({ ...prev, conductorMaterial: value }))}
+                    placeholder="Select material"
+                    searchPlaceholder="Search materials..."
+                    emptyText="No materials found."
+                    disabled={loading}
+                  />
+                )}
+              </div>
+              <div className="flex-1">
+                <Label htmlFor="insulationMaterial">Insulation Material</Label>
+                {materialsLoading ? (
+                  <div className="mt-1 p-2 w-full border rounded text-gray-400">Loading...</div>
+                ) : materialsError ? (
+                  <div className="mt-1 p-2 w-full border rounded text-red-500">{materialsError}</div>
+                ) : (
+                  <SearchableSelect
+                    key={"insulation-material"}
+                    options={rawMaterials}
+                    value={form.insulationMaterial}
+                    onValueChange={value => setForm(prev => ({ ...prev, insulationMaterial: value }))}
+                    placeholder="Select insulation material"
+                    searchPlaceholder="Search materials..."
+                    emptyText="No materials found."
+                    disabled={loading}
+                  />
+                )}
+              </div>
             </div>
+
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -147,19 +211,8 @@ const RawMaterialCalculator = () => {
             
 
             <div className="flex gap-2">
-              <div className="flex-1">
-                <Label htmlFor="conductorMaterial">Conductor Material</Label>
-                <select
-                  name="conductorMaterial"
-                  value={form.conductorMaterial}
-                  onChange={handleChange}
-                  className="mt-1 p-2 w-full border rounded"
-                >
-                  <option value="copper">Copper</option>
-                  <option value="aluminum">Aluminum</option>
-                </select>
-              </div>
-              <div className="flex-1">
+              
+              {/* <div className="flex-1">
                 <Label htmlFor="insulationMaterial">Insulation Material</Label>
                 <select
                   name="insulationMaterial"
@@ -184,7 +237,7 @@ const RawMaterialCalculator = () => {
                   <option value="xlpe">XLPE</option>
                   <option value="rubber">Rubber</option>
                 </select>
-              </div>
+              </div> */}
             </div>
 
             {error && <div className="text-red-500 text-sm">{error}</div>}
@@ -236,7 +289,7 @@ const RawMaterialCalculator = () => {
                   </div>
                 </div>
 
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={handleExportXLSX}>
                   <Download className="h-4 w-4 mr-2" />
                   Export Results
                 </Button>

@@ -145,8 +145,14 @@ const formatXAxis = (tick: string) => {
   if (loading) return <Loader className="py-8" />;
   if (error) return <div>Error: {error}</div>;
 
+  // Always apply safe area padding using the plugin's CSS variable
+  const safeAreaStyle = { paddingTop: 'var(--safe-area-inset-top, 20px)' };
+
   return (
-    <div className="bg-gradient-to-r from-blue-600/90 via-blue-700/90 to-blue-800/90 text-white sticky top-0 z-50 shadow-lg backdrop-blur-md">
+    <div
+      className="bg-gradient-to-r from-blue-600/90 via-blue-700/90 to-blue-800/90 text-white sticky top-0 z-50 shadow-lg backdrop-blur-md"
+      style={safeAreaStyle}
+    >
       <div className="w-full">
         <div className="flex items-center justify-between flex-wrap">
           
