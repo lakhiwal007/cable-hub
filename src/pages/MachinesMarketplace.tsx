@@ -537,6 +537,7 @@ const MachinesMarketplace: React.FC = () => {
                                     <Button
                                       variant="outline"
                                       className="w-full h-10 sm:h-9 text-sm"
+                                      onClick={() => navigate(`/machine/sell/${machine.id}`)}
                                     >
                                       <Eye className="h-4 w-4 mr-2" />
                                       View Details
@@ -667,6 +668,7 @@ const MachinesMarketplace: React.FC = () => {
                                     <Button
                                       variant="outline"
                                       className="w-full h-10 sm:h-9 text-sm"
+                                      onClick={() => navigate(`/machine/buy/${machine.id}`)}
                                     >
                                       <Eye className="h-4 w-4 mr-2" />
                                       View Details

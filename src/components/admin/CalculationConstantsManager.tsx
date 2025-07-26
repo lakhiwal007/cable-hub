@@ -197,21 +197,21 @@ export default function CalculationConstantsManager() {
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Always show category select at the top */}
-            <div className="space-y-2">
-              <Label htmlFor="category" className="text-sm font-medium">Category *</Label>
-              <Select value={newConstant.category} onValueChange={(value) => setNewConstant({ ...newConstant, category: value })}>
-                <SelectTrigger className="h-10">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map((category) => (
-                    <SelectItem key={category.value} value={category.value}>
-                      {category.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="category" className="text-sm font-medium">Category *</Label>
+                <Select value={newConstant.category} onValueChange={(value) => setNewConstant({ ...newConstant, category: value })}>
+                  <SelectTrigger className="h-10">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((category) => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             {/* Show rest of form only if category is selected */}
             {newConstant.category && (
               (newConstant.category === 'default_prices' || newConstant.category === 'material_densities') ? (
@@ -313,63 +313,63 @@ export default function CalculationConstantsManager() {
                 // Existing form for other categories
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-sm font-medium">Name *</Label>
-                      <Input
-                        id="name"
-                        value={newConstant.name}
-                        onChange={(e) => setNewConstant({ ...newConstant, name: e.target.value })}
-                        placeholder="e.g., copper, labor_cost"
-                        className="h-10"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="value" className="text-sm font-medium">Value *</Label>
-                      <Input
-                        id="value"
-                        type="number"
-                        step="0.0001"
-                        value={newConstant.value}
-                        onChange={(e) => setNewConstant({ ...newConstant, value: e.target.value })}
-                        placeholder="Enter value"
-                        className="h-10"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="unit" className="text-sm font-medium">Unit</Label>
-                      <Input
-                        id="unit"
-                        value={newConstant.unit}
-                        onChange={(e) => setNewConstant({ ...newConstant, unit: e.target.value })}
-                        placeholder="e.g., kg/m³, %"
-                        className="h-10"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="description" className="text-sm font-medium">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={newConstant.description}
-                      onChange={(e) => setNewConstant({ ...newConstant, description: e.target.value })}
-                      placeholder="Optional description"
-                      className="min-h-[80px]"
-                    />
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                    <Button onClick={handleAddConstant} className="flex-1 sm:flex-none">
-                      Add Constant
-                    </Button>
-                    <Button 
-                      variant="outline" 
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">Name *</Label>
+                <Input
+                  id="name"
+                  value={newConstant.name}
+                  onChange={(e) => setNewConstant({ ...newConstant, name: e.target.value })}
+                  placeholder="e.g., copper, labor_cost"
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="value" className="text-sm font-medium">Value *</Label>
+                <Input
+                  id="value"
+                  type="number"
+                  step="0.0001"
+                  value={newConstant.value}
+                  onChange={(e) => setNewConstant({ ...newConstant, value: e.target.value })}
+                  placeholder="Enter value"
+                  className="h-10"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="unit" className="text-sm font-medium">Unit</Label>
+                <Input
+                  id="unit"
+                  value={newConstant.unit}
+                  onChange={(e) => setNewConstant({ ...newConstant, unit: e.target.value })}
+                  placeholder="e.g., kg/m³, %"
+                  className="h-10"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-medium">Description</Label>
+              <Textarea
+                id="description"
+                value={newConstant.description}
+                onChange={(e) => setNewConstant({ ...newConstant, description: e.target.value })}
+                placeholder="Optional description"
+                className="min-h-[80px]"
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <Button onClick={handleAddConstant} className="flex-1 sm:flex-none">
+                Add Constant
+              </Button>
+              <Button 
+                variant="outline" 
                       onClick={() => {
                         setNewConstant({ category: '', name: '', value: '', unit: '', description: '', densityValue: '', densityUnit: '', densityDescription: '' });
                         setShowAddForm(false)}}
-                      className="flex-1 sm:flex-none"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
+                className="flex-1 sm:flex-none"
+              >
+                Cancel
+              </Button>
+            </div>
                 </>
               )
             )}
@@ -512,111 +512,111 @@ export default function CalculationConstantsManager() {
         {Object.entries(groupedConstants)
           .filter(([category]) => category !== "default_prices" && category !== "material_densities")
           .map(([category, categoryConstants]) => (
-            <Card key={category} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                  {CATEGORIES.find(c => c.value === category)?.label || category}
-                  <Badge variant="secondary" className="text-xs">
-                    {categoryConstants.length}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-0">
-                  {categoryConstants.map((constant, index) => (
-                    <div key={constant.id} className="border-b border-r last:border-b-0 last:border-r-0">
-                      <div className="p-3 sm:p-4">
-                        {editingConstant?.id === constant.id ? (
-                          <div className="space-y-3">
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Value</Label>
-                              <Input
-                                type="number"
-                                step="0.0001"
-                                value={editingConstant.value}
-                                onChange={(e) => setEditingConstant({ ...editingConstant, value: parseFloat(e.target.value) })}
-                                className="h-9"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Unit</Label>
-                              <Input
-                                value={editingConstant.unit || ''}
-                                onChange={(e) => setEditingConstant({ ...editingConstant, unit: e.target.value })}
-                                className="h-9"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Description</Label>
-                              <Input
-                                value={editingConstant.description || ''}
-                                onChange={(e) => setEditingConstant({ ...editingConstant, description: e.target.value })}
-                                className="h-9"
-                              />
-                            </div>
-                            <div className="flex gap-2 pt-2">
-                              <Button onClick={handleUpdateConstant} size="sm" className="flex-1">
-                                Save
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                onClick={() => setEditingConstant(null)}
-                                size="sm"
-                                className="flex-1"
-                              >
-                                Cancel
-                              </Button>
-                            </div>
+          <Card key={category} className="overflow-hidden">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                {CATEGORIES.find(c => c.value === category)?.label || category}
+                <Badge variant="secondary" className="text-xs">
+                  {categoryConstants.length}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-0">
+                {categoryConstants.map((constant, index) => (
+                  <div key={constant.id} className="border-b border-r last:border-b-0 last:border-r-0">
+                    <div className="p-3 sm:p-4">
+                      {editingConstant?.id === constant.id ? (
+                        <div className="space-y-3">
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Value</Label>
+                            <Input
+                              type="number"
+                              step="0.0001"
+                              value={editingConstant.value}
+                              onChange={(e) => setEditingConstant({ ...editingConstant, value: parseFloat(e.target.value) })}
+                              className="h-9"
+                            />
                           </div>
-                        ) : (
-                          <div className="space-y-3">
-                            <div className="space-y-1">
-                              <div className="flex items-center justify-between gap-2">
-                                <h4 className="font-semibold text-sm truncate">
-                                  {constant.name}
-                                </h4>
-                                {constant.unit && (
-                                  <Badge variant="outline" className="text-xs shrink-0">
-                                    {constant.unit}
-                                  </Badge>
-                                )}
-                              </div>
-                              <p className="text-lg sm:text-xl font-bold text-primary">
-                                {constant.value.toFixed(4)}
-                              </p>
-                              {constant.description && (
-                                <p className="text-xs text-muted-foreground line-clamp-2">
-                                  {constant.description}
-                                </p>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Unit</Label>
+                            <Input
+                              value={editingConstant.unit || ''}
+                              onChange={(e) => setEditingConstant({ ...editingConstant, unit: e.target.value })}
+                              className="h-9"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-sm font-medium">Description</Label>
+                            <Input
+                              value={editingConstant.description || ''}
+                              onChange={(e) => setEditingConstant({ ...editingConstant, description: e.target.value })}
+                              className="h-9"
+                            />
+                          </div>
+                          <div className="flex gap-2 pt-2">
+                            <Button onClick={handleUpdateConstant} size="sm" className="flex-1">
+                              Save
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setEditingConstant(null)}
+                              size="sm"
+                              className="flex-1"
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="space-y-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <h4 className="font-semibold text-sm truncate">
+                                {constant.name}
+                              </h4>
+                              {constant.unit && (
+                                <Badge variant="outline" className="text-xs shrink-0">
+                                  {constant.unit}
+                                </Badge>
                               )}
                             </div>
-                            <div className="flex gap-2 pt-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setEditingConstant(constant)}
-                                className="flex-1"
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => handleDeleteConstant(constant.id)}
-                                className="flex-1"
-                              >
-                                Deactivate
-                              </Button>
-                            </div>
+                            <p className="text-lg sm:text-xl font-bold text-primary">
+                              {constant.value.toFixed(4)}
+                            </p>
+                            {constant.description && (
+                              <p className="text-xs text-muted-foreground line-clamp-2">
+                                {constant.description}
+                              </p>
+                            )}
                           </div>
-                        )}
-                      </div>
+                          <div className="flex gap-2 pt-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setEditingConstant(constant)}
+                              className="flex-1"
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteConstant(constant.id)}
+                              className="flex-1"
+                            >
+                              Deactivate
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {filteredConstants.length === 0 && (

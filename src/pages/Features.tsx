@@ -21,11 +21,13 @@ const Features = () => {
     // }
     // else if (tabId === "consulting") {
     //   navigate("/consulting-listings");
-    // } else if (tabId === "used-dead-stock") {
-    //   navigate("/used-dead-stock-listings");
-    // } else if (tabId === "machines") {
-    //   navigate("/machines-marketplace");
-    // } else if (tabId === "team") {
+    // } 
+    else if (tabId === "used-dead-stock") {
+      navigate("/used-dead-stock-listings");
+    } else if (tabId === "machines") {
+      navigate("/machines-marketplace");
+    } 
+    // else if (tabId === "team") {
     //   navigate("/team");
     // } 
     else if (tabId === "calculator") {

@@ -1569,13 +1569,37 @@ class ApiClient {
   }
 
   async createUsedMachine(data: any) {
-    const { data: result, error } = await supabase.from('used_machines').insert([{ ...data, video_url: data.video_url ?? null }]).select().single();
+    // Get current user ID
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data: result, error } = await supabase
+      .from('used_machines')
+      .insert([{ 
+        ...data, 
+        created_by: user.user.id,
+        video_url: data.video_url ?? null 
+      }])
+      .select()
+      .single();
     if (error) throw new Error(error.message);
     return result;
   }
 
   async createDeadStock(data: any) {
-    const { data: result, error } = await supabase.from('dead_stock').insert([{ ...data, video_url: data.video_url ?? null }]).select().single();
+    // Get current user ID
+    const { data: user } = await supabase.auth.getUser();
+    if (!user.user) throw new Error('Authentication required');
+
+    const { data: result, error } = await supabase
+      .from('dead_stock')
+      .insert([{ 
+        ...data, 
+        created_by: user.user.id,
+        video_url: data.video_url ?? null 
+      }])
+      .select()
+      .single();
     if (error) throw new Error(error.message);
     return result;
   }
@@ -1586,9 +1610,61 @@ class ApiClient {
     return data;
   }
 
+  async getUsedMachineById(id: string) {
+    const { data, error } = await supabase
+      .from('used_machines')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw new Error(error.message);
+
+    // Fetch user information for the machine creator
+    if (data && data.created_by) {
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('id, name, email, user_type')
+        .eq('id', data.created_by)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user:', userError);
+      } else {
+        data.supplier = user;
+      }
+    }
+
+    return data;
+  }
+
   async getDeadStock() {
     const { data, error } = await supabase.from('dead_stock').select('*').order('created_at', { ascending: false });
     if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getDeadStockById(id: string) {
+    const { data, error } = await supabase
+      .from('dead_stock')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw new Error(error.message);
+
+    // Fetch user information for the stock creator
+    if (data && data.created_by) {
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('id, name, email, user_type')
+        .eq('id', data.created_by)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user:', userError);
+      } else {
+        data.supplier = user;
+      }
+    }
+
     return data;
   }
 
@@ -1647,6 +1723,58 @@ class ApiClient {
   async getBuyMachines() {
     const { data, error } = await supabase.from('buy_machines').select('*').order('created_at', { ascending: false });
     if (error) throw new Error(error.message);
+    return data;
+  }
+
+  async getSellMachineById(id: string) {
+    const { data, error } = await supabase
+      .from('sell_machines')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw new Error(error.message);
+
+    // Fetch user information for the machine
+    if (data && data.user_id) {
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('id, name, email, user_type')
+        .eq('id', data.user_id)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user:', userError);
+      } else {
+        data.supplier = user;
+      }
+    }
+
+    return data;
+  }
+
+  async getBuyMachineById(id: string) {
+    const { data, error } = await supabase
+      .from('buy_machines')
+      .select('*')
+      .eq('id', id)
+      .single();
+    if (error) throw new Error(error.message);
+
+    // Fetch user information for the machine
+    if (data && data.user_id) {
+      const { data: user, error: userError } = await supabase
+        .from('users')
+        .select('id, name, email, user_type')
+        .eq('id', data.user_id)
+        .single();
+
+      if (userError) {
+        console.error('Error fetching user:', userError);
+      } else {
+        data.buyer = user;
+      }
+    }
+
     return data;
   }
 

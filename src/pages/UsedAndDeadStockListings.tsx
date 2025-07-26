@@ -78,10 +78,13 @@ const UsedAndDeadStockListings: React.FC = () => {
       apiClient.getUsedMachines().catch(() => []),
       apiClient.getDeadStock().catch(() => []),
     ]).then(([usedData, deadData]) => {
+      console.log('Used machines data:', usedData);
+      console.log('Dead stock data:', deadData);
       setUsed(usedData || []);
       setDead(deadData || []);
       setLoading(false);
     }).catch((err) => {
+      console.error('Error fetching listings:', err);
       setError(err.message || 'Failed to fetch listings');
       setLoading(false);
     });
@@ -185,15 +188,21 @@ const UsedAndDeadStockListings: React.FC = () => {
                   <TabsContent value="used">
                     <div className="space-y-4">
                       <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Used Machines</h3>
+                      <div className="text-sm text-gray-500 mb-2">
+                        Debug: Found {used.length} used machines, filtered: {filteredUsedListings.length}
+                      </div>
                       {filteredUsedListings.length === 0 ? (
                         <div className="text-center py-8 text-gray-500 text-sm sm:text-base">
-                          No used machines found. Try adjusting your search or filters.
+                          {used.length === 0 ? 'No used machines available.' : 'No used machines found. Try adjusting your search or filters.'}
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                          {filteredUsedListings.map((item) => (
-                            <UsedMachineCard key={item.id} item={item} onMediaClick={(url, type) => setMediaDialog({ url, type })} />
-                          ))}
+                          {filteredUsedListings.map((item) => {
+                            console.log('Rendering item:', item);
+                            return (
+                              <UsedMachineCard key={item.id} item={item} onMediaClick={(url, type) => setMediaDialog({ url, type })} />
+                            );
+                          })}
                         </div>
                       )}
                     </div>

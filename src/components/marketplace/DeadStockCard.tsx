@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Eye, MapPin } from 'lucide-react';
 import { WhatsAppContact } from '@/components/ui/whatsapp-contact';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { apiClient } from '@/lib/apiClient';
 
 interface DeadStockCardProps {
   item: any;
@@ -12,11 +12,10 @@ interface DeadStockCardProps {
 }
 
 const DeadStockCard: React.FC<DeadStockCardProps> = ({ item, onMediaClick }) => {
-  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const mainImage = item.image_urls?.[0] || '/placeholder.svg';
   const thumbnails = item.image_urls?.slice(1, 4) || [];
-  const navigate = useNavigate();
-  // isAuthenticated will be received as a prop
+  const isAuthenticated = apiClient.isAuthenticated();
 
   return (
     <div className="group transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-gray-200 h-full bg-white rounded-lg overflow-hidden">
@@ -86,7 +85,7 @@ const DeadStockCard: React.FC<DeadStockCardProps> = ({ item, onMediaClick }) => 
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => onMediaClick(mainImage, 'image')}
+            onClick={() => navigate(`/dead-stock/${item.id}`)}
             className="w-full h-10 sm:h-9 text-sm"
           >
             <Eye className="h-4 w-4 mr-2" />
@@ -99,7 +98,6 @@ const DeadStockCard: React.FC<DeadStockCardProps> = ({ item, onMediaClick }) => 
                 listingTitle={item.stock_name}
                 listingType="supply"
                 listingId={item.id}
-                supplierId={item.supplier_id}
                 variant="default"
                 size="default"
                 className="w-full bg-blue-600 hover:bg-blue-700 transition-colors h-10 sm:h-9 text-sm"

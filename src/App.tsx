@@ -21,6 +21,9 @@ import UsedAndDeadStockListings from "./pages/UsedAndDeadStockListings";
 import PaidExpertConsulting from "./pages/PaidExpertConsulting";
 import ConsultingListings from "./pages/ConsultingListings";
 import MachinesMarketplace from "./pages/MachinesMarketplace";
+import MachineDetails from "./pages/MachineDetails";
+import UsedMachineDetails from "./pages/UsedMachineDetails";
+import DeadStockDetails from "./pages/DeadStockDetails";
 import Team from "./pages/Team";
 import SpecsMarketplace from "./pages/SpecsMarketplace";
 import Features from "./pages/Features";
@@ -105,13 +108,17 @@ const App = () => {
             <Route path="/mentor" element={<Mentor />} />
             <Route path="/chat/:roomId" element={<ChatRoomWrapper />} />
             <Route path="/listing/:listingType/:listingId" element={<ListingDetails />} />
-
-            {/* <Route path="/team" element={<Team />} />
+            <Route path="/machine/:machineType/:machineId" element={<MachineDetails />} />
+            <Route path="/used-machine/:machineId" element={<UsedMachineDetails />} />
+            <Route path="/dead-stock/:stockId" element={<DeadStockDetails />} />
+            
             <Route path="/used-dead-stock-listings" element={<UsedAndDeadStockListings />} />
-            <Route path="/paid-expert-consulting" element={<PaidExpertConsulting />} />
-            <Route path="/consulting-listings" element={<ConsultingListings />} />
             <Route path="/machines-marketplace" element={<MachinesMarketplace />} />
-            <Route path="/specs-marketplace" element={<SpecsMarketplace />} /> */}
+            {/* <Route path="/paid-expert-consulting" element={<PaidExpertConsulting />} />
+            <Route path="/team" element={<Team />} />
+            <Route path="/consulting-listings" element={<ConsultingListings />} />
+            <Route path="/specs-marketplace" element={<SpecsMarketplace />} />  */}
+            
 
             <Route path="*" element={<NotFound />} />
           </Routes>
