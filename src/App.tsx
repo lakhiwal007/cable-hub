@@ -114,10 +114,10 @@ const App = () => {
             
             <Route path="/used-dead-stock-listings" element={<UsedAndDeadStockListings />} />
             <Route path="/machines-marketplace" element={<MachinesMarketplace />} />
-            {/* <Route path="/paid-expert-consulting" element={<PaidExpertConsulting />} />
+            <Route path="/paid-expert-consulting" element={<PaidExpertConsulting />} />
             <Route path="/team" element={<Team />} />
             <Route path="/consulting-listings" element={<ConsultingListings />} />
-            <Route path="/specs-marketplace" element={<SpecsMarketplace />} />  */}
+            <Route path="/specs-marketplace" element={<SpecsMarketplace />} /> 
             
 
             <Route path="*" element={<NotFound />} />
